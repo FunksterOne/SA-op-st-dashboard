@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>EPC-satsing — Konsekvensanalyse: kostnad ved å droppe</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  body { font: 13px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .page { padding: 22px 32px; max-width: 1280px; margin: 0 auto }
+
+  .tldr { background: var(--good-soft); border-left: 4px solid var(--good); padding: 14px 18px; margin-bottom: 18px; border-radius: 0 6px 6px 0 }
+  .tldr h2 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--good); font-weight: 700 }
+  .tldr p { margin: 0; font-size: 13px; line-height: 1.6 }
+  .tldr b { color: var(--good) }
+
+  h2.sec { font-size: 14px; color: var(--text); font-weight: 600; margin: 20px 0 10px; padding-left: 10px; border-left: 3px solid var(--accent) }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; border-top: 3px solid var(--accent) }
+  .kpi.bad { border-top-color: var(--bad); background: var(--bad-soft) }
+  .kpi.warn { border-top-color: var(--warn); background: var(--warn-soft) }
+  .kpi.good { border-top-color: var(--good); background: var(--good-soft) }
+  .kpi.epc { border-top-color: var(--good); background: var(--good-soft) }
+  .kpi .l { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700 }
+  .kpi .v { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1.1 }
+  .kpi .v small { font-size: 13px; font-weight: 500; color: var(--muted) }
+  .kpi .d { font-size: 11px; margin-top: 4px; color: var(--text) }
+
+  table.std { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+  table.std th { background: var(--panel-2); padding: 10px 12px; text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700 }
+  table.std th.num { text-align: right }
+  table.std td { padding: 10px 12px; border-bottom: 1px solid var(--line) }
+  table.std td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.std tbody tr:last-child td { border-bottom: 0 }
+  table.std tr.subtotal td { background: var(--panel-2); font-weight: 700 }
+  table.std tr.total td { background: var(--panel-3); font-weight: 700; border-top: 2px solid var(--accent); font-size: 13px }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 11px; font-size: 10.5px; font-weight: 700 }
+  .pill.green { background: var(--good-soft); color: var(--good) }
+  .pill.warn { background: var(--warn-soft); color: var(--warn) }
+  .pill.bad { background: var(--bad-soft); color: var(--bad) }
+
+  /* Margin compare visual */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px }
+  .compare .col { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px }
+  .compare .col.with { border-top: 4px solid var(--good) }
+  .compare .col.without { border-top: 4px solid var(--bad) }
+  .compare .col h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700 }
+  .compare .col.with h3 { color: var(--good) }
+  .compare .col.without h3 { color: var(--bad) }
+  .compare .col .lead { color: var(--muted); font-size: 11.5px; margin-bottom: 10px }
+
+  /* Investment vs return */
+  .invest { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .invest > div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px }
+  .invest > div h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700 }
+  .invest table { width: 100%; font-size: 12.5px; border-collapse: collapse }
+  .invest td { padding: 5px 0; border-bottom: 1px solid var(--line) }
+  .invest td.num { text-align: right; font-variant-numeric: tabular-nums }
+  .invest tr:last-child td { border-bottom: 0; font-weight: 700; padding-top: 8px; border-top: 1px solid var(--line) }
+
+  /* Markedstrend */
+  .market-trend { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px }
+  .trend-bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; align-items: end; height: 120px; margin: 12px 0 }
+  .trend-bar { display: flex; flex-direction: column; align-items: center; position: relative }
+  .trend-bar .stack { width: 70%; background: linear-gradient(180deg, var(--good), #1f6629); border-radius: 3px }
+  .trend-bar .total { position: absolute; top: -16px; font-size: 10.5px; font-weight: 700; color: var(--good); font-variant-numeric: tabular-nums }
+  .trend-bar .lbl { font-size: 10.5px; color: var(--muted); margin-top: 6px; font-weight: 600 }
+
+  .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px }
+  .risk-card { border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 8px; padding: 12px 16px; background: var(--warn-soft) }
+  .risk-card.high { border-left-color: var(--bad); background: var(--bad-soft) }
+  .risk-card h4 { margin: 0 0 4px; font-size: 13px; font-weight: 700 }
+  .risk-card p { margin: 0; font-size: 12px; line-height: 1.5 }
+  .risk-card .level { display: inline-block; font-size: 9.5px; padding: 1px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-right: 6px }
+  .risk-card.high .level { background: var(--bad); color: white }
+  .risk-card .level { background: var(--warn); color: white }
+
+  .rec { background: var(--good-soft); border-left: 4px solid var(--good); padding: 14px 18px; margin-top: 12px; border-radius: 0 6px 6px 0 }
+  .rec h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--good) }
+  .rec p { margin: 0; font-size: 12.5px; line-height: 1.6 }
+  .rec ol { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; line-height: 1.65 }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="epc-satsing"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="implementering">Implementering</span>
+      <span>EPC-satsing · Konsekvensanalyse</span>
+    </div>
+    <h1>EPC-satsing — kostnaden ved å droppe energirehab-segmentet</h1>
+    <div class="ph-meta-row">
+      <span>Periode: <b>Q1 2026</b></span>
+      <span>Versjon: <b>v1.0</b></span>
+      <span>Klassifisering: <b>Konfidensiell</b></span>
+    </div>
+  </header>
+
+  <div class="page">
+
+  <div class="tldr">
+    <h2>Hovedfunn</h2>
+    <p>EPC (Energy Performance Contracts) er <i>den eneste reelle margin-løfteren</i> i porteføljen. Med 12 % margin på et segment som er regulatorisk drevet (EPBD/EU-taksonomi) og vokser 25–35 % årlig, er det forskjellen mellom å nå og bomme på offensiv-banens EBIT-mål. <b>Tap ved å droppe EPC: 0,7 MNOK EBIT/år (offensiv) og 1,9 MNOK/år (bull case).</b> Strategisk: vinduet er kort — etablering nå koster 350–450 kNOK; etablering om 24 mnd koster det dobbelte og henter inn 12 mnd lavere markedsandel.</p>
+  </div>
+
+  <h2 class="sec">1. Eksekutiv kostnadsbilde — å droppe vs etablere</h2>
+  <div class="kpi-row">
+    <div class="kpi epc">
+      <div class="l">Etableringskost</div>
+      <div class="v">~ 400 <small>kNOK</small></div>
+      <div class="d">Engangskostnad — sertifiseringer + 1 dedikert leder</div>
+    </div>
+    <div class="kpi good">
+      <div class="l">EBIT-bidrag offensiv</div>
+      <div class="v">+ 1,0 <small>MNOK/år</small></div>
+      <div class="d">8 MNOK omsetning × 12 % margin i 2029</div>
+    </div>
+    <div class="kpi good">
+      <div class="l">EBIT-bidrag bull</div>
+      <div class="v">+ 1,9 <small>MNOK/år</small></div>
+      <div class="d">15 MNOK omsetning × 12,5 % margin i 2029</div>
+    </div>
+    <div class="kpi bad">
+      <div class="l">Akkumulert tap 5 år offensiv</div>
+      <div class="v">~ 3,0 <small>MNOK</small></div>
+      <div class="d">+ varig konkurransefortrinn-tap</div>
+    </div>
+  </div>
+
+  <h2 class="sec">2. Margin-effekt — med vs uten EPC</h2>
+  <div class="compare">
+    <div class="col with">
+      <h3>Med EPC (anbefalt)</h3>
+      <div class="lead">Etablér i 2026 H2, første kontrakt 2027, divisjon i 2028.</div>
+      <table class="std">
+        <thead><tr><th>2029 scenario</th><th class="num">Omsetning</th><th class="num">EBIT</th><th class="num">Margin</th></tr></thead>
+        <tbody>
+          <tr><td>Base</td><td class="num">167</td><td class="num">12,3</td><td class="num">7,3 %</td></tr>
+          <tr><td>Offensiv (m/EPC 8 MNOK)</td><td class="num">237</td><td class="num">18,5</td><td class="num">7,8 %</td></tr>
+          <tr class="total"><td>Bull (m/EPC 15 MNOK)</td><td class="num">320</td><td class="num">26,6</td><td class="num">8,3 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col without">
+      <h3>Uten EPC (status quo)</h3>
+      <div class="lead">Vi blir i tradisjonell offentlig ROT. Margin-mix ufordret.</div>
+      <table class="std">
+        <thead><tr><th>2029 scenario</th><th class="num">Omsetning</th><th class="num">EBIT</th><th class="num">Margin</th></tr></thead>
+        <tbody>
+          <tr><td>Base</td><td class="num">167</td><td class="num">12,3</td><td class="num">7,3 %</td></tr>
+          <tr><td>Offensiv (uten EPC)</td><td class="num">229</td><td class="num">17,5</td><td class="num">7,6 %</td></tr>
+          <tr class="total"><td>Bull (uten EPC)</td><td class="num">305</td><td class="num">24,7</td><td class="num">8,1 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.6"><b>Differanse på offensiv:</b> 1,0 MNOK EBIT/år (5–6 % bedre EBIT) som vi henter ut av et 8 MNOK premium-segment. <b>På bull:</b> 1,9 MNOK/år (8 % bedre EBIT). Forskjellen er dyrere å hente inn senere fordi etablering tar 18–24 mnd uansett.</p>
+
+  <h2 class="sec">3. Investering vs avkastning — prosjektregnestykke</h2>
+  <div class="invest">
+    <div>
+      <h4 style="color:var(--bad)">Investering år 1–2</h4>
+      <table>
+        <tr><td>BREEAM AP-sertifisering (1 leder)</td><td class="num">85 kNOK</td></tr>
+        <tr><td>ENOVA-prosjektering kompetanse (kurs)</td><td class="num">60 kNOK</td></tr>
+        <tr><td>Energirevisjons-utstyr (måleinstrument)</td><td class="num">120 kNOK</td></tr>
+        <tr><td>Dedikert prosjektleder 50 % (år 1)</td><td class="num">425 kNOK</td></tr>
+        <tr><td>Markedsføring + posisjonering</td><td class="num">90 kNOK</td></tr>
+        <tr><td>Mindre tap første pilot-kontrakt</td><td class="num">100 kNOK</td></tr>
+        <tr><td><b>Sum etableringskost (engangs + år 1)</b></td><td class="num"><b>880 kNOK</b></td></tr>
+      </table>
+    </div>
+    <div>
+      <h4 style="color:var(--good)">Akkumulert avkastning (offensiv)</h4>
+      <table>
+        <tr><td>2026 — pilot</td><td class="num">−100 (tap)</td></tr>
+        <tr><td>2027 — første kontrakt 2 MNOK</td><td class="num">240 kNOK</td></tr>
+        <tr><td>2028 — 5 MNOK omsetning</td><td class="num">600 kNOK</td></tr>
+        <tr><td>2029 — 8 MNOK omsetning</td><td class="num">960 kNOK</td></tr>
+        <tr><td>2030 — 11 MNOK omsetning</td><td class="num">1 320 kNOK</td></tr>
+        <tr><td><b>Sum 5 år EBIT</b></td><td class="num"><b>3 020 kNOK</b></td></tr>
+      </table>
+    </div>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.6"><b>ROI:</b> 880 kNOK investert → 3,02 MNOK EBIT over 5 år = <b>3,4× return</b>. Tilbakebetalingstid: 3,5 år. Sammenlignet med M9 forsikring (5,7× return men lavere absolutt-størrelse), er EPC en sterkere investering per krone.</p>
+
+  <h2 class="sec">4. Markedstrend — EPC-segmentet vokser uavhengig av oss</h2>
+  <div class="market-trend">
+    <p style="margin:0 0 8px;font-size:12.5px;color:var(--text);line-height:1.6"><b>Estimert offentlig EPC-marked Norge (MNOK omsetning årlig):</b> EU-taksonomi og bygningsenergidirektivet (EPBD) tvinger frem energirehab av offentlige bygg. Markedet vokser 25–35 % årlig over en 5-års periode.</p>
+    <div class="trend-bars">
+      <div class="trend-bar">
+        <div class="total">~800</div>
+        <div class="stack" style="height:23%"></div>
+        <div class="lbl">2024</div>
+      </div>
+      <div class="trend-bar">
+        <div class="total">~1100</div>
+        <div class="stack" style="height:31%"></div>
+        <div class="lbl">2025</div>
+      </div>
+      <div class="trend-bar">
+        <div class="total">~1500</div>
+        <div class="stack" style="height:43%"></div>
+        <div class="lbl">2026</div>
+      </div>
+      <div class="trend-bar">
+        <div class="total">~2000</div>
+        <div class="stack" style="height:57%"></div>
+        <div class="lbl">2027</div>
+      </div>
+      <div class="trend-bar">
+        <div class="total">~2700</div>
+        <div class="stack" style="height:77%"></div>
+        <div class="lbl">2028</div>
+      </div>
+      <div class="trend-bar">
+        <div class="total">~3500</div>
+        <div class="stack" style="height:100%"></div>
+        <div class="lbl">2029</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.55"><b>Vår posisjonering:</b> Hvis vi tar 1,5 % av nasjonalt EPC-marked i 2029 (Salten-andel) = ~50 MNOK potensial. Vår offensiv-antakelse på 8 MNOK er svært forsiktig — det er rom for vekst utover plan hvis vi etablerer tidlig.</p>
+  </div>
+
+  <h2 class="sec">5. Strategisk risiko ved å droppe</h2>
+  <div class="risk-grid">
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>Konkurrenter etablerer EPC først</h4>
+      <p>Gunvald Johansen Bygg, Econordland eller Veidekke kan etablere EPC-divisjon parallelt. Når de har første kontrakt i drift, har de referanseprosjekt som vi mangler — det gjør oss kvalifiseringsmessig dårligere stilt for resten av tiåret.</p>
+    </div>
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>EU-taksonomi gjør EPC obligatorisk for kvalifisering</h4>
+      <p>Når kommunale bygg må energi-rehabes innen 2030 for å unngå laveste energiklasse, kan offentlige innkjøpere kreve at leverandører har EPC-kompetanse for å kvalifisere på rammeavtaler — selv for tradisjonelt ROT-arbeid. Da blir manglende EPC en barriere på <i>hele</i> rammeavtaler, ikke bare EPC-kontrakter.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>BREEAM-kompetanse blir markedskrav</h4>
+      <p>BREEAM In-Use-sertifisering blir standard for kommunale bygg. Uten BREEAM AP internt må vi kjøpe ekstern rådgivning for hver tilbud — løfter kalkulasjonskost og reduserer margin på ROT-jobber også.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>SA-konsernportefølje frem til 2030</h4>
+      <p>Hvis ServiceAlliansen vurderer børsnotering eller industrielt salg på 2028–2030-horisont, blir EPC-portefølje attraktivt for investor — det er det som differensierer en moderne rehab-aktør fra en tradisjonell. Manglende EPC kan redusere multipler.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Begrenset talentpool ved sen etablering</h4>
+      <p>BREEAM AP-er er en knapp ressurs nasjonalt. Hvis vi venter til 2028 med å starte sertifisering, må vi konkurrere om de samme ~100 personene mot etablerte aktører — lønningskravene vil være vesentlig høyere.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>ENOVA-tilskudd fases ut</h4>
+      <p>Statlige tilskudd til EPC-prosjekter er på sitt høyeste nå. ENOVA reduserer ramme til 2028+. Tidlig etablering låser inn mer attraktive prosjekter.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">6. Anbefaling</h2>
+  <div class="rec">
+    <h3>Etablér EPC-pilot i 2026 H2, divisjon innen Q4 2027</h3>
+    <p>Investeringen på 880 kNOK er liten i forhold til avkastning — men <b>vinduet er kort</b>. EPC er regulatorisk drevet, og etablerte aktører får varig fortrinn på kvalifisering. Anbefalt eksekverings-rekkefølge:</p>
+    <ol>
+      <li><b>Q3 2026:</b> Send én leder (Areal-avdelingsleder eller eksisterende prosjektleder) på BREEAM AP-utdanning. Estimert 3 mnd og 85 kNOK.</li>
+      <li><b>Q4 2026:</b> Identifisér første pilot-prosjekt — gjerne et eksisterende offentlig rehab-prosjekt der vi kan legge til energidimensjonen som tilleggsbestilling.</li>
+      <li><b>Q1 2027:</b> Lever første EPC-kvalifiserte tilbud. Kan godt være med-tilbud sammen med rådgivende ingeniør hvis intern kompetanse ikke er nok.</li>
+      <li><b>Q2–Q4 2027:</b> Vinn første EPC-kontrakt. Bruk den som referanse-prosjekt for offensive tilbud.</li>
+      <li><b>Q4 2027:</b> Formalisér EPC som egen divisjon med dedikert leder.</li>
+      <li><b>2028+:</b> Skal-er volum til 5 MNOK i 2028, 8 MNOK i 2029, 11 MNOK i 2030.</li>
+    </ol>
+    <p style="margin-top:10px;font-size:11.5px;font-style:italic;color:var(--muted)"><b>Beslutningseier:</b> Styret bør formelt vedta EPC som strategisk satsing på neste møte. SA-konsernet bør tilføre 100–150 kNOK i kompetanse-tilskudd første år (rimelig konsernansvar gitt at flere SA-selskap kan dele læringen).</p>
+  </div>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

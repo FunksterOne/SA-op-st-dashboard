@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Overlevering — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<script src="prosjekter.js"></script>
+<script src="anbud-data.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .page-header h1 { margin: 6px 0 0; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-sub { margin: 4px 0 0; font-size: 13px; color: var(--muted) }
+
+  .container { padding: 22px 32px; max-width: 1400px }
+
+  /* Flow-strip — viser hovedsporet */
+  .flow-strip {
+    display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+    gap: 8px; align-items: stretch; margin-bottom: 22px;
+    padding: 16px 18px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .flow-stage {
+    display: flex; flex-direction: column; align-items: center; padding: 10px 8px;
+    background: var(--panel-2); border-radius: 8px; border: 1px solid var(--line);
+    text-align: center; min-width: 0;
+  }
+  .flow-stage .label {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 700;
+  }
+  .flow-stage .count {
+    font-size: 22px; font-weight: 700; line-height: 1.1; margin: 4px 0;
+    color: var(--text); letter-spacing: -0.02em;
+  }
+  .flow-stage .sub { font-size: 10.5px; color: var(--muted) }
+  .flow-stage.s-anbud   { border-left: 3px solid var(--hi) }
+  .flow-stage.s-vunnet  { border-left: 3px solid var(--good) }
+  .flow-stage.s-kontrakt{ border-left: 3px solid var(--accent) }
+  .flow-stage.s-mob     { border-left: 3px solid var(--warn) }
+  .flow-stage.s-prosjekt{ border-left: 3px solid var(--pending) }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 20px; line-height: 1;
+  }
+
+  /* Kanban */
+  .kanban {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  }
+  @media (max-width: 1200px) { .kanban { grid-template-columns: repeat(2, 1fr) } }
+  @media (max-width: 700px)  { .kanban { grid-template-columns: 1fr } }
+
+  .col {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .col .col-head {
+    padding: 14px 16px 12px; border-bottom: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+  .col .col-head .col-eyebrow {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.12em; font-weight: 700; display: flex; align-items: center; gap: 6px;
+  }
+  .col .col-head .col-eyebrow::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+  .col.s-vunnet  .col-head .col-eyebrow { color: var(--good) }
+  .col.s-vunnet  .col-head .col-eyebrow::before { background: var(--good) }
+  .col.s-kontrakt .col-head .col-eyebrow { color: var(--accent-2) }
+  .col.s-kontrakt .col-head .col-eyebrow::before { background: var(--accent) }
+  .col.s-mob     .col-head .col-eyebrow { color: var(--warn) }
+  .col.s-mob     .col-head .col-eyebrow::before { background: var(--warn) }
+  .col.s-prosjekt .col-head .col-eyebrow { color: var(--pending) }
+  .col.s-prosjekt .col-head .col-eyebrow::before { background: var(--pending) }
+  .col .col-head h3 { margin: 4px 0 0; font-size: 13.5px; font-weight: 600 }
+  .col .col-head .col-sub { margin: 2px 0 0; font-size: 11px; color: var(--muted) }
+  .col .col-head .col-count {
+    float: right; font-size: 11px; padding: 2px 8px; background: var(--panel-3);
+    color: var(--text); border-radius: 10px; font-weight: 600;
+  }
+
+  .col .col-body { padding: 10px; display: flex; flex-direction: column; gap: 9px; flex: 1 }
+  .col .col-empty {
+    padding: 22px 10px; text-align: center; color: var(--muted); font-size: 12px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px;
+    padding: 11px 12px; cursor: pointer; transition: 0.12s; text-decoration: none; color: var(--text);
+    display: block;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-1px); text-decoration: none }
+  .card .cd-line1 {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 4px;
+  }
+  .card .cd-id { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; letter-spacing: 0.04em }
+  .card .cd-tag {
+    font-size: 9px; padding: 2px 5px; border-radius: 3px; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 700; background: var(--panel-3); color: var(--muted);
+  }
+  .card .cd-title {
+    font-size: 12.5px; font-weight: 600; line-height: 1.3; margin-bottom: 4px;
+    overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .card .cd-meta { font-size: 10.5px; color: var(--muted); margin-bottom: 8px; line-height: 1.4 }
+  .card .cd-verdi { font-weight: 600; color: var(--text) }
+  .card .cd-checks {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
+    margin-bottom: 6px;
+  }
+  .card .cd-check {
+    height: 4px; background: var(--panel-3); border-radius: 2px; overflow: hidden;
+  }
+  .card .cd-check.done { background: var(--good) }
+  .card .cd-check.in_progress { background: var(--warn) }
+  .card .cd-action {
+    font-size: 10.5px; color: var(--muted); padding-top: 6px;
+    border-top: 1px solid var(--line); line-height: 1.4;
+  }
+  .card .cd-action b { color: var(--text); font-weight: 500 }
+  .card .cd-links {
+    display: flex; gap: 8px; margin-top: 6px; padding-top: 6px;
+    border-top: 1px solid var(--line); font-size: 10.5px;
+  }
+  .card .cd-links a { color: var(--accent-2); text-decoration: none; font-weight: 500 }
+  .card .cd-links a:hover { text-decoration: underline }
+
+  /* Help-toggle og forklaringspanel */
+  .help-row {
+    padding: 12px 32px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .help-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 13px; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--muted); font: inherit; font-size: 12px; border-radius: 6px; cursor: pointer;
+    transition: 0.12s;
+  }
+  .help-toggle:hover { border-color: var(--accent); color: var(--text) }
+  .help-toggle .info-icon {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    color: #fff; font-size: 11px; font-weight: 700; line-height: 16px; text-align: center;
+    display: inline-block;
+  }
+  .help-toggle .chev { transition: transform 0.15s; font-size: 9px; color: var(--muted) }
+  .help-toggle.open .chev { transform: rotate(180deg); color: var(--accent-2) }
+  .help-toggle.open { color: var(--text); border-color: var(--accent) }
+
+  .help-panel {
+    display: none; margin: 12px 32px 0;
+    padding: 18px 22px; background: var(--panel); border: 1px solid var(--line);
+    border-left: 3px solid var(--accent); border-radius: 8px;
+  }
+  .help-panel.open { display: block }
+  .help-panel h2 { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--accent-2) }
+  .help-panel .help-intro {
+    color: var(--muted); font-size: 12.5px; line-height: 1.55; margin-bottom: 16px; max-width: 880px;
+  }
+  .help-panel .help-stages {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  @media (max-width: 1100px) { .help-panel .help-stages { grid-template-columns: repeat(2, 1fr) } }
+  @media (max-width: 700px) { .help-panel .help-stages { grid-template-columns: 1fr } }
+  .help-panel .help-stage {
+    padding: 11px 14px; background: var(--panel-2); border-radius: 6px;
+    border-left: 3px solid var(--muted); display: flex; flex-direction: column; gap: 4px;
+  }
+  .help-panel .help-stage.hs-vunnet  { border-left-color: var(--good) }
+  .help-panel .help-stage.hs-kontrakt{ border-left-color: var(--accent) }
+  .help-panel .help-stage.hs-mob     { border-left-color: var(--warn) }
+  .help-panel .help-stage.hs-aktivert{ border-left-color: var(--pending) }
+  .help-panel .help-stage .stage-label {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .help-panel .help-stage .stage-num {
+    width: 16px; height: 16px; background: var(--panel-3); border-radius: 50%;
+    color: var(--text); font-size: 10px; font-weight: 700; text-align: center; line-height: 16px;
+  }
+  .help-panel .help-stage.hs-vunnet  .stage-label { color: var(--good) }
+  .help-panel .help-stage.hs-kontrakt .stage-label { color: var(--accent-2) }
+  .help-panel .help-stage.hs-mob     .stage-label { color: var(--warn) }
+  .help-panel .help-stage.hs-aktivert .stage-label { color: var(--pending) }
+  .help-panel .help-stage .stage-desc {
+    font-size: 11.5px; line-height: 1.45; color: var(--text);
+  }
+  .help-panel .help-stage .stage-trigger {
+    font-size: 10.5px; color: var(--muted); margin-top: 4px;
+    padding-top: 4px; border-top: 1px dashed var(--line); line-height: 1.4;
+  }
+  .help-panel .help-stage .stage-trigger b { color: var(--text); font-weight: 500 }
+  .help-panel .help-checks {
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line);
+    font-size: 11.5px; color: var(--muted); line-height: 1.5;
+  }
+  .help-panel .help-checks b { color: var(--text); font-weight: 600 }
+  .help-panel .help-checks .check-dots {
+    display: inline-flex; gap: 3px; vertical-align: middle; margin: 0 4px;
+  }
+  .help-panel .help-checks .check-dots span {
+    width: 10px; height: 4px; background: var(--good); border-radius: 2px;
+  }
+
+  /* Inline scope filter (når by/konsern) */
+  .scope-filter-wrap {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 12px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .filter-chips { display: inline-flex; gap: 4px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px }
+  .filter-chip {
+    padding: 5px 11px; background: transparent; border: 0; color: var(--muted);
+    font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 4px;
+  }
+  .filter-chip:hover { color: var(--text); background: var(--panel-3) }
+  .filter-chip.active { background: var(--panel-3); color: var(--accent-2); font-weight: 600 }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="overlevering"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div>
+      <div class="ph-crumb">
+        <span class="mode-pill" data-mode="daglig">Daglig</span>
+        <a href="anbud.html" id="cr-anbud" style="color:var(--muted);text-decoration:none">Anbudspipeline</a>
+        <span style="color:var(--muted);font-weight:400">›</span>
+        <span style="color:var(--text)">Overlevering</span>
+        <span style="color:var(--muted);font-weight:400">›</span>
+        <a href="prosjekter.html" style="color:var(--muted);text-decoration:none">Prosjekter</a>
+      </div>
+      <h1 id="ph-title">Overlevering — fra anbud til prosjekt</h1>
+      <div class="ph-sub" id="ph-sub">Bridgen som binder vunnet anbud til aktivt prosjekt. Spor fremdrift i kontrakt, mobilisering og oppstart.</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:right" id="ph-meta">
+      <div>Hovedspor: Anbud → Overlevering → Prosjekt</div>
+      <div style="margin-top:2px">Klikk et kort for full detalj</div>
+    </div>
+  </header>
+
+  <div class="help-row">
+    <button class="help-toggle" id="help-toggle" type="button" onclick="toggleHelp()" aria-expanded="false">
+      <span class="info-icon">i</span>
+      <span>Slik fungerer overlevering</span>
+      <span class="chev">▾</span>
+    </button>
+  </div>
+
+  <div class="help-panel" id="help-panel" role="region" aria-label="Forklaring av overleveringsprosessen">
+    <h2>Bridgen mellom anbud og prosjekt</h2>
+    <p class="help-intro">
+      Overlevering er det operasjonelle bindeleddet fra du har vunnet et anbud til prosjektet er aktivert i drift.
+      Hver vunnet sak går gjennom fire stager — fra skriftlig tildeling til første arbeidsdag på byggeplass.
+      Tellerne over og kanban-tavlen under reflekterer dataene i sanntid: anbudets <code>status</code> og
+      det linkede prosjektets aktive lifecycle-fase bestemmer hvor saken havner.
+    </p>
+    <div class="help-stages">
+      <div class="help-stage hs-vunnet">
+        <div class="stage-label"><span class="stage-num">1</span>Vunnet</div>
+        <div class="stage-desc">Skriftlig tildeling mottatt fra kunde. Inntakskøen mens kontrakten utformes — saken er din, men ikke signert.</div>
+        <div class="stage-trigger"><b>Trigger:</b> anbud satt til <code>Vunnet</code>, ikke linket til prosjekt enda.</div>
+      </div>
+      <div class="help-stage hs-kontrakt">
+        <div class="stage-label"><span class="stage-num">2</span>Kontrakt</div>
+        <div class="stage-desc">Avtaleverk under utforming og signering. DL og kunde-rep avklarer endelige mengder, milepæler og betalingsplan.</div>
+        <div class="stage-trigger"><b>Trigger:</b> prosjekt opprettet, aktiv fase = <code>Kontraktinngåelse</code>.</div>
+      </div>
+      <div class="help-stage hs-mob">
+        <div class="stage-label"><span class="stage-num">3</span>Mobilisering</div>
+        <div class="stage-desc">Prosjektleder og bas tildelt. Byggeplassbefaring, materiellbestilling og oppstartsmøte med kunde.</div>
+        <div class="stage-trigger"><b>Trigger:</b> aktiv fase = <code>Planlegging</code>.</div>
+      </div>
+      <div class="help-stage hs-aktivert">
+        <div class="stage-label"><span class="stage-num">4</span>Aktivert</div>
+        <div class="stage-desc">Utførelse startet. Første 60 dager følges tett med margin- og fremdriftskontroll før saken overlates til ordinær prosjekt-styring.</div>
+        <div class="stage-trigger"><b>Trigger:</b> aktiv fase = <code>Utførelse</code>, oppstart innenfor 60 d.</div>
+      </div>
+    </div>
+    <div class="help-checks">
+      <b>Sjekklisten på hvert kort</b>
+      <span class="check-dots"><span></span><span></span><span></span><span></span></span>
+      fyller seg automatisk: <b>kontrakt signert</b> → <b>byggeplassbefaring</b> → <b>ressurs (PL + bas)</b> → <b>oppstartsmøte</b>.
+      Hovedklikk på et kort åpner prosjekt-detalj hvis prosjektet er opprettet, ellers anbud-detalj.
+    </div>
+  </div>
+
+  <div class="scope-filter-wrap" id="scope-filter-wrap" style="display:none">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Selskap</span>
+      <div class="filter-chips" id="selskap-chips"></div>
+    </div>
+    <div id="result-count" style="font-size:11.5px;color:var(--muted)"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- Flow-strip: hele hovedsporet -->
+    <div class="flow-strip">
+      <div class="flow-stage s-anbud" title="Anbud i pipeline — innkommende eller pending avgjørelse fra kunde. Vises på Anbudspipeline-siden.">
+        <div class="label">Pipeline</div>
+        <div class="count" id="cnt-pending">0</div>
+        <div class="sub">Anbud avventer</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage s-vunnet" title="1. Vunnet — skriftlig tildeling mottatt fra kunde. Inntakskøen mens kontrakten utformes.">
+        <div class="label">Vunnet</div>
+        <div class="count" id="cnt-vunnet">0</div>
+        <div class="sub">Venter kontrakt</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage s-kontrakt" title="2. Kontrakt — avtaleverk under utforming og signering. DL og kunde-rep avklarer endelige detaljer.">
+        <div class="label">Kontrakt</div>
+        <div class="count" id="cnt-kontrakt">0</div>
+        <div class="sub">Under signering</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage s-mob" title="3. Mobilisering — PL og bas tildelt. Byggeplassbefaring, materiellbestilling og oppstartsmøte.">
+        <div class="label">Mobilisering</div>
+        <div class="count" id="cnt-mob">0</div>
+        <div class="sub">Planlegging / ressurs</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage s-prosjekt" title="4. Aktivert — utførelse i gang. Første 60 d følges tett med margin- og fremdriftskontroll.">
+        <div class="label">Aktivert</div>
+        <div class="count" id="cnt-aktivert">0</div>
+        <div class="sub">Utførelse i gang</div>
+      </div>
+    </div>
+
+    <!-- Kanban -->
+    <div class="kanban">
+      <div class="col s-vunnet">
+        <div class="col-head">
+          <div class="col-eyebrow">Vunnet — venter kontrakt <span class="col-count" id="hd-vunnet">0</span></div>
+          <h3>Skriftlig tildeling mottatt</h3>
+          <div class="col-sub">Neste: kontrakt-utforming og signering</div>
+        </div>
+        <div class="col-body" id="col-vunnet"></div>
+      </div>
+      <div class="col s-kontrakt">
+        <div class="col-head">
+          <div class="col-eyebrow">Kontrakt under signering <span class="col-count" id="hd-kontrakt">0</span></div>
+          <h3>Avtaleverk på plass</h3>
+          <div class="col-sub">Neste: byggeplassbefaring og PL-tildeling</div>
+        </div>
+        <div class="col-body" id="col-kontrakt"></div>
+      </div>
+      <div class="col s-mob">
+        <div class="col-head">
+          <div class="col-eyebrow">Mobilisering <span class="col-count" id="hd-mob">0</span></div>
+          <h3>Planlegging og ressurstildeling</h3>
+          <div class="col-sub">Neste: oppstartsmøte og første arbeidsdag</div>
+        </div>
+        <div class="col-body" id="col-mob"></div>
+      </div>
+      <div class="col s-prosjekt">
+        <div class="col-head">
+          <div class="col-eyebrow">Aktivert (siste 60 d) <span class="col-count" id="hd-aktivert">0</span></div>
+          <h3>Utførelse i gang</h3>
+          <div class="col-sub">Følges opp i prosjekt-styringen</div>
+        </div>
+        <div class="col-body" id="col-aktivert"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+<script>
+let activeSelskapFilter = 'alle';
+
+function fmtKrLocal(v) {
+  if (v == null) return '—';
+  if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(1).replace('.', ',') + ' M';
+  if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + ' k';
+  return Math.round(v).toLocaleString('no-NO');
+}
+function fmtDateLocal(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  const days = ['søn','man','tir','ons','tor','fre','lør'];
+  return `${days[d.getDay()]} ${d.getDate()}. ${['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'][d.getMonth()]}`;
+}
+
+function renderHeader() {
+  const lbl = getScopeLabel();
+  const scope = getActiveScope();
+  document.getElementById('ph-title').textContent = `Overlevering — ${lbl.label}`;
+  document.getElementById('ph-title').style.color = lbl.farge;
+  document.getElementById('cr-anbud').href = getRouteFor('anbud');
+}
+
+function renderSelskapFilter() {
+  const scope = getActiveScope();
+  const wrap = document.getElementById('scope-filter-wrap');
+  const chips = document.getElementById('selskap-chips');
+  if (scope.type === 'selskap') {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'flex';
+  const selskaper = getSelskaperInScope(scope);
+  let html = `<button class="filter-chip ${activeSelskapFilter === 'alle' ? 'active' : ''}" data-selskap="alle">Alle</button>`;
+  selskaper.forEach(s => {
+    html += `<button class="filter-chip ${activeSelskapFilter === s.id ? 'active' : ''}" data-selskap="${s.id}" style="${activeSelskapFilter === s.id ? `color:${s.farge}` : ''}">${s.kortnavn}</button>`;
+  });
+  chips.innerHTML = html;
+  chips.querySelectorAll('[data-selskap]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeSelskapFilter = btn.dataset.selskap;
+      render();
+    });
+  });
+}
+
+// Klassifiser et item i ett av 4 stages basert på anbud + linket prosjekt
+function classify(anbud) {
+  const prosjekt = anbud.prosjekt_id ? getProsjektById(anbud.prosjekt_id) : null;
+  if (!prosjekt) {
+    // Vunnet anbud uten prosjekt-rad — venter på kontrakt
+    return { stage: 'vunnet', prosjekt: null, checks: [false, false, false, false] };
+  }
+  // Aktivt fase i prosjekt
+  const fase = aktivProsjektFase(prosjekt);
+  const faseNavn = fase ? fase.fase : '';
+
+  if (faseNavn === 'Kontraktinngåelse') {
+    return { stage: 'kontrakt', prosjekt, checks: [true, false, false, false] };
+  }
+  if (faseNavn === 'Planlegging') {
+    return { stage: 'mob', prosjekt, checks: [true, true, false, false] };
+  }
+  if (faseNavn === 'Utførelse') {
+    // Sjekk om "siste 60 d" — basert på utforelse-fase start
+    const utforelseStart = (prosjekt.faser || []).find(f => f.fase === 'Utførelse')?.start;
+    if (utforelseStart) {
+      const daysSince = Math.floor((Date.now() - new Date(utforelseStart)) / 86400000);
+      if (daysSince <= 60 && daysSince >= -14) {
+        return { stage: 'aktivert', prosjekt, checks: [true, true, true, true], daysSince };
+      }
+    }
+    // Etablert prosjekt — ikke i overlevering lenger
+    return { stage: 'etablert', prosjekt };
+  }
+  if (faseNavn === 'Ferdigstillelse' || faseNavn === 'Garanti (5 år)') {
+    return { stage: 'etablert', prosjekt };
+  }
+  // Ellers — fortsatt i tidlig fase
+  return { stage: 'vunnet', prosjekt, checks: [false, false, false, false] };
+}
+
+function actionTextForStage(stage, prosjekt, anbud) {
+  if (stage === 'vunnet') {
+    return `<b>Neste:</b> kontrakt-utkast til ${anbud.kunde}. Tildelingsdato: ${fmtDateLocal(anbud.avgjort)}.`;
+  }
+  if (stage === 'kontrakt') {
+    const fase = (prosjekt.faser || []).find(f => f.fase === 'Kontraktinngåelse');
+    return `<b>Neste:</b> signering · planlagt ${fmtDateLocal(fase?.slutt)} · ansvarlig ${fase?.ansvarlig || 'DL'}`;
+  }
+  if (stage === 'mob') {
+    const planFase = (prosjekt.faser || []).find(f => f.fase === 'Planlegging');
+    const utFase = (prosjekt.faser || []).find(f => f.fase === 'Utførelse');
+    return `<b>Neste:</b> oppstart ${fmtDateLocal(utFase?.start)} · PL ${planFase?.ansvarlig?.split('(')[0]?.trim() || '—'}`;
+  }
+  if (stage === 'aktivert') {
+    return `<b>Aktiv:</b> ${prosjekt.fremdrift_pct} % fremdrift · margin ${prosjekt.margin_faktisk_pct != null ? prosjekt.margin_faktisk_pct.toFixed(1).replace('.', ',') + ' %' : '—'}`;
+  }
+  return '';
+}
+
+function buildCard(anbud, classified) {
+  const selskap = SELSKAPER.find(s => s.id === anbud.selskap_id);
+  const showSelskap = getActiveScope().type !== 'selskap';
+  const tag = showSelskap && selskap
+    ? `<span class="cd-tag" style="color:${selskap.farge}">${selskap.kortnavn}</span>`
+    : '';
+  const checks = (classified.checks || []).map(c => `<span class="cd-check ${c ? 'done' : ''}"></span>`).join('');
+  const actionTxt = actionTextForStage(classified.stage, classified.prosjekt, anbud);
+
+  let prosjektLink = '';
+  if (classified.prosjekt) {
+    prosjektLink = `<a href="prosjekt.html?id=${encodeURIComponent(classified.prosjekt.id)}" onclick="event.stopPropagation()">Prosjekt ${classified.prosjekt.id} →</a>`;
+  }
+  const anbudLink = `<a href="anbud-detalj.html?id=${encodeURIComponent(anbud.id)}" onclick="event.stopPropagation()">Anbud ${anbud.id} →</a>`;
+
+  // Hovedklikk = går til prosjekt hvis det fins, ellers anbud-detalj
+  const primaryHref = classified.prosjekt
+    ? `prosjekt.html?id=${encodeURIComponent(classified.prosjekt.id)}`
+    : `anbud-detalj.html?id=${encodeURIComponent(anbud.id)}`;
+
+  return `
+    <a class="card" href="${primaryHref}">
+      <div class="cd-line1">
+        <span class="cd-id">${anbud.id}</span>
+        ${tag}
+      </div>
+      <div class="cd-title">${anbud.tittel}</div>
+      <div class="cd-meta">
+        ${anbud.kunde}<br>
+        <span class="cd-verdi">${fmtKrLocal(anbud.verdi_levert_kr || anbud.verdi_estimert_kr)}</span>
+      </div>
+      <div class="cd-checks" title="Sjekkliste: kontrakt · befaring · ressurser · oppstart">
+        ${checks}
+      </div>
+      <div class="cd-action">${actionTxt}</div>
+      <div class="cd-links">
+        ${anbudLink}
+        ${prosjektLink}
+      </div>
+    </a>
+  `;
+}
+
+function render() {
+  const scope = getActiveScope();
+  let anbudList = getAnbudInScope(scope).filter(a => a.status === 'vunnet');
+  if (activeSelskapFilter !== 'alle') {
+    anbudList = anbudList.filter(a => a.selskap_id === activeSelskapFilter);
+  }
+
+  const cols = { vunnet: [], kontrakt: [], mob: [], aktivert: [], etablert: [] };
+  anbudList.forEach(a => {
+    const c = classify(a);
+    if (cols[c.stage]) cols[c.stage].push({ anbud: a, classified: c });
+  });
+
+  // Topp-tellere — pipeline + flow
+  const pendingCount = getAnbudInScope(scope).filter(a => a.status === 'pending'
+    && (activeSelskapFilter === 'alle' || a.selskap_id === activeSelskapFilter)
+  ).length;
+  document.getElementById('cnt-pending').textContent = pendingCount;
+  document.getElementById('cnt-vunnet').textContent = cols.vunnet.length;
+  document.getElementById('cnt-kontrakt').textContent = cols.kontrakt.length;
+  document.getElementById('cnt-mob').textContent = cols.mob.length;
+  document.getElementById('cnt-aktivert').textContent = cols.aktivert.length;
+
+  document.getElementById('hd-vunnet').textContent = cols.vunnet.length;
+  document.getElementById('hd-kontrakt').textContent = cols.kontrakt.length;
+  document.getElementById('hd-mob').textContent = cols.mob.length;
+  document.getElementById('hd-aktivert').textContent = cols.aktivert.length;
+
+  // Render cards
+  const renderCol = (id, items, emptyMsg) => {
+    const wrap = document.getElementById(id);
+    if (items.length === 0) {
+      wrap.innerHTML = `<div class="col-empty">${emptyMsg}</div>`;
+      return;
+    }
+    wrap.innerHTML = items.map(it => buildCard(it.anbud, it.classified)).join('');
+  };
+  renderCol('col-vunnet',   cols.vunnet,   'Ingen anbud venter kontrakt akkurat nå.');
+  renderCol('col-kontrakt', cols.kontrakt, 'Ingen kontrakter under signering.');
+  renderCol('col-mob',      cols.mob,      'Ingen prosjekter i mobilisering.');
+  renderCol('col-aktivert', cols.aktivert, 'Ingen prosjekter aktivert siste 60 dager.');
+
+  // Sub-tekst
+  const total = cols.vunnet.length + cols.kontrakt.length + cols.mob.length + cols.aktivert.length;
+  document.getElementById('ph-sub').textContent =
+    `${total} vunne anbud i overlevering · ${cols.aktivert.length} prosjekter aktivert siste 60 dager · ${cols.mob.length + cols.kontrakt.length + cols.vunnet.length} fortsatt under handover.`;
+  document.getElementById('result-count').textContent =
+    `${total} av ${anbudList.length} vunne anbud i bridgen`;
+}
+
+// Help-panel toggle med localStorage-persistens
+const HELP_KEY = 'overlevering-help-open-v1';
+function toggleHelp() {
+  const panel = document.getElementById('help-panel');
+  const btn = document.getElementById('help-toggle');
+  const open = panel.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  try { localStorage.setItem(HELP_KEY, open ? '1' : '0'); } catch (e) {}
+}
+function initHelp() {
+  // Default: kollapset slik at siden er ren. Bruker toggle for å åpne; valg lagres.
+  let open = false;
+  try {
+    open = localStorage.getItem(HELP_KEY) === '1';
+  } catch (e) {}
+  if (open) {
+    document.getElementById('help-panel').classList.add('open');
+    document.getElementById('help-toggle').classList.add('open');
+    document.getElementById('help-toggle').setAttribute('aria-expanded', 'true');
+  }
+}
+
+function init() {
+  renderHeader();
+  renderSelskapFilter();
+  render();
+  initHelp();
+}
+
+init();
+window.addEventListener('scope-changed', () => { activeSelskapFilter = 'alle'; init(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Anbud — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<script src="prosjekter.js"></script>
+<script src="anbud-data.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header .ph-crumb a { color: var(--muted); text-decoration: none }
+  .page-header .ph-crumb a:hover { color: var(--accent-2) }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .ph-status-banner {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-top: 12px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    font-size: 12.5px;
+  }
+  .ph-status-banner.vunnet { border-left: 4px solid var(--good); background: var(--good-soft) }
+  .ph-status-banner.tapt   { border-left: 4px solid var(--bad);  background: var(--bad-soft) }
+  .ph-status-banner.pending{ border-left: 4px solid var(--hi);   background: var(--hi-soft) }
+  .ph-status-banner.trukket{ border-left: 4px solid var(--muted); background: var(--panel-3) }
+  .ph-status-banner b { color: var(--text); font-weight: 600 }
+  .ph-status-banner a {
+    margin-left: auto; color: var(--accent-2); font-weight: 600; text-decoration: none;
+    padding: 5px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px;
+  }
+  .ph-status-banner a:hover { border-color: var(--accent); text-decoration: none }
+
+  .page-tabs-wrap {
+    padding: 12px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .page-tabs {
+    display: inline-flex; gap: 2px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px;
+  }
+  .page-tabs .tab {
+    padding: 7px 16px; background: transparent; border: 0; color: var(--muted);
+    font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; border-radius: 4px;
+    transition: 0.12s; text-decoration: none;
+  }
+  .page-tabs .tab:hover { color: var(--text); background: var(--panel-3); text-decoration: none }
+  .page-tabs .tab.active { background: var(--panel-3); color: var(--accent-2); font-weight: 600 }
+
+  .container { padding: 22px 32px; max-width: 1280px }
+
+  .summary-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .summary-row { grid-template-columns: repeat(2, 1fr) } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 12px; margin: 0 0 14px }
+
+  /* Lifecycle */
+  .lifecycle { display: grid; gap: 10px }
+  .lc-fase {
+    display: grid; grid-template-columns: 30px 1.6fr 1fr 1fr 1.2fr;
+    gap: 14px; padding: 11px 12px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; align-items: center; font-size: 12.5px;
+    border-left: 3px solid var(--muted);
+  }
+  .lc-fase.completed { border-left-color: var(--good); opacity: 0.85 }
+  .lc-fase.in_progress { border-left-color: var(--accent-2); background: var(--accent-soft) }
+  .lc-fase.planned { border-left-color: var(--muted); opacity: 0.6 }
+  .lc-fase .lc-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--panel-3); color: var(--muted);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .lc-fase.completed .lc-num { background: var(--good-soft); color: var(--good) }
+  .lc-fase.in_progress .lc-num { background: var(--accent-soft); color: var(--accent-2) }
+  .lc-fase .lc-name { font-weight: 600 }
+  .lc-fase .lc-status-badge {
+    display: inline-block; font-size: 9.5px; padding: 2px 6px; border-radius: 3px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .lc-fase.completed .lc-status-badge { background: var(--good-soft); color: var(--good) }
+  .lc-fase.in_progress .lc-status-badge { background: var(--accent-soft); color: var(--accent-2) }
+  .lc-fase.planned .lc-status-badge { background: var(--panel-3); color: var(--muted) }
+  .lc-fase.tapt-fase .lc-status-badge { background: var(--bad-soft); color: var(--bad) }
+  .lc-fase.tapt-fase { border-left-color: var(--bad) }
+  .lc-fase .lc-meta { font-size: 11.5px; color: var(--muted) }
+  .lc-fase .lc-meta b { color: var(--text); font-weight: 500 }
+
+  /* AI vurdering */
+  .ai-grid { display: grid; grid-template-columns: 1.2fr 2fr; gap: 18px }
+  @media (max-width: 800px) { .ai-grid { grid-template-columns: 1fr } }
+  .ai-score-big {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 18px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+  }
+  .ai-score-big .lbl {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 700;
+  }
+  .ai-score-big .val {
+    font-size: 64px; font-weight: 700; line-height: 1; margin: 8px 0; letter-spacing: -0.02em;
+  }
+  .ai-score-big .val.good { color: var(--good) }
+  .ai-score-big .val.warn { color: var(--warn) }
+  .ai-score-big .val.bad { color: var(--bad) }
+  .ai-score-big .det { font-size: 11px; color: var(--muted); text-align: center }
+  .ai-bars { display: grid; gap: 8px }
+  .ai-bar { display: grid; grid-template-columns: 130px 1fr 50px; gap: 10px; align-items: center; font-size: 12px }
+  .ai-bar .label { color: var(--muted); font-size: 11px }
+  .ai-bar .bar {
+    height: 8px; background: var(--panel-3); border-radius: 4px; overflow: hidden;
+  }
+  .ai-bar .bar-fill { height: 100%; border-radius: 4px; background: var(--accent-2) }
+  .ai-bar .bar-fill.good { background: var(--good) }
+  .ai-bar .bar-fill.warn { background: var(--warn) }
+  .ai-bar .bar-fill.bad { background: var(--bad) }
+  .ai-bar .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600 }
+
+  .ai-comment {
+    padding: 12px 14px; background: var(--panel-2); border-left: 3px solid var(--accent);
+    border-radius: 4px; font-size: 12.5px; line-height: 1.5; margin-top: 12px;
+  }
+  .ai-comment .lbl {
+    font-size: 10px; color: var(--accent-2); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;
+  }
+
+  /* Kalkulasjon */
+  .kalk-tabell { width: 100%; border-collapse: collapse; font-size: 12.5px }
+  .kalk-tabell th {
+    text-align: left; padding: 10px 12px; background: var(--panel-2); border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .kalk-tabell th.num, .kalk-tabell td.num {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .kalk-tabell td { padding: 10px 12px; border-bottom: 1px solid var(--line) }
+  .kalk-tabell tr:last-child td { border-bottom: 0 }
+  .kalk-tabell tr.total { font-weight: 600; background: var(--panel-2) }
+  .kalk-tabell tr.total td { border-top: 2px solid var(--line); border-bottom: 0 }
+  .kalk-tabell tr.margin-row { background: var(--accent-soft) }
+  .kalk-tabell tr.margin-row td { font-weight: 700; color: var(--accent-2) }
+
+  /* Konkurrenter */
+  .konk-grid { display: grid; gap: 10px }
+  .konk-row {
+    display: grid; grid-template-columns: 1.5fr 1fr 2fr; gap: 14px;
+    padding: 12px 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    font-size: 12.5px; align-items: center;
+  }
+  .konk-row .navn { font-weight: 600 }
+  .konk-row .sannsynlighet {
+    font-size: 10px; padding: 3px 8px; border-radius: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; display: inline-block;
+    background: var(--panel-3); color: var(--muted);
+  }
+  .konk-row .sannsynlighet.h { background: var(--bad-soft); color: var(--bad) }
+  .konk-row .sannsynlighet.m { background: var(--warn-soft); color: var(--warn) }
+  .konk-row .sannsynlighet.l { background: var(--good-soft); color: var(--good) }
+  .konk-row .historikk { font-size: 11.5px; color: var(--muted) }
+
+  /* Dokumenter */
+  .doc-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px }
+  @media (max-width: 800px) { .doc-list { grid-template-columns: 1fr } }
+  .doc-item {
+    padding: 12px 14px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; font-size: 12.5px;
+  }
+  .doc-item .dl { font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.08em; font-weight: 700 }
+  .doc-item b { display: block; margin-top: 3px; font-weight: 500 }
+  .doc-item .meta { font-size: 11px; color: var(--muted); margin-top: 4px }
+  .doc-item .dlink { color: var(--accent-2); font-size: 11px; margin-top: 6px; display: inline-block }
+
+  .empty-state {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 36px; text-align: center; color: var(--muted); font-size: 13px;
+  }
+
+  .tab-content { display: none }
+  .tab-content.active { display: block }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="anbud-detalj"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="daglig">Daglig</span>
+      <a href="index.html">Dashboard</a>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <a id="cr-anbud" href="anbud.html">Anbudspipeline</a>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <span id="cr-id">AN-…</span>
+    </div>
+    <h1 id="ph-title">Anbud</h1>
+    <div class="ph-meta-row" id="ph-meta-row"></div>
+    <div id="ph-banner-wrap"></div>
+  </header>
+
+  <div class="page-tabs-wrap">
+    <div class="page-tabs">
+      <a class="tab active" data-tab="lifecycle"   href="#lifecycle">Lifecycle</a>
+      <a class="tab"        data-tab="ai"          href="#ai">AI-vurdering</a>
+      <a class="tab"        data-tab="kalkulasjon" href="#kalkulasjon">Kalkulasjon</a>
+      <a class="tab"        data-tab="konkurrenter" href="#konkurrenter">Konkurrenter</a>
+      <a class="tab"        data-tab="dokumenter"  href="#dokumenter">Dokumenter</a>
+    </div>
+    <div style="font-size:11px;color:var(--muted)" id="tab-meta"></div>
+  </div>
+
+  <div class="container">
+
+    <div class="summary-row" id="summary-row"></div>
+
+    <section class="tab-content active" id="tab-lifecycle">
+      <div class="panel">
+        <h2>Lifecycle</h2>
+        <p class="lead">Hver fase fra varsel til vunnet/tapt — dato, status og ansvarlig. Ved Vunnet overleveres til prosjekt-fasen.</p>
+        <div class="lifecycle" id="lifecycle-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-ai">
+      <div class="panel">
+        <h2>AI-vurdering</h2>
+        <p class="lead">Strukturert score på 5 dimensjoner. Brukes som beslutningsstøtte for Go/No-Go.</p>
+        <div class="ai-grid">
+          <div class="ai-score-big" id="ai-score-big"></div>
+          <div class="ai-bars" id="ai-bars"></div>
+        </div>
+        <div class="ai-comment" id="ai-comment"></div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-kalkulasjon">
+      <div class="panel">
+        <h2>Kalkulasjon</h2>
+        <p class="lead">Vårt kostnadsgrunnlag fra Holte SmartKalk · margin-budsjett mot levert pris.</p>
+        <table class="kalk-tabell" id="kalk-tabell"></table>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-konkurrenter">
+      <div class="panel">
+        <h2>Konkurrenter</h2>
+        <p class="lead">Forventet konkurransebilde basert på rammeavtale og kunde-historikk.</p>
+        <div class="konk-grid" id="konk-grid"></div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-dokumenter">
+      <div class="panel">
+        <h2>Dokumenter</h2>
+        <p class="lead">Konkurransegrunnlag, vårt tilbud, kontrakt og læringspunkter.</p>
+        <div class="doc-list" id="doc-list"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+<script>
+function getQueryParam(name) {
+  return new URLSearchParams(location.search).get(name);
+}
+
+function fmtKrLocal(v) {
+  if (v == null) return '—';
+  if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(2).replace('.', ',') + ' MNOK';
+  if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + ' kNOK';
+  return Math.round(v).toLocaleString('no-NO') + ' kr';
+}
+function fmtPctLocal(v, decimals = 1) {
+  if (v == null) return '—';
+  return v.toFixed(decimals).replace('.', ',') + ' %';
+}
+function fmtDateLocal(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  return `${d.getDate()}. ${['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'][d.getMonth()]} ${d.getFullYear()}`;
+}
+
+let anbud = null;
+let agg = null;
+
+function renderHeader() {
+  const id = anbud.id;
+  document.getElementById('cr-id').textContent = id;
+  document.getElementById('ph-title').textContent = anbud.tittel;
+
+  const selskap = SELSKAPER.find(s => s.id === anbud.selskap_id);
+  // Bygge breadcrumb-link til riktig anbud-list
+  document.getElementById('cr-anbud').href = getRouteFor('anbud',
+    { type: 'selskap', id: anbud.selskap_id });
+
+  const aktivFase = aktivAnbudFase(anbud);
+  document.getElementById('ph-meta-row').innerHTML = `
+    <span><b>${selskap?.label || ''}</b> · ${selskap?.lokasjon.by || ''}</span>
+    <span>Kunde: <b>${anbud.kunde}</b></span>
+    <span>Kilde: <b>${anbud.kilde}</b></span>
+    <span>Type: <b>${anbud.type}</b></span>
+    <span>Fag: <b>${anbud.fag.join(', ')}</b></span>
+    <span>Verdi: <b>${fmtKrLocal(anbud.verdi_levert_kr || anbud.verdi_estimert_kr)}</b></span>
+    <span>Frist: <b>${fmtDateLocal(anbud.frist)}</b></span>
+    <span>Aktiv fase: <b>${aktivFase ? aktivFase.fase : '—'}</b></span>
+  `;
+
+  // Status-banner
+  const banner = document.getElementById('ph-banner-wrap');
+  let bannerHtml = '';
+  if (anbud.status === 'vunnet' && anbud.prosjekt_id) {
+    const p = getProsjektById(anbud.prosjekt_id);
+    bannerHtml = `
+      <div class="ph-status-banner vunnet">
+        <span>✓</span>
+        <span><b>Vunnet ${fmtDateLocal(anbud.avgjort)}</b> · overlevert som prosjekt <b>${anbud.prosjekt_id}</b>${p ? ' · margin nå ' + fmtPctLocal(p.margin_faktisk_pct) : ''}</span>
+        <a href="prosjekt.html?id=${encodeURIComponent(anbud.prosjekt_id)}">Åpne prosjekt →</a>
+      </div>
+    `;
+  } else if (anbud.status === 'vunnet') {
+    bannerHtml = `<div class="ph-status-banner vunnet">
+      <span>✓</span>
+      <span><b>Vunnet ${fmtDateLocal(anbud.avgjort)}</b> · prosjekt ikke registrert ennå.</span>
+    </div>`;
+  } else if (anbud.status === 'tapt') {
+    bannerHtml = `<div class="ph-status-banner tapt">
+      <span>✕</span>
+      <span><b>Tapt ${fmtDateLocal(anbud.avgjort)}</b>${anbud.vinner ? ' · vinner: <b>' + anbud.vinner + '</b>' : ''}</span>
+    </div>`;
+  } else if (anbud.status === 'pending') {
+    const dager = agg.dager_til_frist;
+    bannerHtml = `<div class="ph-status-banner pending">
+      <span>◐</span>
+      <span><b>Pending avgjørelse</b> ${dager != null ? '· avgjøres innen ' + dager + ' dager (' + fmtDateLocal(anbud.frist) + ')' : ''}</span>
+    </div>`;
+  } else if (anbud.status === 'trukket' || anbud.status === 'no_go') {
+    bannerHtml = `<div class="ph-status-banner trukket">
+      <span>—</span>
+      <span><b>${ANBUD_STATUS_LABEL[anbud.status]}</b> · ikke levert</span>
+    </div>`;
+  }
+  banner.innerHTML = bannerHtml;
+
+  document.getElementById('tab-meta').textContent =
+    `${anbud.id} · ${anbud.kilde} · ${ANBUD_STATUS_LABEL[anbud.status]}`;
+}
+
+function renderSummary() {
+  const aiCls = anbud.ai_score >= 85 ? 'good' : anbud.ai_score >= 70 ? 'warn' : 'bad';
+  const marginCls = agg.margin_pct < 3 ? 'bad' : agg.margin_pct < 6 ? 'warn' : 'good';
+  document.getElementById('summary-row').innerHTML = `
+    <div class="sa-kpi ${aiCls}">
+      <div class="sa-kpi-label">AI-score</div>
+      <div class="sa-kpi-value">${anbud.ai_score}</div>
+      <div class="sa-kpi-detail">5-faktor screening</div>
+    </div>
+    <div class="sa-kpi">
+      <div class="sa-kpi-label">Vår levert pris</div>
+      <div class="sa-kpi-value">${fmtKrLocal(anbud.verdi_levert_kr || anbud.verdi_estimert_kr)}</div>
+      <div class="sa-kpi-detail">vs estimat ${fmtKrLocal(anbud.verdi_estimert_kr)}</div>
+    </div>
+    <div class="sa-kpi ${marginCls}">
+      <div class="sa-kpi-label">Margin i tilbud</div>
+      <div class="sa-kpi-value">${fmtPctLocal(agg.margin_pct)}</div>
+      <div class="sa-kpi-detail">${fmtKrLocal(agg.margin_kr)} kr</div>
+    </div>
+    <div class="sa-kpi hi">
+      <div class="sa-kpi-label">Estimert timer</div>
+      <div class="sa-kpi-value">${(anbud.kalkulasjon?.timer_estimert || 0).toLocaleString('no-NO')}</div>
+      <div class="sa-kpi-detail">Inkl. PL og fagfolk</div>
+    </div>
+  `;
+}
+
+function renderLifecycle() {
+  const list = document.getElementById('lifecycle-list');
+  let html = '';
+  anbud.faser.forEach((f, i) => {
+    const numLabel = i + 1;
+    const isTapt = /tapt/i.test(f.fase) && f.status === 'completed';
+    const statusLabel = isTapt ? 'Tapt'
+      : f.status === 'completed' ? 'Ferdig'
+      : f.status === 'in_progress' ? 'Pågår'
+      : 'Planlagt';
+    const cls = `lc-fase ${f.status}${isTapt ? ' tapt-fase' : ''}`;
+    html += `
+      <div class="${cls}">
+        <span class="lc-num">${numLabel}</span>
+        <span>
+          <div class="lc-name">${f.fase}<span class="lc-status-badge">${statusLabel}</span></div>
+        </span>
+        <span class="lc-meta">Start: <b>${fmtDateLocal(f.start)}</b></span>
+        <span class="lc-meta">Slutt: <b>${fmtDateLocal(f.slutt)}</b></span>
+        <span class="lc-meta">Ansvarlig: <b>${f.ansvarlig || '—'}</b></span>
+      </div>
+    `;
+  });
+  list.innerHTML = html;
+}
+
+function renderAi() {
+  const cls = anbud.ai_score >= 85 ? 'good' : anbud.ai_score >= 70 ? 'warn' : 'bad';
+  document.getElementById('ai-score-big').innerHTML = `
+    <div class="lbl">AI-score</div>
+    <div class="val ${cls}">${anbud.ai_score}</div>
+    <div class="det">${anbud.ai_score >= 85 ? 'Sterk match — gå for' : anbud.ai_score >= 70 ? 'Vurder nøye — moderat match' : 'Svak match — sannsynlig No-Go'}</div>
+  `;
+
+  const bars = document.getElementById('ai-bars');
+  const labels = {
+    fag_match: 'Fag-match',
+    kunde_historikk: 'Kunde-historikk',
+    konkurransebilde: 'Konkurransebilde',
+    margin_potensial: 'Margin-potensial',
+    kapasitet: 'Vår kapasitet',
+  };
+  let barHtml = '';
+  Object.entries(anbud.ai_vurdering || {}).forEach(([k, v]) => {
+    const fillCls = v >= 85 ? 'good' : v >= 70 ? 'warn' : 'bad';
+    barHtml += `
+      <div class="ai-bar">
+        <span class="label">${labels[k] || k}</span>
+        <span class="bar"><span class="bar-fill ${fillCls}" style="width:${v}%"></span></span>
+        <span class="num">${v}</span>
+      </div>
+    `;
+  });
+  bars.innerHTML = barHtml;
+
+  document.getElementById('ai-comment').innerHTML = `
+    <div class="lbl">AI-kommentar</div>
+    ${anbud.ai_kommentar || '—'}
+  `;
+}
+
+function renderKalkulasjon() {
+  const k = anbud.kalkulasjon || {};
+  const sumKost = agg.sumKost;
+  const tilbud = anbud.verdi_levert_kr || anbud.verdi_estimert_kr || 0;
+  const margin = tilbud - sumKost;
+  const marginPct = tilbud ? margin / tilbud * 100 : 0;
+  const marginCls = marginPct < 3 ? 'bad' : marginPct < 6 ? 'warn' : 'good';
+
+  let html = `
+    <thead>
+      <tr>
+        <th>Kostnadsgruppe</th>
+        <th class="num">Beløp</th>
+        <th class="num">Andel av tilbud</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+  const rader = [
+    { k: 'Materiell',                  v: k.materiell_kr || 0 },
+    { k: 'Lønn (egne timer)',          v: k.lonn_kr || 0 },
+    { k: 'Underentreprenør',           v: k.ue_kr || 0 },
+    { k: 'Administrasjon',             v: k.admin_kr || 0 },
+    { k: 'Risiko / margin-buffer',     v: k.risiko_kr || 0 },
+  ];
+  rader.forEach(r => {
+    const andel = tilbud ? Math.round(r.v / tilbud * 100) : 0;
+    html += `<tr>
+      <td>${r.k}</td>
+      <td class="num">${fmtKrLocal(r.v)}</td>
+      <td class="num">${andel} %</td>
+    </tr>`;
+  });
+
+  html += `
+    <tr class="total">
+      <td>Sum kostnader</td>
+      <td class="num">${fmtKrLocal(sumKost)}</td>
+      <td class="num">${tilbud ? Math.round(sumKost / tilbud * 100) : 0} %</td>
+    </tr>
+    <tr>
+      <td>Levert pris (vårt tilbud)</td>
+      <td class="num">${fmtKrLocal(tilbud)}</td>
+      <td class="num">100 %</td>
+    </tr>
+    <tr class="margin-row">
+      <td>Margin i tilbud</td>
+      <td class="num">${fmtKrLocal(margin)}</td>
+      <td class="num">${fmtPctLocal(marginPct)}</td>
+    </tr>
+    </tbody>
+  `;
+  document.getElementById('kalk-tabell').innerHTML = html;
+}
+
+function renderKonkurrenter() {
+  const list = anbud.konkurrenter || [];
+  if (list.length === 0) {
+    document.getElementById('konk-grid').innerHTML = `
+      <div style="padding:14px;background:var(--panel-2);border-radius:6px;font-size:12.5px;color:var(--muted)">
+        Ingen forventede konkurrenter — single-source eller forsikringsoppdrag.
+      </div>`;
+    return;
+  }
+  let html = '';
+  list.forEach(k => {
+    const cls = k.sannsynlighet === 'Høy' ? 'h' : k.sannsynlighet === 'Mid' ? 'm' : 'l';
+    html += `
+      <div class="konk-row">
+        <span class="navn">${k.navn}</span>
+        <span><span class="sannsynlighet ${cls}">${k.sannsynlighet}</span></span>
+        <span class="historikk">${k.historikk}</span>
+      </div>
+    `;
+  });
+  document.getElementById('konk-grid').innerHTML = html;
+}
+
+function renderDokumenter() {
+  const list = anbud.dokumenter || [];
+  if (list.length === 0) {
+    document.getElementById('doc-list').innerHTML = `
+      <div style="padding:14px;background:var(--panel-2);border-radius:6px;font-size:12.5px;color:var(--muted)">
+        Ingen dokumenter registrert.
+      </div>`;
+    return;
+  }
+  document.getElementById('doc-list').innerHTML = list.map(d => `
+    <div class="doc-item">
+      <div class="dl">${d.type}</div>
+      <b>${d.navn}</b>
+      <div class="meta">Kilde: ${d.kilde}</div>
+      <a class="dlink" href="#">Åpne →</a>
+    </div>
+  `).join('');
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.page-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab)?.classList.add('active');
+  document.querySelector(`.page-tabs .tab[data-tab="${tab}"]`)?.classList.add('active');
+  history.replaceState(null, '', '#' + tab);
+}
+
+function init() {
+  const id = getQueryParam('id');
+  anbud = id ? getAnbudById(id) : null;
+
+  if (!anbud) {
+    document.querySelector('main').innerHTML = `
+      <header class="page-header">
+        <div class="ph-crumb"><span class="mode-pill" data-mode="daglig">Daglig</span><a href="anbud.html">Anbudspipeline</a><span>›</span><span>Ikke funnet</span></div>
+        <h1>Anbudet ble ikke funnet</h1>
+        <div class="ph-meta-row">ID: ${id || '—'}</div>
+      </header>
+      <div class="container">
+        <div class="empty-state">
+          Sjekk lenken eller gå til <a href="anbud.html">anbudspipeline</a>.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  agg = aggregateAnbud(anbud);
+
+  // Sett scope automatisk hvis nødvendig
+  const sc = getActiveScope();
+  const inScope = getAnbudInScope(sc).find(a => a.id === anbud.id);
+  if (!inScope) {
+    setActiveScope({ type: 'selskap', id: anbud.selskap_id });
+  }
+
+  renderHeader();
+  renderSummary();
+  renderLifecycle();
+  renderAi();
+  renderKalkulasjon();
+  renderKonkurrenter();
+  renderDokumenter();
+
+  document.querySelectorAll('.page-tabs .tab').forEach(t => {
+    t.addEventListener('click', (e) => {
+      e.preventDefault();
+      showTab(t.dataset.tab);
+    });
+  });
+  const hash = (location.hash || '#lifecycle').replace('#', '');
+  if (['lifecycle', 'ai', 'kalkulasjon', 'konkurrenter', 'dokumenter'].includes(hash)) showTab(hash);
+}
+
+init();
+</script>
+</body>
+</html>

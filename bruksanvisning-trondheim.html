@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Bruksanvisning — Braa og Sørvåg Bygg · Trondheim</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --panel-3: #262d38;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #d29922;
+    --accent-2: #e8b340;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --pending: #a371f7;
+    --orange: #ff6b35;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #b87a17; --accent-2: #d29922;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35;
+    --hi: #2a6dc7; --pending: #7c5fce; --orange: #d4660a;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  .theme-toggle { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 15px; display: inline-flex; align-items: center; justify-content: center }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0 }
+  body { background: var(--bg); color: var(--text); font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+  header.top { padding: 24px 40px 18px; background: var(--header-grad); border-bottom: 1px solid var(--line) }
+  header.top .crumb { font-size: 12px; color: var(--muted); margin-bottom: 6px }
+  header.top .crumb a { color: var(--accent); text-decoration: none }
+  header.top .selskap-tag { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); background: rgba(210,153,34,0.10); border: 1px solid var(--accent); padding: 3px 10px; border-radius: 10px; margin-bottom: 6px }
+  header.top h1 { margin: 4px 0 6px; font-size: 24px; font-weight: 600; letter-spacing: -0.015em }
+  header.top .sub { color: var(--muted); font-size: 13px; max-width: 880px }
+  main { padding: 32px 40px 80px; max-width: 920px; margin: 0 auto }
+
+  .toc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; border-left: 3px solid var(--accent) }
+  .toc h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .toc ul { margin: 0; padding-left: 18px; columns: 2; font-size: 13px }
+  .toc li { margin-bottom: 4px }
+  .toc a { color: var(--accent-2); text-decoration: none }
+  .toc a:hover { text-decoration: underline }
+
+  .role-section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 26px 30px; margin-bottom: 22px; border-top: 4px solid var(--accent) }
+  .role-section.dl { border-top-color: var(--good) }
+  .role-section.styre { border-top-color: var(--accent) }
+  .role-section.sa { border-top-color: var(--orange) }
+  .role-section .head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px }
+  .role-section h2 { margin: 0; font-size: 20px; font-weight: 600 }
+  .role-section .who { background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-2) }
+  .role-section .lead { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 16px }
+
+  .steps { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; margin: 14px 0 }
+  .steps h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600 }
+  .step-row { display: grid; grid-template-columns: 36px 1fr; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: flex-start }
+  .step-row:last-child { border-bottom: 0 }
+  .step-num { background: var(--accent); color: #1a1f29; font-size: 13px; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; line-height: 28px; text-align: center }
+  .step-content h4 { margin: 0 0 4px; font-size: 13px; font-weight: 600 }
+  .step-content p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.6 }
+  .step-content code { font-family: 'SF Mono', Consolas, monospace; font-size: 11px; background: var(--panel-3); padding: 1px 6px; border-radius: 3px; color: var(--accent-2) }
+  .step-content a { color: var(--accent-2); text-decoration: none }
+  .step-content a:hover { text-decoration: underline }
+
+  .freq-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-left: 6px }
+  .freq-badge.daily { background: rgba(63,185,80,0.18); color: var(--good) }
+  .freq-badge.weekly { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .freq-badge.monthly { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .freq-badge.quarterly { background: rgba(163,113,247,0.18); color: var(--pending) }
+
+  .decision { background: rgba(210,153,34,0.06); border-left: 3px solid var(--accent); padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0; font-size: 13px }
+  .decision b { color: var(--accent-2) }
+  .decision ul { margin: 6px 0 0; padding-left: 20px }
+
+  .summary-box { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; margin: 12px 0 }
+  .summary-box h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .summary-box ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.7 }
+
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 14px 0 }
+  .flow .f-step { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 12px 10px; text-align: center; position: relative }
+  .flow .f-step::after { content: "→"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; z-index: 2 }
+  .flow .f-step:last-child::after { display: none }
+  .flow .f-step h5 { margin: 0 0 3px; font-size: 11px; color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.06em }
+  .flow .f-step p { margin: 0; font-size: 11px; color: var(--text); line-height: 1.4 }
+  .flow .f-step .when { font-size: 9px; color: var(--muted); margin-top: 4px; font-weight: 600 }
+
+  .quickref { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px; margin: 16px 0 }
+  .quickref h3 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .quickref table { width: 100%; border-collapse: collapse; font-size: 12px }
+  .quickref th, .quickref td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left }
+  .quickref th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600 }
+  .quickref tbody tr:last-child td { border-bottom: 0 }
+  .quickref a { color: var(--accent-2); text-decoration: none }
+
+  .mockup-banner { background: rgba(210,153,34,0.08); border-left: 3px solid var(--warn); padding: 10px 18px; border-radius: 0 4px 4px 0; margin-bottom: 18px; font-size: 12px }
+  .mockup-banner b { color: var(--warn) }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="bruksanvisning"></div>
+
+<header class="top">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+    <div>
+      <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a> · <a href="bruksanvisning.html">Byggmester Fritzøe →</a></div>
+      <span class="selskap-tag">Trondheim-enheten</span>
+      <h1>Bruksanvisning — Braa og Sørvåg Bygg AS</h1>
+      <div class="sub">
+    Daglig leder Øyvind Berggren styrer operativt med fokus på <b>marginkonsolidering</b> som hovedoppgave i 2026. Strategisk forankring til SA-konsernet via styreleder Mads Jespersen. Prosessene er identiske med Byggmester Fritzøe — det som er forskjellig er konteksten: kunder, marked, og at Trondheim-enheten er én juridisk enhet.
+      </div>
+    </div>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+
+<main>
+
+<div class="mockup-banner">
+  <b>Note:</b> Eksempler som navngitte ansatte og prosjekter i denne bruksanvisningen er mockup. Strukturen er klar for reell tilpasning når Berggren har gjennomgått innholdet.
+</div>
+
+<div class="toc">
+  <h3>Innhold</h3>
+  <ul>
+    <li><a href="#dl">For DL Berggren — daglig drift</a></li>
+    <li><a href="#dl-tilbud">Drag-and-drop tilbudsforespørsler</a></li>
+    <li><a href="#styre">For styret — kvartalsmøte</a></li>
+    <li><a href="#sa">For ServiceAlliansen — konsernrapport</a></li>
+    <li><a href="#diff">Forskjeller fra Bodø-enheten</a></li>
+    <li><a href="#quickref">Quick reference — alle Trondheim-sider</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<section class="role-section dl" id="dl">
+  <div class="head">
+    <h2>Slik bruker Øyvind Berggren dashboardet</h2>
+    <span class="who">Daglig drift</span>
+  </div>
+  <div class="lead">
+    Berggren tiltrådte som DL i september 2025. Hans hovedoppgave 2026 er <b>marginløftet</b> — fra 0,6 % EBIT i 2024 til stabilt 6 % i 2026 og videre 7,5 %+ i 2027. Dashboardet er bygget for å gi tett kontroll på det viktigste: prosjektmargin, hit-rate og kapasitetsutnyttelse. Total daglig tid 30–45 min.
+  </div>
+
+  <div class="flow">
+    <div class="f-step"><h5>07:30</h5><p>Pipeline-sjekk</p><div class="when">5–10 min</div></div>
+    <div class="f-step"><h5>08:30</h5><p>Morgenmøte</p><div class="when">15 min</div></div>
+    <div class="f-step"><h5>12:30</h5><p>Marginvurdering</p><div class="when">10–15 min</div></div>
+    <div class="f-step"><h5>15:30</h5><p>Tildelinger inn</p><div class="when">5 min</div></div>
+    <div class="f-step"><h5>Mandag</h5><p>SA-ukerapport</p><div class="when">10 min</div></div>
+  </div>
+
+  <div class="steps">
+    <h3>07:30 — Pipeline-sjekk <span class="freq-badge daily">Daglig</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="anbud-trondheim.html">anbud-trondheim.html</a> → fanen «Pipeline / Innkommende»</h4>
+        <p>Trondheim-pipelinen er isolert fra Bodø (egen localStorage). Du ser umiddelbart hvor mange anbud som har kommet inn siden forrige sjekk fordelt på Mercell, TendSign, Doffin, CoBrief, SA Forsikring og e-post.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Vurdér AI-match-scoren mot Trondheim-kontekst</h4>
+        <p>Score &gt;75 % og urgent frist: importer som anbud, prioritér til kalkulator. Score 50–75 %: vurder mot kapasitet — pågående NTNU og Persaunet binder ressurser. Score &lt;50 %: les CoBrief AI-tipset, ofte anbefales å ignorere — særlig hvis geografisk utenfor Trondheim/Trøndelag-kjernen.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Klikk «Importer som anbud» eller «Ignorer»</h4>
+        <p>Importerte anbud får ID-prefiks BS-2026-XXX og dukker opp i samtlige speedometre og KPI-er. Forsikringsoppdrag fra SA får FO-prefiks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>08:30 — Morgenmøte med tilbudsleder og kalkulator <span class="freq-badge daily">Daglig · 15 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="okonomi-trondheim.html">okonomi-trondheim.html</a> — prosjektmatrisen</h4>
+        <p>Sjekk røde flagg. I dag: Lade barnehage (348 t brukt ved 25 % fremdrift). Større prosjekter som NTNU Gløshaugen og Persaunet bolig 12 sjekkes for projisert margin minst en gang i uken.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Gå gjennom dagens kalkulasjoner</h4>
+        <p>En kalkulator er flaskehals. Avgjør hvilket anbud som får førsteprioritet i dag. Vurder om anbud kan utsettes ett døgn for å få en grundig kalkyle ferdig — bedre å levere et godt tilbud enn et raskt.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Avklar leveranser og UE-er</h4>
+        <p>Trondheim har bredere UE-utvalg enn Bodø — bruk det. UE-er som Bjarne Aune Ventilasjon og Trondheim Glassmester er etablerte partnere. Ved ny rammeavtale-vinning vurder UE-strategi sammen.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>12:30 — Marginvurdering på ferdige kalkyler <span class="freq-badge daily">Daglig · etter behov</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>SmartKalk-kalkyle ferdig — varsel i pipelinen</h4>
+        <p>Når kalkyle er klar, oppdateres anbud-status til «Klar for marginvurdering». DL får varsel.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Beslutt marginpåslag — Trondheim-kontekst</h4>
+        <p>Trondheim-strategien er <b>marginløft</b> — vi byr ikke under 6 % på rammeavtaler hvis vi ikke har strategisk grunn. Standard: 6–8 % på rammeavtaler vi vil holde, 8–12 % på enkeltprosjekt, 12–15 % på private. Sjekk historisk margin per kunde i okonomi-trondheim for benchmarking.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Tilbudsleder leverer i kundens portal</h4>
+        <p>Mercell for Trondheim kommune og Forsvarsbygg, TendSign for Trøndelag fylke. Status oppdateres til «Pending».</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>15:30 — Sjekk tildelinger <span class="freq-badge daily">Daglig · 5 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Mercell og TendSign sender tildelingsvarsler</h4>
+        <p>Når et anbud er avgjort, registrer i pipelinen som «Vunnet» eller «Tapt». Ved tap: noter konkurrent (NCC, Trønder Fasade, Trondheim Bygg er typiske tapere). Trondheim-konkurrentbildet er bredere enn Bodø — registrér konsekvent for læring.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Speedometer-oppdatering automatisk</h4>
+        <p>Hit-rate oppdateres umiddelbart. Hvis hit-rate går under 60 %, varsel til DL. Trondheim-mål er stabilt &gt;65 % gjennom 2026.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>Mandag morgen — ukeoppsummering til SA-COO <span class="freq-badge weekly">Ukentlig · 10 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="oversikt-trondheim.html">oversikt-trondheim.html</a> for én-sides bilde</h4>
+        <p>Én skjermside med Trondheim-spesifikk operativt, økonomi, strategisk og implementeringsstatus. Sendes som lenke til SA-COO sammen med Bodø-versjonen.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Avvikssaker tas i ukentlig SA-COO-samtale</h4>
+        <p>Marginavvik &gt;3 %p? Åpne <a href="okonomi-trondheim.html">okonomi-trondheim.html</a> og bor ned i prosjektnivå. Hit-rate fall? Sjekk anbud-trondheim.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="role-section dl" id="dl-tilbud">
+  <div class="head">
+    <h2>Tilbudsforespørsler fra Trondheim-marked — drag-and-drop</h2>
+    <span class="who">5 min per henvendelse</span>
+  </div>
+  <div class="lead">
+    I Trondheim er borettslags- og sameiemarkedet vesentlig større enn i Bodø — flere private henvendelser kommer på e-post med vedlegg. Drag-and-drop-funksjonen gjør første sortering rask.
+  </div>
+
+  <div class="steps">
+    <h3>Slik gjør du det</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="anbud-trondheim.html">anbud-trondheim.html</a> → fanen «Pipeline»</h4>
+        <p>Drag-zone øverst. Trondheim-spesifikke demoer er forhåndslastet (Strindheim borettslag, Tyholt sameie, Byåsen privat, Moholt næring) — bruk for å teste.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Dra e-postvedleggene inn</h4>
+        <p>PDF, .eml, bilder, tegninger, Word-filer aksepteres. Flere filer i én slipp = behandles som én forespørsel.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>AI-evaluering kjører (~2 sekunder)</h4>
+        <p>Match-score 0–100 mot Braa og Sørvåg-profilen. Trondheim-kontekst: AI tar med at vi har sterk maler-avdeling (5 personer) som åpner for bredere oppdragstype enn Bodø.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Beslutt: «Importer» eller «Avvis»</h4>
+        <p>Importerte tilbudsforespørsler får TF-2026-XXX og legges som <i>Pending</i>. Avviste fjernes uten lagring.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="decision">
+    <b>Beslutningsregler — Trondheim:</b>
+    <ul>
+      <li>Score &gt; 75 %: Alltid importér.</li>
+      <li>Score 50–75 %: Vurder kapasitet — Trondheim har mer pågående aktivitet enn Bodø, eksisterende oppdrag binder ofte mer.</li>
+      <li>Score &lt; 50 %: Avvis, evt. vurder om kunden bør rutes til Bodø-enheten (det skjer sjelden geografisk, men kan hende ved konsernkunder).</li>
+      <li>Privat under 1 MNOK: Standard avvis — vi prioriterer offentlig ROT og større private.</li>
+      <li>Borettslag/sameie i Trondheim: Nesten alltid importér — segmentet vokser, og hvert prosjekt åpner for andre i samme nettverk.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="role-section styre" id="styre">
+  <div class="head">
+    <h2>Slik bruker styret dashboardet</h2>
+    <span class="who">Strategisk retning · Trondheim-styret</span>
+  </div>
+  <div class="lead">
+    Trondheim-styret møtes typisk hver tredje måned. SA-styreleder Mads Jespersen er felles for begge porteføljebedrifter — han ser konsolidert konsernbilde.
+  </div>
+
+  <div class="steps">
+    <h3>Forberedelse til kvartalsmøte</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="oversikt-trondheim.html">oversikt-trondheim.html</a></h4>
+        <p>Send lenken til <a href="oversikt-trondheim.html">oversikt-trondheim.html</a> til styremedlemmer. Hver får én skjermside med alle fire dimensjoner.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Sammenlign med Bodø-enheten</h4>
+        <p>Åpne <a href="oversikt.html">oversikt.html</a> sammen — peer-comparison synliggjør hvor Trondheim ligger an. Forventet: marginutviklingen Trondheim er hovedfortellingen, hit-rate-løft i 2027 er sekundærmålet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>Under møtet — strategi-diskusjon</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Bytt til strategisk view i <a href="index.html">index.html</a></h4>
+        <p>Velg «Braa og Sørvåg Bygg» fra selskap-velgeren øverst. Scenariokortene viser Trondheim-spesifikke base/offensiv/bull (77/102/137 MNOK ROT i 2029). Spill med scenariovelgeren — endre M&amp;A og EPC-valg, se omsetning og kapital-effekt live.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Lagre vedtak som scenario</h4>
+        <p>Klikk «Lagre scenario» med navn (f.eks. «Trondheim styremøte mai 2026»). Scenarioet huskes lokalt og synliggjøres i oversikt-trondheim og sa-rapport.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="role-section sa" id="sa">
+  <div class="head">
+    <h2>Slik leveres data til ServiceAlliansen-konsernet</h2>
+    <span class="who">SA-COO + SA-styret</span>
+  </div>
+  <div class="lead">
+    SA-konsernet får Trondheim-data via to dashboard-sider: oversikt-trondheim.html ukentlig (SA-COO) og <a href="sa-rapport.html">sa-rapport.html</a> kvartalsvis (SA-styret). Sa-rapporten inneholder begge porteføljebedrifter side-om-side med peer-comparison.
+  </div>
+
+  <div class="steps">
+    <h3>Månedlig konsernoppdatering</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>3. virkedag etter månedsslutt</h4>
+        <p>DL Berggren sender lenke til oversikt-trondheim til SA-COO. Ledsagende kommentar: hva er fortjenestemarginen, og er den stabilisert?</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>SA-COO sammenligner</h4>
+        <p>Åpner <a href="sa-rapport.html">sa-rapport.html</a> med peer-comparison Bodø vs Trondheim. Identifiserer tegn på lokal divergens — om Trondheim drar fra eller henger etter på drift.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="role-section" id="diff">
+  <div class="head">
+    <h2>Hva som er forskjellig fra Bodø-enheten</h2>
+    <span class="who">Operasjonell og strategisk forskjell</span>
+  </div>
+  <div class="lead">
+    Prosessene er identiske — det er konteksten som skiller seg. Disse forskjellene må Berggren og Trondheim-team være bevisst på når de bruker dashboardet.
+  </div>
+
+  <div class="summary-box">
+    <h4>Operasjonelle forskjeller</h4>
+    <ul>
+      <li><b>Én juridisk enhet</b> (vs Bodøs to: Fritzøe + Areal). Pipeline-portalen har ikke selskap-velger, ingen kombinerte tilbud.</li>
+      <li><b>Selskap-felt fjernet</b> i anbud-tabellen — alle anbud er Braa og Sørvåg.</li>
+      <li><b>Speedometer er ett</b> — ikke tre. Fokuserer all hit-rate-måling på samme enhet.</li>
+      <li><b>Bredere UE-marked</b> i Trondheim — flere alternative leverandører for ventilasjon, glass, tak.</li>
+      <li><b>Maler-avdelingen er mindre</b> (5 personer vs Areals 11). Vurder kapasitet før byd på rene malerjobber.</li>
+    </ul>
+  </div>
+
+  <div class="summary-box">
+    <h4>Strategiske forskjeller</h4>
+    <ul>
+      <li><b>Marginløft er hovedfortelling</b> — fra 0,6 % i 2024 til 6 %+ stabilt i 2026.</li>
+      <li><b>Vekst er sekundært</b> — base case er konsolidering. Offensive M&amp;A-spor først aktuelt fra 2027.</li>
+      <li><b>EPC-pilot kommer etter Bodø</b> — kompetansen kan deles, men Bodø har lokal-marked-fit raskere (Helse Nord, Forsvarsbygg).</li>
+      <li><b>Forsikringsstrøm via SA</b> har samme mekanikk, men Trondheim har større volumpotensial — &amp; større konkurranse fra Recover/Ocab/Reco.</li>
+    </ul>
+  </div>
+
+  <div class="summary-box">
+    <h4>Strukturelle felles-elementer</h4>
+    <ul>
+      <li><b>Mads Jespersen</b> styreleder begge enheter — bekrefter SA-eierlinje.</li>
+      <li><b>Felles SA HR-system</b> — én rekrutterer betjener begge.</li>
+      <li><b>Felles Visma Lønn 5.0</b> — én lønnsavdeling.</li>
+      <li><b>Felles SA-læringsplattform</b> — BREEAM AP, fukt, brann-kompetanse deles.</li>
+      <li><b>Felles teknisk implementering</b> (M1–M10) — én utviklingsplan, to selskaps-tenants.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="role-section" id="quickref">
+  <div class="head">
+    <h2>Quick reference — Trondheim-sider</h2>
+    <span class="who">Oversikt</span>
+  </div>
+
+  <div class="quickref">
+    <table>
+      <thead>
+        <tr>
+          <th>Side</th>
+          <th>Bruker</th>
+          <th>Frekvens</th>
+          <th>Hva</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="index.html">index.html</a></td><td>DL + Styret</td><td>Daglig / kvartalsvis</td><td>Hovedinngang. Bruk selskap-velger for å bytte til Trondheim-kontekst.</td></tr>
+        <tr><td><a href="anbud-trondheim.html">anbud-trondheim.html</a></td><td>DL + tilbudsleder</td><td>Daglig (4× per dag)</td><td>Trondheim-pipeline med drag-and-drop, isolert localStorage.</td></tr>
+        <tr><td><a href="okonomi-trondheim.html">okonomi-trondheim.html</a></td><td>DL Berggren</td><td>Ukentlig</td><td>Live regnskap Braa og Sørvåg, prosjektmargin, timeføring, lønn.</td></tr>
+        <tr><td><a href="dashboard-trondheim.html">dashboard-trondheim.html</a></td><td>Styret + DL</td><td>Kvartalsvis</td><td>Bransjekart Trøndelag · M&amp;A-screening for Trondheim-marked.</td></tr>
+        <tr><td><a href="oversikt-trondheim.html">oversikt-trondheim.html</a></td><td>DL → SA-COO</td><td>Ukentlig (mandag)</td><td>Print-vennlig én-side for konsernrapport.</td></tr>
+        <tr><td><a href="sa-rapport.html">sa-rapport.html</a></td><td>Styret → SA-styret</td><td>Kvartalsvis</td><td>Felles for begge enheter med peer-comparison.</td></tr>
+        <tr><td><a href="implementering.html">implementering.html</a></td><td>DL + SA</td><td>Månedlig</td><td>Felles teknisk plan for begge porteføljebedrifter.</td></tr>
+        <tr><td><a href="bruksanvisning-trondheim.html">bruksanvisning-trondheim.html</a></td><td>Alle nye</td><td>Onboarding</td><td>Du leser den nå.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

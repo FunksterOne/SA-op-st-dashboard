@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Strategi — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1f2630; --panel-3: #262d38;
+    --line: #2a313c; --text: #e6edf3; --muted: #8b95a3;
+    --accent: #4f9da6; --accent-2: #66c2cc;
+    --good: #3fb950; --warn: #d29922; --bad: #f85149;
+    --hi: #58a6ff; --pending: #a371f7;
+    --base: #58a6ff; --offensiv: #d29922; --bull: #3fb950;
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #2d6e76; --accent-2: #4a8a92;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35;
+    --hi: #2a6dc7; --pending: #7c5fce;
+    --base: #2a6dc7; --offensiv: #b87a17; --bull: #2e8a3a;
+  }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0 }
+  body { background: var(--bg); color: var(--text);
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .page-header h1 { margin: 6px 0 0; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-sub { margin: 4px 0 0; font-size: 13px; color: var(--muted) }
+  .container { padding: 22px 32px; max-width: 1280px }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 22px 24px; margin-bottom: 18px;
+  }
+  .panel h2 { margin: 0 0 6px; font-size: 16px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 13px; margin-bottom: 16px }
+  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px }
+  @media (max-width: 1000px) { .scenario-grid { grid-template-columns: 1fr } }
+  .scenario {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; border-top: 3px solid var(--base);
+  }
+  a.scenario:hover {
+    border-color: var(--accent); transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+  }
+  .scenario.s-base { border-top-color: var(--base) }
+  .scenario.s-offensiv { border-top-color: var(--offensiv) }
+  .scenario.s-bull { border-top-color: var(--bull) }
+  .scenario h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .scenario .sc-cagr { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em }
+  .scenario .sc-ramp { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 14px 0 10px }
+  .scenario .sc-year {
+    background: var(--panel-3); border-radius: 5px; padding: 8px 6px; text-align: center;
+  }
+  .scenario .sc-year .y { font-size: 9.5px; color: var(--muted); font-weight: 600 }
+  .scenario .sc-year .v { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 2px }
+  .scenario .sc-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11.5px; margin: 8px 0 12px }
+  .scenario .sc-meta div { background: var(--panel); padding: 6px 8px; border-radius: 4px }
+  .scenario .sc-meta .lbl { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .scenario .sc-meta .v { font-weight: 600; margin-top: 2px }
+  .scenario .sc-desc { font-size: 12px; color: var(--muted); line-height: 1.45 }
+  .market-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px }
+  @media (max-width: 900px) { .market-grid { grid-template-columns: 1fr } }
+  .market-card {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .market-card .m-lbl { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600 }
+  .market-card .m-val { font-size: 22px; font-weight: 700; margin: 4px 0 }
+  .market-card .m-sub { font-size: 11px; color: var(--muted) }
+  .market-card .m-trend { font-size: 11.5px; margin-top: 6px }
+  .market-card .m-trend.up { color: var(--good) }
+  .market-card .m-trend.down { color: var(--bad) }
+  .summary-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .summary-row { grid-template-columns: repeat(2, 1fr) } }
+  .sum-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+  }
+  .sum-card .sc-lbl { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600 }
+  .sum-card .sc-val { font-size: 24px; font-weight: 700; margin: 4px 0 0; letter-spacing: -0.02em }
+  .sum-card .sc-sub { font-size: 11px; color: var(--muted); margin-top: 2px }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="strategi"></div>
+
+<main class="main-content">
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+      <span>Vekst-scenarier</span>
+    </div>
+    <h1 id="ph-title">Vekst-scenarier</h1>
+    <div class="ph-sub" id="ph-sub">Tre alternative vekstløp · 2026–2029 horisont</div>
+  </header>
+
+  <div class="container">
+
+    <!-- Sammendrag 2024-tall -->
+    <div class="summary-row" id="summary-row"></div>
+
+    <!-- Scenarier -->
+    <div class="panel">
+      <h2>Scenarier 2026–2029</h2>
+      <p class="lead">Tre alternative vekstløp. ROT-anbud (kjernevirksomhet) + forsikringsstrøm (SA-distribusjon) i MNOK per år. Ramp-tabell viser sum for valgt scope.</p>
+      <div class="scenario-grid" id="scenario-grid"></div>
+    </div>
+
+    <!-- Marked -->
+    <div class="panel">
+      <h2>Markedsbildet</h2>
+      <p class="lead">SSB sysselsetting NACE 41–43 og igangsatte boliger. Brukes som bakgrunn for scenario-vurdering.</p>
+      <div class="market-grid" id="market-grid"></div>
+    </div>
+
+    <!-- Hva som besluttes hvor -->
+    <div class="panel">
+      <h2>Beslutningsforum</h2>
+      <p class="lead">Hva som besluttes på hvert nivå.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div class="scenario" style="border-top-color:var(--accent)">
+          <h3>Daglig leder (selskap)</h3>
+          <div class="sc-desc">Pipeline, anbudsdeltagelse, prosjektmargin, bemanning, tidsfrister. Operativt valg innen rammene satt av styret.</div>
+        </div>
+        <div class="scenario" style="border-top-color:var(--accent)">
+          <h3>Styret (per selskap)</h3>
+          <div class="sc-desc">Kvartalsvis: budsjett, scenario-valg, kapital, geografisk utvidelse, styresaker krav til kapital over 5 MNOK.</div>
+        </div>
+        <div class="scenario" style="border-top-color:var(--accent)">
+          <h3>SA-konsern</h3>
+          <div class="sc-desc">Konsernbidrag, oppkjøp, forsikringsavtaler, felles HR/læring/innkjøp. Strategisk retning på tvers.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+<script>
+function renderHeader() {
+  const lbl = getScopeLabel();
+  document.getElementById('ph-title').textContent = `Vekst-scenarier — ${lbl.label}`;
+  document.getElementById('ph-title').style.color = lbl.farge;
+
+  const scope = getActiveScope();
+  let sub = '2026–2029 horisont';
+  if (scope.type === 'selskap') {
+    const s = getSelskap(scope.id);
+    sub = `${s.label} · ${s.lokasjon.by} · ${s.regnskap_2024.omsetning_mnok.toFixed(1).replace('.', ',')} MNOK 2024`;
+  } else if (scope.type === 'by') {
+    const r = getRegnskap2024(scope);
+    sub = `${getBy(scope.id).label} · ${r.n} selskap · ${r.omsetning_mnok.toFixed(1).replace('.', ',')} MNOK 2024`;
+  } else {
+    const r = getRegnskap2024(scope);
+    sub = `Konsern · ${r.n} selskap · ${r.omsetning_mnok.toFixed(1).replace('.', ',')} MNOK 2024`;
+  }
+  document.getElementById('ph-sub').textContent = sub;
+}
+
+function renderSummary() {
+  const r = getRegnskap2024();
+  const row = document.getElementById('summary-row');
+  row.innerHTML = `
+    <div class="sum-card">
+      <div class="sc-lbl">Omsetning 2024</div>
+      <div class="sc-val">${r.omsetning_mnok.toFixed(1).replace('.', ',')} MNOK</div>
+      <div class="sc-sub">${r.n} selskap aggregert</div>
+    </div>
+    <div class="sum-card">
+      <div class="sc-lbl">Driftsmargin 2024</div>
+      <div class="sc-val">${r.driftsmargin_pct.toFixed(1).replace('.', ',')} %</div>
+      <div class="sc-sub">EBIT ${r.driftsresultat_mnok.toFixed(1).replace('.', ',')} MNOK</div>
+    </div>
+    <div class="sum-card">
+      <div class="sc-lbl">Egenkapital</div>
+      <div class="sc-val">${r.ek_mnok.toFixed(1).replace('.', ',')} MNOK</div>
+      <div class="sc-sub">Per 31.12.2024</div>
+    </div>
+    <div class="sum-card">
+      <div class="sc-lbl">Ansatte</div>
+      <div class="sc-val">${r.ansatte}</div>
+      <div class="sc-sub">Brreg 2024</div>
+    </div>
+  `;
+}
+
+function renderScenarios() {
+  const scope = getActiveScope();
+  const grid = document.getElementById('scenario-grid');
+  grid.innerHTML = '';
+
+  ['base', 'offensiv', 'bull'].forEach(name => {
+    const yrs = [2026, 2027, 2028, 2029];
+    const data = yrs.map(y => getScenarioForScope(name, y, scope));
+    const last = data[data.length - 1];
+
+    // Hent beskrivelse fra første by/scenario som har den
+    let beskrivelse = '', cagr = '', kapital = '', ansatte = '', margin = '';
+    if (scope.type === 'by') {
+      const sc = getBy(scope.id).scenarioer[name];
+      beskrivelse = sc.beskrivelse; cagr = sc.cagr_pct + ' % CAGR';
+      kapital = sc.kapitalbehov; ansatte = sc.ansatte_2029; margin = sc.ebit_margin_2029_pct;
+    } else if (scope.type === 'selskap') {
+      const s = getSelskap(scope.id);
+      const sc = getBy(s.by).scenarioer[name];
+      beskrivelse = sc.beskrivelse; cagr = sc.cagr_pct + ' % CAGR';
+      kapital = sc.kapitalbehov; ansatte = '—'; margin = sc.ebit_margin_2029_pct;
+    } else {
+      // Konsern: gjennomsnitt
+      const cagrs = BYER.map(b => b.scenarioer[name].cagr_pct);
+      cagr = `~${Math.round(cagrs.reduce((s,x)=>s+x,0)/cagrs.length)} % CAGR (snitt)`;
+      kapital = BYER.map(b => b.scenarioer[name].kapitalbehov).join(' + ');
+      ansatte = BYER.reduce((s, b) => s + b.scenarioer[name].ansatte_2029, 0);
+      margin = (BYER.reduce((s, b) => s + b.scenarioer[name].ebit_margin_2029_pct, 0) / BYER.length).toFixed(1);
+      beskrivelse = `Aggregert ${name}-scenario for hele konsernet (${BYER.length} byer).`;
+    }
+
+    grid.innerHTML += `
+      <a class="scenario s-${name}" href="scenario.html?type=${name}" style="text-decoration:none;color:inherit;display:block;cursor:pointer;transition:0.15s">
+        <h3>${name === 'base' ? 'Base' : name === 'offensiv' ? 'Offensiv' : 'Bull'} <span style="float:right;color:var(--accent-2);font-size:11px;font-weight:500">Drill →</span></h3>
+        <div class="sc-cagr">${cagr}</div>
+        <div class="sc-ramp">
+          ${data.map((d, i) => `
+            <div class="sc-year">
+              <div class="y">${yrs[i]}</div>
+              <div class="v">${d.total.toFixed(0)}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="sc-meta">
+          <div><div class="lbl">Margin 2029</div><div class="v">${margin} %</div></div>
+          <div><div class="lbl">Ansatte 2029</div><div class="v">${ansatte}</div></div>
+          <div style="grid-column:1/-1"><div class="lbl">Kapitalbehov</div><div class="v">${kapital}</div></div>
+        </div>
+        <div class="sc-desc">${beskrivelse}</div>
+      </a>
+    `;
+  });
+}
+
+function renderMarket() {
+  const scope = getActiveScope();
+  const grid = document.getElementById('market-grid');
+  grid.innerHTML = '';
+
+  // Bestem hvilke byer som er relevante
+  let byer = [];
+  if (scope.type === 'by') byer = [getBy(scope.id)];
+  else if (scope.type === 'selskap') {
+    const s = getSelskap(scope.id);
+    byer = [getBy(s.by)];
+  } else byer = BYER;
+
+  byer.forEach(by => {
+    const m = by.marked;
+    const sysTrend = m.sysselsetting_endring_pct;
+    const igTrend = m.igangsetting_endring_pct;
+    grid.innerHTML += `
+      <div class="market-card">
+        <div class="m-lbl">${by.label} · ${by.fylke}</div>
+        <div class="m-val" style="color:${by.farge}">${m.sysselsetting_fylke_2025.toLocaleString('no-NO')}</div>
+        <div class="m-sub">Sysselsatte NACE 41–43 (2025)</div>
+        <div class="m-trend ${sysTrend < 0 ? 'down' : 'up'}">${sysTrend > 0 ? '+' : ''}${sysTrend.toFixed(1)} % vs 2024</div>
+      </div>
+      <div class="market-card">
+        <div class="m-lbl">Igangsatte boliger ${by.fylke}</div>
+        <div class="m-val">${m.igangsatte_boliger_2024.toLocaleString('no-NO')}</div>
+        <div class="m-sub">2024 · vs ${m.igangsatte_boliger_2020.toLocaleString('no-NO')} (2020)</div>
+        <div class="m-trend ${igTrend < 0 ? 'down' : 'up'}">${igTrend > 0 ? '+' : ''}${igTrend} % siden 2020</div>
+      </div>
+    `;
+  });
+
+  // Felles SA-makro
+  grid.innerHTML += `
+    <div class="market-card">
+      <div class="m-lbl">SA forsikringsstrøm</div>
+      <div class="m-val">10–22 MNOK</div>
+      <div class="m-sub">Ramp-bane offensiv-scenario (per by)</div>
+      <div class="m-trend up">Sentralt allokert via SA Forsikring</div>
+    </div>
+  `;
+}
+
+function refresh() {
+  renderHeader();
+  renderSummary();
+  renderScenarios();
+  renderMarket();
+}
+
+refresh();
+window.addEventListener('scope-changed', refresh);
+</script>
+</body>
+</html>

@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Anbudsportal — Braa og Sørvåg Bygg · Trondheim</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #d29922;
+    --accent-2: #e8b340;
+    --good: #3fb950;
+    --warn: #b87a17;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --pending: #a371f7;
+    --panel-3: #262d38;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #b87a17; --accent-2: #d29922;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35; --hi: #2a6dc7; --pending: #7c5fce;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  .theme-toggle { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 15px; display: inline-flex; align-items: center; justify-content: center }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14.5px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+  header {
+    padding: 20px 32px; border-bottom: 1px solid var(--line);
+    background: var(--header-grad);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em }
+  header .brand { color: var(--accent); font-weight: 500 }
+  header .selskap-tag {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
+    background: rgba(210,153,34,0.10); border: 1px solid var(--accent);
+    padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+  }
+  header .period { color: var(--muted); font-size: 12px }
+  .toolbar {
+    padding: 14px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .toolbar select, .toolbar input, .toolbar button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 6px 10px; border-radius: 4px; font-size: 13px; font-family: inherit;
+  }
+  .toolbar button { cursor: pointer; transition: 0.1s }
+  .toolbar button:hover { background: var(--accent); border-color: var(--accent); color: #1a1f29 }
+  .toolbar .spacer { flex: 1 }
+  .toolbar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px }
+  main { padding: 24px 32px 60px; max-width: 1280px; margin: 0 auto }
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 12px 14px; border-radius: 6px;
+  }
+  .kpi .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em }
+  .kpi .v { font-size: 18px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums }
+  .kpi .d { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .grid-bottom { display: grid; grid-template-columns: 1fr 320px; gap: 16px }
+  .table-card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+  .table-card .head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .table-card .head h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .table-card .head .count { color: var(--text); font-weight: 600 }
+  table.anbud { width: 100%; border-collapse: collapse; font-size: 13px }
+  table.anbud th {
+    text-align: left; padding: 10px 12px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  table.anbud th.num { text-align: right }
+  table.anbud th:hover { color: var(--text) }
+  table.anbud td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.anbud td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.anbud tbody tr:hover { background: rgba(210,153,34,0.04) }
+  table.anbud .id { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums }
+  table.anbud .tit { font-weight: 500 }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 500; line-height: 1.4 }
+  .badge.s-vunnet { background: rgba(63,185,80,0.18); color: var(--good) }
+  .badge.s-tapt { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .badge.s-pending { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .badge.s-utkast { background: rgba(139,149,163,0.18); color: var(--muted) }
+  .badge.s-forsikringsoppdrag { background: rgba(232,93,117,0.18); color: #e85d75 }
+  .badge.braa { background: rgba(210,153,34,0.18); color: var(--accent-2) }
+  .badge.mini { background: rgba(210,153,34,0.15); color: var(--warn); border: 1px solid rgba(210,153,34,0.3) }
+  .badge.hoved { background: rgba(248,81,73,0.10); color: #ff9a93; border: 1px solid rgba(248,81,73,0.3) }
+  .badge.tilbud { background: rgba(255,107,53,0.15); color: #ff8856 }
+  .badge.fag { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); margin-right: 2px }
+  .side { display: flex; flex-direction: column; gap: 16px }
+  .side .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .side .card h3 { margin: 0 0 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .bar-row { display: grid; grid-template-columns: 110px 1fr 50px; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px }
+  .bar-row .label { color: var(--text) }
+  .bar-row .bar { background: var(--panel-2); border-radius: 3px; height: 18px; position: relative; overflow: hidden }
+  .bar-row .bar .fill { background: var(--accent); height: 100%; border-radius: 3px; transition: width 0.3s }
+  .bar-row .bar .fill.won { background: var(--good) }
+  .bar-row .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted) }
+  .quarter-chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; align-items: end; height: 120px; margin-top: 12px }
+  .qbar { position: relative; display: flex; flex-direction: column; align-items: center }
+  .qbar .stack { width: 100%; display: flex; flex-direction: column-reverse; border-radius: 3px; overflow: hidden }
+  .qbar .seg.won { background: var(--good) }
+  .qbar .seg.lost { background: var(--bad) }
+  .qbar .seg.pending { background: var(--pending) }
+  .qbar .lbl { font-size: 10px; color: var(--muted); margin-top: 4px }
+  .qbar .total { font-size: 10px; color: var(--text); position: absolute; top: -14px; font-variant-numeric: tabular-nums }
+  /* tabs */
+  .tabs { display: flex; gap: 4px; padding: 0 32px; background: var(--panel); border-bottom: 1px solid var(--line) }
+  .tabs .tab { padding: 10px 18px; cursor: pointer; font-size: 13px; color: var(--muted); border-bottom: 2px solid transparent; user-select: none }
+  .tabs .tab:hover { color: var(--text) }
+  .tabs .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500 }
+  .tabs .tab .badge-count { display: inline-block; background: var(--accent); color: #1a1f29; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; margin-left: 4px }
+  .tab-content { display: none }
+  .tab-content.active { display: block }
+  /* pipeline */
+  .pipeline-head {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 16px;
+    display: flex; gap: 16px; align-items: center;
+  }
+  .pipeline-head .src { background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; font-size: 12px }
+  .pipeline-head .src .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .pipeline-head .src .v { font-size: 16px; font-weight: 600; margin-top: 2px }
+  .pipeline-head .src.doffin { border-left: 3px solid #58a6ff }
+  .pipeline-head .src.mercell { border-left: 3px solid var(--accent) }
+  .pipeline-head .src.tendsign { border-left: 3px solid #a371f7 }
+  .pipeline-head .src.cobrief { border-left: 3px solid #4f9da6 }
+  .pipeline-head .src.email { border-left: 3px solid var(--muted) }
+  .pipeline-head .src.forsikring { border-left: 3px solid #e85d75 }
+  .pipeline-list { display: flex; flex-direction: column; gap: 10px }
+  .pipe-item {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 14px 18px;
+    display: grid; grid-template-columns: 90px 1fr 100px 120px 200px;
+    gap: 14px; align-items: center;
+  }
+  .pipe-item.doffin { border-left: 3px solid #58a6ff }
+  .pipe-item.mercell { border-left: 3px solid var(--accent) }
+  .pipe-item.tendsign { border-left: 3px solid #a371f7 }
+  .pipe-item.cobrief { border-left: 3px solid #4f9da6 }
+  .pipe-item.email { border-left: 3px solid var(--muted) }
+  .pipe-item.forsikring { border-left: 3px solid #e85d75 }
+  .pipe-item .src-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600 }
+  .pipe-item.doffin .src-tag { color: #58a6ff }
+  .pipe-item.mercell .src-tag { color: var(--accent) }
+  .pipe-item.tendsign .src-tag { color: #a371f7 }
+  .pipe-item.cobrief .src-tag { color: #4f9da6 }
+  .pipe-item.email .src-tag { color: var(--muted) }
+  .pipe-item.forsikring .src-tag { color: #e85d75 }
+  .pipe-item .ref { font-size: 10px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums }
+  .pipe-item .titl { font-weight: 500; font-size: 13px }
+  .pipe-item .kunde { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .pipe-item .frist .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .pipe-item .frist .v { font-size: 13px; font-weight: 500; margin-top: 2px; font-variant-numeric: tabular-nums }
+  .pipe-item .frist.urgent .v { color: var(--bad) }
+  .pipe-item .frist.soon .v { color: var(--warn) }
+  .pipe-item .match { background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; text-align: center }
+  .pipe-item .match .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .pipe-item .match .v { font-size: 16px; font-weight: 600; margin-top: 1px }
+  .pipe-item .match.high .v { color: var(--good) }
+  .pipe-item .match.med .v { color: var(--warn) }
+  .pipe-item .match.low .v { color: var(--bad) }
+  .pipe-item .match.na .v { color: var(--muted) }
+  .pipe-item .acts { display: flex; gap: 6px; justify-content: flex-end }
+  .pipe-item .acts button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 5px 10px; border-radius: 4px; font: inherit; font-size: 11px; cursor: pointer;
+  }
+  .pipe-item .acts button.primary { background: var(--accent); border-color: var(--accent); color: #1a1f29; font-weight: 600 }
+  .pipe-item .acts button:hover { filter: brightness(1.15) }
+  .pipe-item .ai-tip {
+    grid-column: 2 / 5; font-size: 11px; color: var(--muted); margin-top: 4px;
+    background: rgba(210,153,34,0.08); border-left: 2px solid var(--accent);
+    padding: 6px 10px; border-radius: 0 4px 4px 0;
+  }
+  .pipe-item .ai-tip b { color: var(--accent-2) }
+  .pipe-item.removing { transition: 0.35s; opacity: 0; transform: translateX(20px); pointer-events: none }
+  /* drop-zone */
+  .inbox-drop { margin-bottom: 18px }
+  .dropzone {
+    background: var(--panel); border: 2px dashed var(--line); border-radius: 10px;
+    padding: 24px 28px; text-align: center; transition: 0.2s; cursor: pointer;
+  }
+  .dropzone.drag-over {
+    border-color: var(--accent); background: rgba(210,153,34,0.08);
+    transform: scale(1.005);
+  }
+  .dropzone .dz-icon { font-size: 32px; margin-bottom: 6px }
+  .dropzone .dz-title { font-size: 15px; font-weight: 600; margin-bottom: 4px }
+  .dropzone .dz-sub { color: var(--muted); font-size: 12px; margin-bottom: 10px }
+  .dropzone .dz-demos { font-size: 11px; color: var(--muted) }
+  .dropzone .dz-demos button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 5px 10px; margin: 4px 3px 0; border-radius: 4px;
+    cursor: pointer; font: inherit; font-size: 11px; transition: 0.15s;
+  }
+  .dropzone .dz-demos button:hover { border-color: var(--accent); color: var(--accent-2) }
+  .eval-result {
+    background: var(--panel); border: 1px solid var(--accent); border-radius: 10px;
+    padding: 18px 22px; margin-top: 14px;
+    border-left: 4px solid var(--accent);
+    animation: fadeInUp 0.3s ease-out;
+  }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+  .eval-loading {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 22px; text-align: center; margin-top: 14px;
+    color: var(--muted); font-size: 13px;
+  }
+  .eval-loading .spinner {
+    display: inline-block; width: 20px; height: 20px; border: 3px solid var(--line);
+    border-top-color: var(--accent); border-radius: 50%; vertical-align: middle;
+    margin-right: 10px; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .eval-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px }
+  .eval-head h4 { margin: 0; font-size: 14px; font-weight: 600 }
+  .eval-meta { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .eval-score { font-size: 24px; font-weight: 700; padding: 8px 16px; border-radius: 8px; background: var(--panel-2); border: 2px solid var(--line); font-variant-numeric: tabular-nums }
+  .eval-score.high { color: var(--good); border-color: var(--good); background: rgba(63,185,80,0.10) }
+  .eval-score.med { color: var(--warn); border-color: var(--warn); background: rgba(210,153,34,0.10) }
+  .eval-score.low { color: var(--bad); border-color: var(--bad); background: rgba(248,81,73,0.10) }
+  .eval-body { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px; margin-bottom: 12px; font-size: 12.5px }
+  .eval-row { display: grid; grid-template-columns: 130px 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--line) }
+  .eval-row .lbl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em }
+  .eval-row .val { color: var(--text); font-weight: 500 }
+  .eval-notes {
+    background: rgba(210,153,34,0.08); border-left: 3px solid var(--accent);
+    padding: 10px 14px; margin: 8px 0 14px; border-radius: 0 4px 4px 0;
+    font-size: 12px; line-height: 1.5;
+  }
+  .eval-notes b { color: var(--accent-2) }
+  .eval-actions { display: flex; gap: 8px }
+  .eval-actions button {
+    padding: 8px 16px; border-radius: 4px; cursor: pointer; font: inherit; font-size: 12px;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+  }
+  .eval-actions button.primary { background: var(--accent); border-color: var(--accent); color: #1a1f29; font-weight: 600 }
+  .badge.kat-borettslag { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .badge.kat-privat { background: rgba(255,107,53,0.15); color: #ff8856 }
+  .badge.kat-sameie { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .badge.kat-bedrift { background: rgba(210,153,34,0.18); color: var(--warn) }
+  /* toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel); border: 1px solid var(--good); border-left: 3px solid var(--good);
+    color: var(--text); padding: 10px 16px; border-radius: 6px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4); z-index: 100;
+    opacity: 0; transform: translateY(10px); transition: 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0) }
+  .toast .id { color: var(--muted); font-size: 11px }
+  .save-pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--good); opacity: 0; transition: 0.3s }
+  .save-pulse.on { opacity: 1; box-shadow: 0 0 8px var(--good) }
+  .header-right { display: flex; gap: 14px; align-items: center }
+  .reset-btn {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+    padding: 5px 12px; border-radius: 4px; font: inherit; font-size: 12px; cursor: pointer; transition: 0.15s;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--accent) }
+  /* flash new row */
+  @keyframes flashNew { 0% { background: rgba(63,185,80,0.35); box-shadow: inset 3px 0 0 var(--good) } 100% { background: transparent; box-shadow: inset 3px 0 0 transparent } }
+  table.anbud tbody tr.new-row td { animation: flashNew 2.8s ease-out }
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 24px; line-height: 1.6 }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="anbud"></div>
+
+<header>
+  <div>
+    <div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;font-weight:600;display:flex;align-items:center;gap:10px">
+      <span class="mode-pill" data-mode="daglig">Daglig</span>
+      <span>Hovedspor</span>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <span>Anbudspipeline</span>
+    </div>
+    <h1 style="margin:6px 0 0">Anbudspipeline — Braa og Sørvåg Bygg <span class="selskap-tag">Trondheim</span></h1>
+    <div class="period" id="periodLabel" style="margin-top:4px">DL Øyvind Berggren · 32 ansatte · Tillerbruvegen 76, 7092 Tiller</div>
+  </div>
+  <div class="header-right">
+    <a href="overlevering.html" style="font-size:12px;color:var(--accent-2);text-decoration:none;padding:7px 13px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2)">Vunnet → Overlevering →</a>
+    <span class="period"><span class="save-pulse" id="savePulse"></span> &nbsp;Sist lagret lokalt</span>
+    <button class="reset-btn" onclick="resetState()">Tilbakestill demo</button>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="anbud">Anbudsregister</div>
+  <div class="tab" data-tab="pipeline">Pipeline / Innkommende <span class="badge-count" id="pipeCount">0</span></div>
+</div>
+
+<div class="tab-content active" id="tab-anbud">
+<div class="toolbar">
+  <label>Status</label>
+  <select id="filterStatus">
+    <option value="all">Alle</option>
+    <option value="Vunnet">Vunnet</option>
+    <option value="Tapt">Tapt</option>
+    <option value="Pending">Avventer svar</option>
+  </select>
+  <label>Type</label>
+  <select id="filterType">
+    <option value="all">Alle</option>
+    <option value="Mini-konkurranse">Mini-konkurranse</option>
+    <option value="Hovedanbud">Hovedanbud</option>
+    <option value="Tilbudsforespørsel">Tilbudsforespørsel</option>
+    <option value="Forsikringsoppdrag">Forsikringsoppdrag</option>
+  </select>
+  <label>Fag</label>
+  <select id="filterFag">
+    <option value="all">Alle</option>
+    <option value="Snekker">Snekker</option>
+    <option value="Maler">Maler</option>
+    <option value="Bygg-rehab">Bygg-rehab</option>
+    <option value="Fasade">Fasade</option>
+    <option value="Tak">Tak</option>
+    <option value="Vinduer">Vinduer</option>
+    <option value="Total-rehab">Total-rehab</option>
+  </select>
+  <label>Kunde</label>
+  <select id="filterKunde">
+    <option value="all">Alle</option>
+  </select>
+  <label>Periode</label>
+  <select id="filterPeriode">
+    <option value="all">Alle</option>
+    <option value="2026">2026</option>
+    <option value="2025">2025</option>
+    <option value="2026-Q2">2026-Q2</option>
+    <option value="2026-Q1">2026-Q1</option>
+    <option value="2025-Q4">2025-Q4</option>
+    <option value="2025-Q3">2025-Q3</option>
+  </select>
+  <div class="spacer"></div>
+  <button class="primary" id="openAdd" style="background:var(--accent);border-color:var(--accent);color:#1a1f29;font-weight:600">+ Nytt anbud</button>
+</div>
+
+<main>
+  <section class="kpis">
+    <div class="kpi"><div class="l">Verdi vunnet</div><div class="v" id="kpiVunnetVerdi">–</div><div class="d">av aktive tilbud</div></div>
+    <div class="kpi"><div class="l">Verdi tapt</div><div class="v" id="kpiTaptVerdi">–</div><div class="d">tapte konkurranser</div></div>
+    <div class="kpi"><div class="l">Verdi i pipeline</div><div class="v" id="kpiPendingVerdi">–</div><div class="d">avventer svar</div></div>
+    <div class="kpi"><div class="l">Snitt anbudsverdi</div><div class="v" id="kpiSnittVerdi">–</div><div class="d">levert</div></div>
+    <div class="kpi"><div class="l">Hit-rate verdi</div><div class="v" id="kpiHitRateVerdi">–</div><div class="d">vunnet kr / total kr</div></div>
+  </section>
+
+  <div class="grid-bottom">
+    <div class="table-card">
+      <div class="head">
+        <h3>Anbudsregister Trondheim — <span class="count" id="rowCount">0</span> oppføringer</h3>
+        <div style="color:var(--muted);font-size:11px">Klikk kolonne for sortering</div>
+      </div>
+      <table class="anbud" id="anbudTable">
+        <thead><tr>
+          <th data-key="id">ID</th>
+          <th data-key="tittel">Tittel</th>
+          <th data-key="kunde">Kunde</th>
+          <th data-key="type">Type</th>
+          <th data-key="fag">Fag</th>
+          <th data-key="verdi" class="num">Verdi (NOK)</th>
+          <th data-key="frist" class="num">Frist</th>
+          <th data-key="resultat">Status</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <aside class="side">
+      <div class="card"><h3>Suksessrate per kunde</h3><div id="kundeChart"></div></div>
+      <div class="card"><h3>Suksessrate per fag</h3><div id="fagChart"></div></div>
+      <div class="card">
+        <h3>Anbud per kvartal</h3>
+        <div class="quarter-chart" id="quarterChart"></div>
+        <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--muted)">
+          <span><span style="display:inline-block;width:8px;height:8px;background:var(--good);border-radius:2px"></span> Vunnet</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:var(--bad);border-radius:2px"></span> Tapt</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:var(--pending);border-radius:2px"></span> Pending</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footnote">
+    <b>Datamodell:</b> Trondheim-enheten har eget anbudsregister isolert fra Bodø (separat localStorage-key). Type-felt: Mini-konkurranse / Hovedanbud / Tilbudsforespørsel (drag-drop fra borettslag/private) / Forsikringsoppdrag (via SA-distribusjon).
+    <br><b>Forsikringsstrøm:</b> SA-distribusjonsportalen konkurrerer med <b>Recover Nordic, Ocab og Reco</b> som de tre store nasjonale skadebehandlerne — alle tre brukes av de store forsikringsselskapene. Vi rangerer ikke disse innbyrdes; SA-volumet til Trondheim avhenger av hvilke saker forsikringsselskapene allokerer til SA framfor til de andre.
+    <br><b>Hit-rate:</b> Vunnet / (Vunnet + Tapt). Pending teller ikke i nevneren før det er avgjort. Eksempel-data nedenfor er reelle navn på Trondheim-objekter, men anbudsutfall er fiktive.
+  </div>
+
+</div><!-- /tab-anbud -->
+
+<div class="tab-content" id="tab-pipeline">
+
+  <div class="inbox-drop">
+    <div class="dropzone" id="emailDrop">
+      <div class="dz-icon">📥</div>
+      <div class="dz-title">Tilbudsforespørsler fra borettslag og private — Trondheim-marked</div>
+      <div class="dz-sub">Dra og slipp e-post (.eml), PDF, tegninger eller bilder her — AI evaluerer relevans, kategoriserer og foreslår behandling.</div>
+      <div class="dz-demos">
+        Test med eksempler:
+        <button data-demo="strindheim">📄 Strindheim borettslag — fasaderehab</button>
+        <button data-demo="tyholt">📄 Tyholt sameie — vinduer</button>
+        <button data-demo="byasen">📄 Byåsen privat — totalrehab</button>
+        <button data-demo="moholt">📄 Moholt næring — kontorombygging</button>
+      </div>
+    </div>
+    <div id="evalArea"></div>
+  </div>
+
+  <div class="pipeline-head">
+    <div style="flex:0 0 auto">
+      <h2 style="margin:0;font-size:14px">Innkommende fra integrasjoner</h2>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">Auto-importert siste 7 dager — krever bekreftelse før det legges i registeret</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto">
+      <div class="src doffin"><div class="l">Doffin</div><div class="v">3</div></div>
+      <div class="src mercell"><div class="l">Mercell</div><div class="v">5</div></div>
+      <div class="src tendsign"><div class="l">TendSign</div><div class="v">2</div></div>
+      <div class="src cobrief"><div class="l">CoBrief</div><div class="v">3</div></div>
+      <div class="src forsikring" style="background:rgba(232,93,117,0.10)"><div class="l">SA Forsikring</div><div class="v">3</div></div>
+      <div class="src email"><div class="l">E-post</div><div class="v">1</div></div>
+    </div>
+  </div>
+
+  <div class="pipeline-list">
+
+    <!-- SA Forsikring — Vannskade Trondheim -->
+    <div class="pipe-item forsikring">
+      <div>
+        <div class="src-tag">SA Forsikring</div>
+        <div class="ref">2026-04-30 08:14<br>Gjensidige · 2026-V21055</div>
+      </div>
+      <div>
+        <div class="titl">Vannskade — leilighet Strindveien 102, blokk B</div>
+        <div class="kunde">Gjensidige Forsikring · via SA distribusjon · Vannskade kjøkken/bad · Akutt-flagg</div>
+      </div>
+      <div class="frist urgent"><div class="l">Befaring</div><div class="v">02.05.26</div></div>
+      <div class="match high"><div class="l">SA-match</div><div class="v">91 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som forsikringsoppdrag</button>
+        <button>Avslå</button>
+      </div>
+      <div class="ai-tip">
+        <b>SA Distribusjon:</b> 8 km fra Tiller. Skade-omfang ~290 kNOK ifølge takstmann. Krever fukt-protokoll-sertifisert tømrer (vi har 3). Standard SA-margin 6–8 %, fast pris fra forsikringsselskap. <b>Akutt-flagg</b> — befaring innen 72 t.
+      </div>
+    </div>
+
+    <!-- SA Forsikring — Brannskade -->
+    <div class="pipe-item forsikring">
+      <div>
+        <div class="src-tag">SA Forsikring</div>
+        <div class="ref">2026-04-29 10:22<br>Tryg · T-26-002841</div>
+      </div>
+      <div>
+        <div class="titl">Brannskade — enebolig Heimdal, kjøkken/stue</div>
+        <div class="kunde">Tryg Forsikring · via SA distribusjon · Brann · 1 etg.</div>
+      </div>
+      <div class="frist"><div class="l">Oppstart</div><div class="v">14.05.26</div></div>
+      <div class="match high"><div class="l">SA-match</div><div class="v">85 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som forsikringsoppdrag</button>
+        <button>Avslå</button>
+      </div>
+      <div class="ai-tip">
+        <b>SA Distribusjon:</b> Estimert verdi 950 kNOK ifølge takst. Riv + total-rehab 70 m². 2 mnd gjennomføring. Vi har brann-rehabkurs planlagt høst — krever ekstern UE eller fagutdanning Brevik-deltagelse for sertifisering.
+      </div>
+    </div>
+
+    <!-- SA Forsikring — Stormskade -->
+    <div class="pipe-item forsikring">
+      <div>
+        <div class="src-tag">SA Forsikring</div>
+        <div class="ref">2026-04-28 13:45<br>If · IF-2026-31144</div>
+      </div>
+      <div>
+        <div class="titl">Stormskade — fasadeplater Lerkendal sameie, 14 leiligheter</div>
+        <div class="kunde">If Skadeforsikring · via SA distribusjon · Vinterstorm jan 2026</div>
+      </div>
+      <div class="frist"><div class="l">Oppstart</div><div class="v">21.05.26</div></div>
+      <div class="match high"><div class="l">SA-match</div><div class="v">79 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som forsikringsoppdrag</button>
+        <button>Avslå</button>
+      </div>
+      <div class="ai-tip">
+        <b>SA Distribusjon:</b> Fasadeplater og festepunkter. Estimert 720 kNOK. Standard 6–8 ukers gjennomføring. Trenger lift-utstyr — vi leaser én via SA-konsernavtale. Lerkendal er attraktivt referanseprosjekt for borettslag-segmentet i Trondheim.
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-29 09:30<br>MC-2026-04287</div>
+      </div>
+      <div>
+        <div class="titl">Strinda vgs — biologirommet ombygging</div>
+        <div class="kunde">Trøndelag fylkeskommune · Rammeavtale Bygg-rehab fylke 2024–28 · Mini-konkurranse</div>
+      </div>
+      <div class="frist urgent"><div class="l">Frist</div><div class="v">10.05.26</div></div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">88 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Kombinert ombygging + lab-installasjoner. Verdi 3,2–4,0 MNOK. Krever spesialventilasjon — UE Bjarne Aune Ventilasjon brukes av oss tidligere. Sterk match mot referanseprosjekter (Charlottenlund vgs vunnet 2025-Q3).
+      </div>
+    </div>
+
+    <!-- Doffin rammeavtale-utlysning -->
+    <div class="pipe-item doffin">
+      <div>
+        <div class="src-tag">Doffin</div>
+        <div class="ref">2026-04-28 06:00<br>2026-091844</div>
+      </div>
+      <div>
+        <div class="titl">Rammeavtale bygg- og vedlikehold 2027–2030</div>
+        <div class="kunde">Helse Midt-Norge RHF · Hovedanbud · CPV 45000000, 45400000</div>
+      </div>
+      <div class="frist soon"><div class="l">Frist</div><div class="v">14.06.26</div></div>
+      <div class="match high"><div class="v">★★★</div><div class="l">Strategisk</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>Strategisk varsel:</b> Helse Midt lyser ut 4-års rammeavtale for hele Trøndelag. Dagens rammeavtale (Bygg-rehab Helse Midt 2023–27) løper til 2027. Vi er på dagens — denne avtalen avgjør tilstedeværelse mot St. Olavs/Levanger/Namsos i 4 år til. <b>Krever ledelsesvurdering før tilbudsarbeid.</b>
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse, Trondheim kommune -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-27 14:48<br>MC-2026-04201</div>
+      </div>
+      <div>
+        <div class="titl">Steindal skole — vindusutskifting fløy A og B</div>
+        <div class="kunde">Trondheim kommune · Rammeavtale Bygg-vedlikehold 2024–27 · Mini-konkurranse</div>
+      </div>
+      <div class="frist soon"><div class="l">Frist</div><div class="v">19.05.26</div></div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">92 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> 38 vinduer, energi-energieffektive. Estimat 1,8–2,4 MNOK. Vi har gjort tilsvarende på Selsbakk skole (vunnet 2025-Q3) — referanse er sterk. Anbefales å byde med 7,5 % margin.
+      </div>
+    </div>
+
+    <!-- TendSign mini-konkurranse -->
+    <div class="pipe-item tendsign">
+      <div>
+        <div class="src-tag">TendSign</div>
+        <div class="ref">2026-04-26 11:18<br>TS-1149205</div>
+      </div>
+      <div>
+        <div class="titl">Persaunet leir — bolig 14, 15 og 16 (cluster)</div>
+        <div class="kunde">Forsvarsbygg · Rammeavtale Trøndelag 2024–28 · Mini-konkurranse</div>
+      </div>
+      <div class="frist soon"><div class="l">Frist</div><div class="v">25.05.26</div></div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">94 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Tre boliger som cluster — tilsvarende mal som Persaunet bolig 12 (pågår, AN-2026-005). Estimat 9–11 MNOK samlet. Sterk match — fortsetter en allerede etablert kjent-bygg-relasjon.
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse fra Trondheim Eiendom -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-26 09:14<br>MC-2026-04188</div>
+      </div>
+      <div>
+        <div class="titl">Granåsen omsorgssenter — innvendig maling fellesarealer</div>
+        <div class="kunde">Trondheim Eiendom KF · Rammeavtale Bygg-vedlikehold 2024–27 · Mini-konkurranse</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">12.05.26</div></div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">82 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Rent malerarbeid ~620 m² + ferdige rammer. Estimat 0,9–1,2 MNOK. Maler-avdelingen vår (5 personer) har kapasitet i mai. Anbefales.
+      </div>
+    </div>
+
+    <!-- CoBrief AI-aggregert -->
+    <div class="pipe-item cobrief">
+      <div>
+        <div class="src-tag">CoBrief AI</div>
+        <div class="ref">2026-04-25 08:00<br>CB-TR-7311</div>
+      </div>
+      <div>
+        <div class="titl">Steinkjer rådhus — fasaderehab og energioppgradering</div>
+        <div class="kunde">Steinkjer kommune · Hovedanbud · Estimert 24–32 MNOK</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">28.06.26</div></div>
+      <div class="match med"><div class="l">AI-match</div><div class="v">58 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Stort prosjekt utenfor kjerne-Trondheim (Innherred). Stor verdi men krever stedlig oppfølging og BREEAM AP for energidelen. Vi har 1 BREEAM AP under utdanning. Vurdér ift. NTNU-kapasitet og Persaunet-pågående. Pass strategi-bane offensiv (Trøndelag-bredde).
+      </div>
+    </div>
+
+    <!-- Doffin rammeavtale Trondheim Eiendom -->
+    <div class="pipe-item doffin">
+      <div>
+        <div class="src-tag">Doffin</div>
+        <div class="ref">2026-04-24 06:00<br>2026-091711</div>
+      </div>
+      <div>
+        <div class="titl">Rammeavtale tømrer- og snekkerarbeid 2027–2031</div>
+        <div class="kunde">Trondheim Eiendom KF · Hovedanbud · CPV 45422000, 45420000</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">02.07.26</div></div>
+      <div class="match high"><div class="v">★★★</div><div class="l">Strategisk</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>Strategisk varsel:</b> Trondheim Eiendoms ny 4-års rammeavtale på tømrer/snekker — vår NACE-kjerne (43.320). Dagens leverandører plukkes ut i denne. <b>Beslutningskritisk for offensiv-bane Q3 2027 og fremover.</b>
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-24 13:55<br>MC-2026-04162</div>
+      </div>
+      <div>
+        <div class="titl">Tyholt skole — utskifting tak fløy nord</div>
+        <div class="kunde">Trondheim kommune · Rammeavtale Bygg-vedlikehold 2024–27 · Mini-konkurranse</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">17.05.26</div></div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">84 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Tak ~480 m². Vi har gjort to tak-prosjekt siste år (Selsbakk + Heimdal vgs). Estimat 2,8–3,5 MNOK. Anbefales.
+      </div>
+    </div>
+
+    <!-- TendSign mini-konkurranse fylke -->
+    <div class="pipe-item tendsign">
+      <div>
+        <div class="src-tag">TendSign</div>
+        <div class="ref">2026-04-23 10:42<br>TS-1149018</div>
+      </div>
+      <div>
+        <div class="titl">Adolf Øiens skole — innvendig maling 2 etasjer</div>
+        <div class="kunde">Trøndelag fylkeskommune · Rammeavtale Bygg-rehab fylke 2024–28 · Mini-konkurranse</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">22.05.26</div></div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">86 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> ~720 m² maling. Maler-avdelingen vår er noe presset (Granåsen-tilbud parallelt) — vurder kapasitet før beslutning. Estimat 1,1–1,4 MNOK.
+      </div>
+    </div>
+
+    <!-- E-post fallback -->
+    <div class="pipe-item email">
+      <div>
+        <div class="src-tag">E-post</div>
+        <div class="ref">2026-04-23 16:32<br>(Graph parse)</div>
+      </div>
+      <div>
+        <div class="titl">[Mercell] Avrop på rammeavtale — detaljer i portalen</div>
+        <div class="kunde">Trondheim kommune · Mini-konkurranse · ⚠ Manuell sjekk</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">~ukjent</div></div>
+      <div class="match na"><div class="l">AI-match</div><div class="v">–</div></div>
+      <div class="acts">
+        <button>Åpne i Mercell</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>E-post-parser:</b> Generic notification fra Mercell. Krever manuell pålogging. I produksjon vil Mercell Supplier API erstatte dette.
+      </div>
+    </div>
+
+    <!-- CoBrief AI med strategi-anbefaling -->
+    <div class="pipe-item cobrief">
+      <div>
+        <div class="src-tag">CoBrief AI</div>
+        <div class="ref">2026-04-22 08:00<br>CB-TR-7298</div>
+      </div>
+      <div>
+        <div class="titl">Stjørdal rådhus — kontorflater modernisering</div>
+        <div class="kunde">Stjørdal kommune · Hovedanbud · Estimert 6–9 MNOK</div>
+      </div>
+      <div class="frist"><div class="l">Frist</div><div class="v">11.06.26</div></div>
+      <div class="match med"><div class="l">AI-match</div><div class="v">63 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Stjørdal er innenfor offensiv-banen (Trøndelag-bredde, 35 km fra Trondheim sentrum). Verdi 6–9 MNOK passer mellomsegmentet. Krever stedlig PL eller hyppig pendling — vurder.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    <b>Pipeline-kilder:</b> Doffin (data.norge.no daglig dump) · Mercell (Supplier API + e-post-fallback) · TendSign (samme Mercell-konsern) · CoBrief (AI-evaluering + nordisk aggregering) · SA Forsikring (SA-distribusjonsportal) · E-post (Microsoft Graph-parse).
+    <br><b>Forsikrings-distribusjon — konkurransekontekst:</b> SA-konsernet konkurrerer mot Recover Nordic, Ocab og Reco om håndverker-leveranse til de store forsikringsselskapene. Alle tre brukes av Gjensidige, If, Tryg, Fremtind. Vår SA-andel av Trondheim-volumet avhenger av hvordan forsikringsselskapene allokerer mellom disse fire — ikke av vår direkte konkurranse mot lokal Trondheim-håndverker.
+  </div>
+
+</div><!-- /tab-pipeline -->
+
+<div class="modal-bg" id="modalBg" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:50">
+  <div class="modal" style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:24px 28px;width:540px;max-width:90vw">
+    <h3 style="margin:0 0 16px;font-size:16px">Nytt anbud</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Tittel</label><input id="m-tittel" placeholder="F.eks. Strinda vgs — biologirom" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Kunde</label><input id="m-kunde" placeholder="Trondheim kommune" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Type</label>
+        <select id="m-type" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"><option>Mini-konkurranse</option><option>Hovedanbud</option><option>Tilbudsforespørsel</option></select>
+      </div>
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Fag (komma-sep)</label><input id="m-fag" placeholder="Bygg-rehab, Snekker" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Estimert verdi (NOK)</label><input id="m-verdi" type="number" placeholder="3500000" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Frist</label><input id="m-frist" type="date" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Status</label>
+        <select id="m-resultat" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"><option>Pending</option><option>Vunnet</option><option>Tapt</option></select>
+      </div>
+      <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px">Vinner (hvis tapt)</label><input id="m-vinner" placeholder="Konkurrerende firma" style="width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:4px;font:inherit;font-size:13px"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px">
+      <button id="cancelAdd" style="background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:4px;cursor:pointer;font:inherit;font-size:13px">Avbryt</button>
+      <button class="primary" id="saveAdd" style="background:var(--accent);border:1px solid var(--accent);color:#1a1f29;padding:8px 16px;border-radius:4px;cursor:pointer;font:inherit;font-size:13px;font-weight:600">Lagre anbud</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// SEED DATA — 25 anbud Trondheim
+// ================================================================
+const seed = [
+  { id: "BS-2025-018", tittel: "Charlottenlund vgs — garderobe og dusj", kunde: "Trøndelag fylkeskommune", ramme: "Bygg-rehab fylke 2024-28", type: "Mini-konkurranse", fag: ["Bygg-rehab","Snekker"], verdi: 3400000, frist: "2025-08-12", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-019", tittel: "Trondheim rådhus — innvendig maling 4. etg", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Maler"], verdi: 850000, frist: "2025-08-22", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-020", tittel: "Sjøgangen barnehage — tak", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Tak"], verdi: 1100000, frist: "2025-09-04", resultat: "Tapt", vinner: "Norsk Bygg & Tak AS" },
+  { id: "BS-2025-021", tittel: "St. Olavs Bevegelsessenteret — innvendig rehab", kunde: "Helse Midt-Norge", ramme: "Bygg-rehab Helse Midt 2023-27", type: "Hovedanbud", fag: ["Total-rehab","Bygg-rehab"], verdi: 5200000, frist: "2025-09-18", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-022", tittel: "Bymarka skole — gymsal oppussing", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Bygg-rehab","Maler"], verdi: 1600000, frist: "2025-09-26", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-023", tittel: "Tinghuset Trondheim — garderoberehab", kunde: "Statsbygg", ramme: "—", type: "Hovedanbud", fag: ["Bygg-rehab"], verdi: 8200000, frist: "2025-10-08", resultat: "Tapt", vinner: "NCC Building" },
+  { id: "BS-2025-024", tittel: "Trondheim rådhus — Bytårnet kontorflate 5. etg", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Bygg-rehab"], verdi: 2100000, frist: "2025-10-15", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-025", tittel: "Brundalen omsorgssenter — inngangsparti", kunde: "Trondheim Eiendom KF", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Bygg-rehab"], verdi: 920000, frist: "2025-10-30", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-026", tittel: "Heimdal vgs — innvendig oppussing fløy A", kunde: "Trøndelag fylkeskommune", ramme: "Bygg-rehab fylke 2024-28", type: "Mini-konkurranse", fag: ["Maler","Bygg-rehab"], verdi: 1300000, frist: "2025-11-10", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-027", tittel: "Polsken sykehjem — fellesarealer maling", kunde: "Trondheim Eiendom KF", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Maler"], verdi: 680000, frist: "2025-11-22", resultat: "Tapt", vinner: "Trondheim Maleri AS" },
+  { id: "BS-2025-028", tittel: "Selsbakk skole — dør og vindusutskifting", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Vinduer","Snekker"], verdi: 4600000, frist: "2025-12-04", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2025-029", tittel: "Lade kirke — tårnrehab", kunde: "Den norske kirke Trondheim", ramme: "—", type: "Hovedanbud", fag: ["Tak","Bygg-rehab"], verdi: 6800000, frist: "2025-12-15", resultat: "Tapt", vinner: "Trondheim Bygg AS" },
+  { id: "BS-2025-030", tittel: "Persaunet leir — bolig 8 og 9 vinduer", kunde: "Forsvarsbygg", ramme: "Salten Trøndelag 2024-28", type: "Mini-konkurranse", fag: ["Vinduer"], verdi: 2400000, frist: "2025-12-22", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-001", tittel: "Tyholt brannstasjon — garderobeombygging", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Bygg-rehab","Snekker"], verdi: 1900000, frist: "2026-01-18", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-002", tittel: "NTNU Gløshaugen — Inst.bygg kontorrehab", kunde: "Statsbygg", ramme: "—", type: "Hovedanbud", fag: ["Bygg-rehab","Total-rehab"], verdi: 7800000, frist: "2026-02-03", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-003", tittel: "Heimdal vgs — fasaderehab", kunde: "Trøndelag fylkeskommune", ramme: "Bygg-rehab fylke 2024-28", type: "Mini-konkurranse", fag: ["Fasade"], verdi: 3100000, frist: "2026-02-12", resultat: "Tapt", vinner: "Trønder Fasade AS" },
+  { id: "BS-2026-004", tittel: "Trondheim havn — administrasjonsbygg fasade", kunde: "Trondheim Havn IKS", ramme: "—", type: "Hovedanbud", fag: ["Fasade","Bygg-rehab"], verdi: 8200000, frist: "2026-02-20", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-005", tittel: "Persaunet leir — bolig 12 totalrehab", kunde: "Forsvarsbygg", ramme: "Salten Trøndelag 2024-28", type: "Hovedanbud", fag: ["Total-rehab","Bygg-rehab"], verdi: 3500000, frist: "2026-03-04", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-006", tittel: "Saupstad senter — rehab inngangsparti", kunde: "Trondheim Eiendom KF", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Bygg-rehab"], verdi: 1450000, frist: "2026-03-15", resultat: "Tapt", vinner: "Snekkerverk Trondheim AS" },
+  { id: "BS-2026-007", tittel: "Brundalen omsorgsboliger — innvendig maling", kunde: "Trondheim Eiendom KF", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Maler"], verdi: 1100000, frist: "2026-03-25", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-008", tittel: "Adolf Øiens skole — vinduer fløy B", kunde: "Trøndelag fylkeskommune", ramme: "Bygg-rehab fylke 2024-28", type: "Mini-konkurranse", fag: ["Vinduer","Snekker"], verdi: 2800000, frist: "2026-04-08", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-009", tittel: "Lade barnehage — byggeteknisk rehab", kunde: "Trondheim kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Bygg-rehab"], verdi: 4800000, frist: "2026-04-15", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-010", tittel: "Olavshallen — innvendig oppgradering foaje", kunde: "Trondheim Eiendom KF", ramme: "—", type: "Hovedanbud", fag: ["Bygg-rehab","Maler"], verdi: 2400000, frist: "2026-04-22", resultat: "Vunnet", vinner: "" },
+  { id: "BS-2026-011", tittel: "St. Olavs hospital — Kvinneklinikken vinduer", kunde: "Helse Midt-Norge", ramme: "Bygg-rehab Helse Midt 2023-27", type: "Mini-konkurranse", fag: ["Vinduer"], verdi: 4200000, frist: "2026-04-28", resultat: "Pending", vinner: "" },
+  { id: "BS-2026-012", tittel: "Skarvegen senior — utskifting vinduer", kunde: "Trondheim Eiendom KF", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", fag: ["Vinduer"], verdi: 1700000, frist: "2026-04-30", resultat: "Pending", vinner: "" },
+];
+
+let anbud = [...seed];
+let sortKey = 'frist', sortAsc = false;
+const consumedPipeIds = new Set();
+const STORAGE_KEY = 'braa-anbud-state-v1';
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      anbud, consumedPipeIds: [...consumedPipeIds], ts: Date.now(),
+    }));
+    const p = document.getElementById('savePulse');
+    if (p) { p.classList.add('on'); setTimeout(() => p.classList.remove('on'), 700); }
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (Array.isArray(s.anbud)) anbud = s.anbud;
+    if (Array.isArray(s.consumedPipeIds)) s.consumedPipeIds.forEach(id => consumedPipeIds.add(id));
+  } catch (e) {}
+}
+
+function assignPipeIds() {
+  document.querySelectorAll('.pipe-item').forEach((el, idx) => {
+    const refHtml = el.querySelector('.ref')?.innerHTML || '';
+    const lines = refHtml.split(/<br\s*\/?>/i).map(s => s.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+    el.dataset.pipeId = lines[lines.length - 1] || `PIPE-${idx}`;
+  });
+}
+
+function applyConsumedToDom() {
+  document.querySelectorAll('.pipe-item').forEach(el => {
+    if (consumedPipeIds.has(el.dataset.pipeId)) el.remove();
+  });
+}
+
+function resetState() {
+  if (!confirm('Tilbakestill demo? Trondheim-data går tilbake til standard.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// SVG gauge
+// renderGauge fjernet — hit-rate vises på dashboard.
+
+function getFiltered() {
+  const fs = document.getElementById('filterStatus').value;
+  const ft = document.getElementById('filterType').value;
+  const ff = document.getElementById('filterFag').value;
+  const fk = document.getElementById('filterKunde').value;
+  const fp = document.getElementById('filterPeriode').value;
+  return anbud.filter(a => {
+    if (fs !== 'all' && a.resultat !== fs) return false;
+    if (ft !== 'all' && a.type !== ft) return false;
+    if (ff !== 'all' && !a.fag.includes(ff)) return false;
+    if (fk !== 'all' && a.kunde !== fk) return false;
+    if (fp !== 'all') {
+      const d = a.frist;
+      if (fp === '2026' && !d.startsWith('2026')) return false;
+      if (fp === '2025' && !d.startsWith('2025')) return false;
+      if (fp.includes('Q')) {
+        const [yr, q] = fp.split('-');
+        const m = parseInt(d.slice(5,7));
+        const qmap = { Q1:[1,3], Q2:[4,6], Q3:[7,9], Q4:[10,12] }[q];
+        if (!d.startsWith(yr) || m < qmap[0] || m > qmap[1]) return false;
+      }
+    }
+    return true;
+  });
+}
+
+function fmtNOK(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1).replace('.', ',') + ' MNOK';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + ' kNOK';
+  return n.toString();
+}
+
+function renderGauges() { /* fjernet — gauge-kort er flyttet til dashboard */ }
+
+function renderKpis() {
+  const list = getFiltered();
+  const won = list.filter(a => a.resultat === 'Vunnet');
+  const lost = list.filter(a => a.resultat === 'Tapt');
+  const pending = list.filter(a => a.resultat === 'Pending');
+  const decided = [...won, ...lost];
+  const sum = arr => arr.reduce((s, a) => s + a.verdi, 0);
+  const wonSum = sum(won), lostSum = sum(lost), pendSum = sum(pending), decSum = sum(decided);
+  document.getElementById('kpiVunnetVerdi').textContent = fmtNOK(wonSum);
+  document.getElementById('kpiTaptVerdi').textContent = fmtNOK(lostSum);
+  document.getElementById('kpiPendingVerdi').textContent = fmtNOK(pendSum);
+  document.getElementById('kpiSnittVerdi').textContent = decided.length ? fmtNOK(decSum / decided.length) : '–';
+  document.getElementById('kpiHitRateVerdi').textContent = decSum ? Math.round(wonSum / decSum * 100) + ' %' : '–';
+}
+
+function renderTable() {
+  const list = getFiltered();
+  list.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === 'fag') { av = a.fag.join(', '); bv = b.fag.join(', '); }
+    if (sortKey === 'verdi') return sortAsc ? av - bv : bv - av;
+    if (typeof av === 'string') return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortAsc ? av - bv : bv - av;
+  });
+  const tbody = document.querySelector('#anbudTable tbody');
+  tbody.innerHTML = list.map(a => {
+    const status = `<span class="badge s-${a.resultat.toLowerCase()}">${a.resultat}${a.vinner ? ' → '+a.vinner : ''}</span>`;
+    const typeCls = a.type === 'Mini-konkurranse' ? 'mini' : a.type === 'Hovedanbud' ? 'hoved' : 'tilbud';
+    const typeText = a.type === 'Mini-konkurranse' ? 'Mini' : a.type === 'Hovedanbud' ? 'Hoved' : a.type === 'Forsikringsoppdrag' ? 'Forsikring' : 'Tilbud';
+    const type = `<span class="badge ${typeCls}">${typeText}</span>`;
+    const fag = a.fag.map(f => `<span class="badge fag">${f}</span>`).join('');
+    return `<tr style="cursor:pointer" onclick="location.href='anbud-detalj.html?id=${encodeURIComponent(a.id)}'" title="Åpne anbud-detalj">
+      <td><span class="id">${a.id}</span></td>
+      <td><div class="tit">${a.tittel}</div><div class="id">${a.ramme || ''}</div></td>
+      <td>${a.kunde}</td>
+      <td>${type}</td>
+      <td>${fag}</td>
+      <td class="num">${a.verdi.toLocaleString('no-NO')}</td>
+      <td class="num">${a.frist}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rowCount').textContent = list.length;
+}
+
+function renderKundeChart() {
+  const list = getFiltered();
+  const m = {};
+  list.forEach(a => {
+    if (a.resultat === 'Pending') return;
+    if (!m[a.kunde]) m[a.kunde] = { v: 0, t: 0 };
+    if (a.resultat === 'Vunnet') m[a.kunde].v++; else m[a.kunde].t++;
+  });
+  const rows = Object.entries(m).map(([k, s]) => ({ k, ...s, total: s.v + s.t, rate: s.v / (s.v + s.t) * 100 }));
+  rows.sort((a, b) => b.total - a.total);
+  document.getElementById('kundeChart').innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <div class="label">${r.k.length > 13 ? r.k.slice(0,12)+'…' : r.k}</div>
+      <div class="bar"><div class="fill won" style="width:${r.rate}%"></div></div>
+      <div class="v">${Math.round(r.rate)}% (${r.total})</div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:12px">Ingen avgjorte anbud</div>';
+}
+
+function renderFagChart() {
+  const list = getFiltered();
+  const m = {};
+  list.forEach(a => {
+    if (a.resultat === 'Pending') return;
+    a.fag.forEach(f => {
+      if (!m[f]) m[f] = { v: 0, t: 0 };
+      if (a.resultat === 'Vunnet') m[f].v++; else m[f].t++;
+    });
+  });
+  const rows = Object.entries(m).map(([k, s]) => ({ k, ...s, total: s.v + s.t, rate: s.v / (s.v + s.t) * 100 }));
+  rows.sort((a, b) => b.total - a.total);
+  document.getElementById('fagChart').innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <div class="label">${r.k}</div>
+      <div class="bar"><div class="fill won" style="width:${r.rate}%"></div></div>
+      <div class="v">${Math.round(r.rate)}% (${r.total})</div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:12px">Ingen avgjorte anbud</div>';
+}
+
+function renderQuarterChart() {
+  const list = getFiltered();
+  const quarters = ['2025-Q3','2025-Q4','2026-Q1','2026-Q2','2026-Q3','2026-Q4'];
+  const m = Object.fromEntries(quarters.map(q => [q, { v:0, t:0, p:0 }]));
+  list.forEach(a => {
+    const yr = a.frist.slice(0,4);
+    const mn = parseInt(a.frist.slice(5,7));
+    const q = yr + '-Q' + Math.ceil(mn/3);
+    if (!m[q]) return;
+    if (a.resultat === 'Vunnet') m[q].v++;
+    else if (a.resultat === 'Tapt') m[q].t++;
+    else if (a.resultat === 'Pending') m[q].p++;
+  });
+  const max = Math.max(1, ...quarters.map(q => m[q].v + m[q].t + m[q].p));
+  document.getElementById('quarterChart').innerHTML = quarters.map(q => {
+    const s = m[q]; const total = s.v + s.t + s.p;
+    return `<div class="qbar">
+      <div class="total">${total || ''}</div>
+      <div class="stack" style="height:${total/max*100}%">
+        ${s.p ? `<div class="seg pending" style="height:${(s.p/(total||1))*100}%"></div>` : ''}
+        ${s.t ? `<div class="seg lost" style="height:${(s.t/(total||1))*100}%"></div>` : ''}
+        ${s.v ? `<div class="seg won" style="height:${(s.v/(total||1))*100}%"></div>` : ''}
+      </div>
+      <div class="lbl">${q.replace('20','')}</div>
+    </div>`;
+  }).join('');
+}
+
+function refreshAll() { renderGauges(); renderKpis(); renderTable(); renderKundeChart(); renderFagChart(); renderQuarterChart(); }
+
+function populateKunder() {
+  const sel = document.getElementById('filterKunde');
+  const set = [...new Set(anbud.map(a => a.kunde))].sort();
+  sel.innerHTML = '<option value="all">Alle</option>' + set.map(k => `<option>${k}</option>`).join('');
+}
+
+['filterStatus','filterType','filterFag','filterKunde','filterPeriode'].forEach(id => document.getElementById(id).addEventListener('change', refreshAll));
+document.querySelectorAll('#anbudTable thead th').forEach(th => {
+  th.addEventListener('click', () => { const k = th.dataset.key; sortAsc = (sortKey === k) ? !sortAsc : true; sortKey = k; renderTable(); });
+});
+
+// Modal
+const modalBg = document.getElementById('modalBg');
+document.getElementById('openAdd').onclick = () => modalBg.style.display = 'flex';
+document.getElementById('cancelAdd').onclick = () => modalBg.style.display = 'none';
+modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.style.display = 'none' };
+document.getElementById('saveAdd').onclick = () => {
+  const tittel = document.getElementById('m-tittel').value.trim();
+  if (!tittel) { alert('Tittel mangler'); return; }
+  const id = 'BS-' + new Date().getFullYear() + '-' + String(anbud.length + 1).padStart(3, '0');
+  const nytt = {
+    id, tittel,
+    kunde: document.getElementById('m-kunde').value.trim() || 'Ukjent',
+    ramme: '—',
+    type: document.getElementById('m-type').value,
+    fag: document.getElementById('m-fag').value.split(',').map(s => s.trim()).filter(Boolean),
+    verdi: parseInt(document.getElementById('m-verdi').value) || 0,
+    frist: document.getElementById('m-frist').value || '2026-12-31',
+    resultat: document.getElementById('m-resultat').value,
+    vinner: document.getElementById('m-vinner').value.trim() || '',
+  };
+  anbud.unshift(nytt);
+  ['m-tittel','m-kunde','m-fag','m-verdi','m-frist','m-vinner'].forEach(id => document.getElementById(id).value = '');
+  populateKunder(); modalBg.style.display = 'none'; refreshAll(); saveState();
+};
+
+// Tabs
+document.querySelectorAll('.tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+function updatePipeCount() { document.getElementById('pipeCount').textContent = document.querySelectorAll('.pipe-item:not(.removing)').length }
+
+function toast(msg, idText) {
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = msg + (idText ? `<br><span class="id">${idText}</span>` : '');
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3200);
+}
+
+function removePipeItem(el) {
+  if (el.dataset.pipeId) consumedPipeIds.add(el.dataset.pipeId);
+  el.classList.add('removing');
+  saveState();
+  setTimeout(() => { el.remove(); updatePipeCount(); }, 350);
+}
+
+function highlightNewRow(id) {
+  setTimeout(() => {
+    document.querySelectorAll('#anbudTable tbody tr').forEach(row => {
+      if (row.querySelector('.id')?.textContent.trim() === id) {
+        row.classList.add('new-row');
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => row.classList.remove('new-row'), 2800);
+      }
+    });
+  }, 120);
+}
+
+// Drag-drop demoer (Trondheim-spesifikke)
+const demoDb = {
+  strindheim: { filename: "Henvendelse_Strindheim_borettslag.pdf", kategori: "Borettslag", kunde: "Strindheim Borettslag", tittel: "Fasaderehab og maling — alle 6 blokker", fag: ["Fasade","Maler"], verdi: 5800000, score: 89, frist: "2026-06-30", notes: "Borettslag med 86 leiligheter over 6 blokker, etablert 1970-tallet. Behov for puss og maling. Sterk match — Trondheim-borettslag-segmentet vokser. Estimat 5–7 MNOK med 8 % margin." },
+  tyholt: { filename: "Befaring_Tyholt_sameie.eml", kategori: "Sameie", kunde: "Tyholt Sameie", tittel: "Vindusutskifting alle 32 leiligheter", fag: ["Vinduer","Snekker"], verdi: 3400000, score: 82, frist: "2026-08-15", notes: "Sameie 32 enheter. Energieffektivitet hoveddriver. Tilsvarende prosjekt vunnet på Lerkendal Q3 2025. God match." },
+  byasen: { filename: "Tegninger_Byasen_villa.pdf", kategori: "Privat", kunde: "Privatperson · Byåsen", tittel: "Totalrehab villa fra 1968", fag: ["Bygg-rehab","Total-rehab","Snekker"], verdi: 3200000, score: 64, frist: "2026-10-15", notes: "Privat oppdrag, moderat strategisk match (vi prioriterer offentlig ROT). Verdi over 2 MNOK-terskel for privat. Vurder kapasitet — pågående NTNU og Persaunet kan begrense." },
+  moholt: { filename: "Tilbudsforesp_Moholt_kontorbygg.pdf", kategori: "Bedrift", kunde: "Bedriftskunde · Moholt", tittel: "Kontorombygging næringsbygg", fag: ["Bygg-rehab","Snekker","Maler"], verdi: 2200000, score: 71, frist: "2026-08-30", notes: "Næringsbygg i Trondheim. Innenfor kjerneområde. Standard kontorombygging med åpne planløsninger. God match — kan kombineres med rammeavtale-bemanning hvis kapasitet tillater." },
+};
+
+(function setupDropzone() {
+  const dz = document.getElementById('emailDrop'); const area = document.getElementById('evalArea');
+  if (!dz || !area) return;
+  function showLoading() { area.innerHTML = `<div class="eval-loading"><span class="spinner"></span>Analyserer dokument og evaluerer mot Braa og Sørvåg-profilen...</div>` }
+  function showResult(d) {
+    const scoreClass = d.score >= 70 ? 'high' : d.score >= 50 ? 'med' : 'low';
+    const fagBadges = d.fag.map(f => `<span class="badge fag">${f}</span>`).join(' ');
+    area.innerHTML = `
+      <div class="eval-result">
+        <div class="eval-head">
+          <div><h4>📄 ${d.filename}</h4><div class="eval-meta">${d.kunde} · <span class="badge kat-${d.kategori.toLowerCase()}">${d.kategori}</span></div></div>
+          <div class="eval-score ${scoreClass}">${d.score}%</div>
+        </div>
+        <div class="eval-body">
+          <div class="eval-row"><div class="lbl">Tittel</div><div class="val">${d.tittel}</div></div>
+          <div class="eval-row"><div class="lbl">Fag</div><div class="val">${fagBadges}</div></div>
+          <div class="eval-row"><div class="lbl">Estimert verdi</div><div class="val">${d.verdi.toLocaleString('no-NO')} kr</div></div>
+          <div class="eval-row"><div class="lbl">Foreslått frist</div><div class="val">${d.frist}</div></div>
+          <div class="eval-row"><div class="lbl">Type</div><div class="val"><span class="badge tilbud">Tilbudsforespørsel</span></div></div>
+          <div class="eval-row"><div class="lbl">Selskap</div><div class="val"><span class="badge braa">Braa og Sørvåg</span></div></div>
+        </div>
+        <div class="eval-notes"><b>AI-vurdering:</b> ${d.notes}</div>
+        <div class="eval-actions">
+          <button class="primary" id="evalImport">✓ Importer som tilbudsforespørsel</button>
+          <button id="evalReject">Avvis</button>
+        </div>
+      </div>`;
+    document.getElementById('evalImport').onclick = () => {
+      const yr = d.frist.slice(0, 4);
+      const id = `TF-${yr}-${String(anbud.length + 1).padStart(3, '0')}`;
+      anbud.unshift({ id, tittel: d.tittel, kunde: d.kunde, ramme: d.kategori, type: "Tilbudsforespørsel", fag: d.fag, verdi: d.verdi, frist: d.frist, resultat: "Pending", vinner: "" });
+      populateKunder(); refreshAll(); saveState(); area.innerHTML = '';
+      document.querySelector('.tabs .tab[data-tab="anbud"]').click();
+      highlightNewRow(id);
+      toast(`Tilbudsforespørsel importert: <b>${d.tittel}</b>`, id);
+    };
+    document.getElementById('evalReject').onclick = () => { area.innerHTML = ''; toast('Tilbudsforespørsel avvist'); };
+  }
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dz.classList.add('drag-over'); }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag-over'); }));
+  dz.addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const n = files[0].name.toLowerCase();
+      let d;
+      if (n.includes('strindheim') || n.includes('borettslag')) d = demoDb.strindheim;
+      else if (n.includes('tyholt') || n.includes('sameie')) d = demoDb.tyholt;
+      else if (n.includes('villa') || n.includes('byasen') || n.includes('byåsen')) d = demoDb.byasen;
+      else if (n.includes('moholt') || n.includes('bedrift') || n.includes('kontor')) d = demoDb.moholt;
+      else d = { ...demoDb.byasen, filename: files[0].name, tittel: files[0].name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' '), notes: 'Fil dratt inn — automatisk analyse begrenset uten innhold. Manuell sjekk anbefalt.' };
+      showLoading();
+      setTimeout(() => showResult(d), 1400);
+    }
+  });
+  dz.querySelectorAll('button[data-demo]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const d = demoDb[btn.dataset.demo];
+      showLoading(); setTimeout(() => showResult(d), 1200);
+    });
+  });
+})();
+
+// Pipeline import / ignore
+document.querySelector('.pipeline-list').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button'); if (!btn) return;
+  const item = btn.closest('.pipe-item'); if (!item) return;
+  const txt = btn.textContent.trim();
+  if (txt === 'Importer som anbud' || txt === 'Importer som forsikringsoppdrag') {
+    const isForsikring = item.classList.contains('forsikring');
+    // Extract data from pipe-item DOM
+    const tittel = item.querySelector('.titl').textContent.trim();
+    const kundeText = item.querySelector('.kunde').textContent.trim();
+    const fristText = item.querySelector('.frist .v').textContent.trim();
+    const aiTipText = item.querySelector('.ai-tip')?.textContent || '';
+    const parts = kundeText.split('·').map(s => s.trim());
+    const kunde = parts[0];
+    let ramme = '—', type = 'Mini-konkurranse';
+    parts.forEach(p => { if (p.startsWith('Rammeavtale ')) ramme = p.replace('Rammeavtale ', '').trim(); if (/Hovedanbud/i.test(p)) type = 'Hovedanbud'; else if (/Mini-konkurranse/i.test(p)) type = 'Mini-konkurranse'; });
+    if (isForsikring) type = 'Forsikringsoppdrag';
+    let frist = '';
+    const fm = fristText.match(/(\d{2})\.(\d{2})\.(\d{2})/);
+    if (fm) frist = `20${fm[3]}-${fm[2]}-${fm[1]}`;
+    let verdi = 0;
+    const vRange = aiTipText.match(/[Ee]stimer[a-zæøå]*\s+(?:verdi\s+)?([\d,]+)\s*[–-]\s*([\d,]+)\s*MNOK/);
+    if (vRange) verdi = Math.round((parseFloat(vRange[1].replace(',','.')) + parseFloat(vRange[2].replace(',','.'))) / 2 * 1_000_000);
+    else { const vSingle = aiTipText.match(/[Ee]stimer[a-zæøå]*\s+([\d,]+)\s*MNOK/); if (vSingle) verdi = Math.round(parseFloat(vSingle[1].replace(',','.')) * 1_000_000); }
+    const t = tittel.toLowerCase(); const fag = [];
+    if (/maling/.test(t)) fag.push('Maler');
+    if (/snekker|parkett|gulvleg/.test(t)) fag.push('Snekker');
+    if (/\btak\b|takvinduer/.test(t)) fag.push('Tak');
+    if (/vindu/.test(t)) fag.push('Vinduer');
+    if (/fasade/.test(t)) fag.push('Fasade');
+    if (/total[- ]?rehab/.test(t)) fag.push('Total-rehab');
+    if (/(rehab|ombygg|kontor)/.test(t) && !fag.includes('Total-rehab')) fag.push('Bygg-rehab');
+    if (fag.length === 0) fag.push('Bygg-rehab');
+    const yr = frist ? frist.slice(0, 4) : '2026';
+    const idPrefix = isForsikring ? 'FO' : 'BS';
+    const id = `${idPrefix}-${yr}-${String(anbud.length + 1).padStart(3, '0')}`;
+    anbud.unshift({ id, tittel, kunde, ramme, type, fag, verdi, frist, resultat: 'Pending', vinner: '' });
+    populateKunder(); refreshAll();
+    removePipeItem(item);
+    document.querySelector('.tabs .tab[data-tab="anbud"]').click();
+    highlightNewRow(id);
+    toast(`${isForsikring ? 'Forsikringsoppdrag' : 'Anbud'} importert: <b>${tittel}</b>`, id);
+  } else if (txt === 'Ignorer' || txt === 'Avslå') {
+    removePipeItem(item);
+    toast(txt === 'Avslå' ? 'Forsikringsoppdrag avslått' : 'Ignorert');
+  } else if (txt.startsWith('Åpne')) {
+    toast('I produksjon: åpner Mercell-portalen i ny fane.');
+  }
+});
+
+// Init
+assignPipeIds();
+loadState();
+applyConsumedToDom();
+populateKunder();
+refreshAll();
+updatePipeCount();
+</script>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

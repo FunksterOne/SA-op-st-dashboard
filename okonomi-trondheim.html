@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Økonomi — Braa og Sørvåg Bygg · Trondheim</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --panel-3: #262d38;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #d29922;
+    --accent-2: #e8b340;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --pending: #a371f7;
+    --po: #ff6b35;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #b87a17; --accent-2: #d29922;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35;
+    --hi: #2a6dc7; --pending: #7c5fce; --po: #d4660a;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  .theme-toggle { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 15px; display: inline-flex; align-items: center; justify-content: center }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0 }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14.5px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header.top {
+    padding: 20px 36px 16px;
+    background: var(--header-grad);
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  }
+  header.top .crumb { font-size: 12px; color: var(--muted); margin-bottom: 4px }
+  header.top .crumb a { color: var(--accent); text-decoration: none }
+  header.top .crumb a:hover { text-decoration: underline }
+  header.top .selskap-tag {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
+    background: rgba(210,153,34,0.10); border: 1px solid var(--accent);
+    padding: 3px 10px; border-radius: 10px; margin-bottom: 6px;
+  }
+  header.top h1 { margin: 4px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.015em }
+  header.top .sub { color: var(--muted); font-size: 12px; margin-top: 4px }
+  .po-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,107,53,0.12); border: 1px solid var(--po);
+    padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .po-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); animation: pulse 2s infinite }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,185,80,0.6) }
+    50% { opacity: 0.5; box-shadow: 0 0 0 5px rgba(63,185,80,0) }
+  }
+  .toolbar {
+    padding: 12px 36px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .toolbar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px }
+  .toolbar select, .toolbar button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 6px 10px; border-radius: 4px; font: inherit; font-size: 13px;
+  }
+  .toolbar button { cursor: pointer }
+  .toolbar button.primary { background: var(--accent); border-color: var(--accent); color: #1a1f29; font-weight: 600 }
+  .toolbar .spacer { flex: 1 }
+
+  main { padding: 24px 36px 80px; max-width: 1280px; margin: 0 auto }
+  .section { margin-bottom: 22px }
+  h2.section-title {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+    font-weight: 600; margin: 0 0 10px; padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* Top KPIs */
+  .kpis-top { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px }
+  .kpi-big {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .kpi-big .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em }
+  .kpi-big .v { font-size: 24px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1.1 }
+  .kpi-big .v small { font-size: 13px; color: var(--muted); font-weight: 400 }
+  .kpi-big .d { color: var(--muted); font-size: 11px; margin-top: 4px }
+  .kpi-big .delta { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 8px; font-weight: 500; margin-left: 4px }
+  .delta.up { background: rgba(63,185,80,0.18); color: var(--good) }
+  .delta.dn { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .delta.neu { background: var(--panel-2); color: var(--muted) }
+  .kpi-big.income { border-top: 3px solid var(--good) }
+  .kpi-big.lonn { border-top: 3px solid var(--hi) }
+  .kpi-big.material { border-top: 3px solid var(--warn) }
+  .kpi-big.ebit { border-top: 3px solid var(--accent) }
+  .kpi-big.margin { border-top: 3px solid var(--pending) }
+
+  /* 12-mnd trend */
+  .trend-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px;
+  }
+  .trend-card h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600 }
+  .trend-card .lead { color: var(--muted); font-size: 12px; margin-bottom: 14px }
+  .trend-chart {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; height: 160px;
+    margin-bottom: 6px;
+  }
+  .trend-bar { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: end }
+  .trend-bar .stack {
+    width: 100%; display: flex; flex-direction: column-reverse;
+    border-radius: 3px; overflow: hidden;
+  }
+  .trend-bar .seg.oms { background: rgba(63,185,80,0.6) }
+  .trend-bar .seg.ebit-pos { background: var(--good) }
+  .trend-bar .seg.ebit-neg { background: var(--bad) }
+  .trend-bar .lbl { font-size: 9px; color: var(--muted); text-align: center; margin-top: 4px }
+  .trend-bar .v { font-size: 9px; color: var(--text); text-align: center; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-variant-numeric: tabular-nums; opacity: 0; transition: 0.15s }
+  .trend-bar:hover .v { opacity: 1 }
+  .trend-legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 8px }
+  .trend-legend .it { display: flex; gap: 6px; align-items: center }
+  .trend-legend .sw { width: 10px; height: 10px; border-radius: 2px }
+
+  /* Prosjektmatrise */
+  table.proj { width: 100%; border-collapse: collapse; font-size: 12px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  table.proj th {
+    text-align: left; padding: 10px 12px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+    white-space: nowrap;
+  }
+  table.proj th.num { text-align: right }
+  table.proj td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.proj td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.proj tbody tr:hover { background: rgba(210,153,34,0.06) }
+  table.proj tbody tr:last-child td { border-bottom: 0 }
+  .pname { font-weight: 500; font-size: 12.5px }
+  .pkunde { color: var(--muted); font-size: 10.5px; margin-top: 1px }
+  .progress-bar {
+    width: 100%; background: var(--panel-2); border-radius: 3px; height: 14px; position: relative; overflow: hidden;
+  }
+  .progress-bar .fill { height: 100%; border-radius: 3px }
+  .progress-bar .lbl {
+    position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+    font-size: 9.5px; text-align: center; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .marg-pill {
+    display: inline-block; padding: 2px 7px; border-radius: 8px; font-size: 11px; font-weight: 600; min-width: 50px; text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .marg-pill.up { background: rgba(63,185,80,0.18); color: var(--good) }
+  .marg-pill.flat { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .marg-pill.dn { background: rgba(248,81,73,0.18); color: var(--bad) }
+
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px;
+  }
+  .panel h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 12px; margin-bottom: 14px }
+  .panel h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 12px 0 6px }
+  .stat-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12px;
+  }
+  .stat-row:last-child { border-bottom: 0 }
+  .stat-row .label { color: var(--text) }
+  .stat-row .label small { color: var(--muted); font-size: 10.5px; display: block; margin-top: 1px }
+  .stat-row .val { font-variant-numeric: tabular-nums; font-weight: 600 }
+  .bar-strip {
+    display: grid; grid-template-columns: 130px 1fr 70px; align-items: center; gap: 8px;
+    margin: 4px 0; font-size: 11.5px;
+  }
+  .bar-strip .nm { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .bar-strip .b { background: var(--panel-2); border-radius: 3px; height: 16px; position: relative; overflow: hidden }
+  .bar-strip .b .f { background: var(--accent); height: 100%; border-radius: 3px }
+  .bar-strip .b .f.green { background: var(--good) }
+  .bar-strip .b .f.warn { background: var(--warn) }
+  .bar-strip .v { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums }
+
+  table.pl {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  table.pl th {
+    text-align: left; padding: 9px 14px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+  }
+  table.pl th.num { text-align: right }
+  table.pl td { padding: 7px 14px; border-bottom: 1px solid var(--line) }
+  table.pl td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.pl tr.subtotal { background: var(--panel-2) }
+  table.pl tr.subtotal td { font-weight: 600; border-top: 1px solid var(--line) }
+  table.pl tr.total { background: var(--panel-3) }
+  table.pl tr.total td { font-weight: 700; border-top: 2px solid var(--accent); font-size: 13.5px }
+  table.pl td.indent { padding-left: 32px; color: var(--muted) }
+
+  /* Bemanning + scenarier */
+  .bem-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px }
+  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px }
+  .scen-box {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; border-top: 3px solid var(--accent);
+  }
+  .scen-box.base { border-top-color: var(--hi) }
+  .scen-box.off { border-top-color: var(--accent) }
+  .scen-box.bull { border-top-color: var(--good) }
+  .scen-box .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px }
+  .scen-box h4 { margin: 0; font-size: 13px; font-weight: 600 }
+  .scen-box .tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 10px; font-weight: 600 }
+  .scen-box.base .tag { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .scen-box.off .tag { background: rgba(210,153,34,0.18); color: var(--accent) }
+  .scen-box.bull .tag { background: rgba(63,185,80,0.18); color: var(--good) }
+  .scen-box .target {
+    font-size: 22px; font-weight: 600; margin: 6px 0; font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .scen-box .target small { font-size: 12px; color: var(--muted); font-weight: 400 }
+  .scen-box ul { margin: 6px 0 8px; padding-left: 16px; font-size: 12px; line-height: 1.6 }
+  .scen-box .meta { font-size: 11px; color: var(--muted); padding-top: 8px; border-top: 1px dashed var(--line); margin-top: 8px }
+  .scen-box .meta b { color: var(--text); font-weight: 600 }
+
+  /* Stage flow */
+  .stage-flow {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: stretch;
+    margin: 14px 0 18px;
+  }
+  .stage {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px 10px; position: relative; text-align: center;
+  }
+  .stage.done { background: rgba(63,185,80,0.10); border-color: var(--good); border-top: 3px solid var(--good) }
+  .stage.now { background: rgba(210,153,34,0.12); border-color: var(--warn); border-top: 3px solid var(--warn) }
+  .stage.next { border-top: 3px solid var(--line) }
+  .stage::after {
+    content: "▶"; position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 11px; z-index: 2;
+  }
+  .stage:last-child::after { display: none }
+  .stage .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; margin-bottom: 3px }
+  .stage h5 { margin: 0 0 4px; font-size: 12px; color: var(--text); font-weight: 600 }
+  .stage p { margin: 0; font-size: 10.5px; color: var(--muted); line-height: 1.45 }
+  .stage code { font-family: 'SF Mono', Consolas, monospace; font-size: 9.5px; color: var(--accent-2); background: var(--panel); padding: 1px 4px; border-radius: 2px; display: inline-block; margin-top: 4px }
+
+  /* HR */
+  .hr-panels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px }
+  .hr-card {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 20px; border-top: 3px solid #a371f7;
+  }
+  .hr-card h4 { margin: 0 0 8px; font-size: 13px; font-weight: 600 }
+  .hr-card .src { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px }
+  .hr-track { font-size: 12px; line-height: 1.6 }
+  .hr-track .row { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); align-items: center }
+  .hr-track .row:last-child { border-bottom: 0 }
+  .hr-track .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); margin: 0 auto }
+  .hr-track .dot.done { background: var(--good) }
+  .hr-track .dot.now { background: var(--warn) }
+  .hr-track .dot.next { background: var(--panel-3); border: 1px solid var(--muted) }
+  .hr-track .row .l { color: var(--text); font-size: 12px }
+  .hr-track .row .l small { color: var(--muted); font-size: 10.5px; display: block; margin-top: 1px }
+  .hr-track .row .when { font-size: 10px; color: var(--muted); white-space: nowrap }
+
+  /* Mix */
+  .mix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .mix-bar-chart { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px }
+  .mix-bar-chart h4 { margin: 0 0 10px; font-size: 13px; font-weight: 600 }
+  .mix-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: end; height: 220px; margin: 14px 0 4px }
+  .mix-bar { display: flex; flex-direction: column; align-items: center }
+  .mix-bar .stack { width: 70%; display: flex; flex-direction: column-reverse; border-radius: 4px; overflow: hidden; position: relative }
+  .mix-bar .seg.rot { background: linear-gradient(180deg, #d29922, #8a6a16) }
+  .mix-bar .seg.fors { background: repeating-linear-gradient(45deg, #e85d75, #e85d75 4px, #c44558 4px, #c44558 8px) }
+  .mix-bar .seg.epc { background: linear-gradient(180deg, #66c2cc, #4f9da6) }
+  .mix-bar .total { font-size: 14px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums }
+  .mix-bar .ebit { font-size: 11px; color: var(--good); font-weight: 600; margin-top: 2px }
+  .mix-bar .label { font-size: 11px; color: var(--muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600 }
+  .mix-legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 16px; flex-wrap: wrap }
+  .mix-legend .it { display: flex; align-items: center; gap: 6px }
+  .mix-legend .sw { width: 12px; height: 12px; border-radius: 2px }
+  table.mixmath { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+  table.mixmath th { background: var(--panel-3); padding: 8px 12px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700 }
+  table.mixmath th.num, table.mixmath td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.mixmath td { padding: 7px 12px; border-bottom: 1px solid var(--line) }
+  table.mixmath tr.total td { background: var(--panel-3); font-weight: 700; border-top: 2px solid var(--accent); border-bottom: 0 }
+
+  /* Endpoints */
+  .endpoints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+  .ep {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px 14px; border-left: 3px solid var(--good);
+  }
+  .ep code { font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: var(--accent-2) }
+  .ep h5 { margin: 4px 0; font-size: 12px }
+  .ep p { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
+  .ep .sync { font-size: 10px; color: var(--good); margin-top: 4px }
+
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 16px; line-height: 1.6 }
+  .footnote a { color: var(--accent); text-decoration: none }
+  .footnote a:hover { text-decoration: underline }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="okonomi"></div>
+
+<header class="top">
+  <div>
+    <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a> · <a href="okonomi.html">Byggmester Fritzøe →</a></div>
+    <span class="selskap-tag">Trondheim-enheten</span>
+    <h1>Økonomi — Braa og Sørvåg Bygg</h1>
+    <div class="sub">DL: Øyvind Björnänger Berggren · Tillerbruvegen 76, 7092 Tiller · 32 ansatte · regnskap fra PowerOffice Go</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="po-badge"><span class="dot"></span>PowerOffice Go · sist synket 2026-04-30 06:14</div>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <label>Periode</label>
+  <select id="period">
+    <option value="hittil2026" selected>Hittil 2026 (Jan–Apr)</option>
+    <option value="q12026">Q1 2026</option>
+    <option value="apr2026">April 2026</option>
+    <option value="mnd-12">Siste 12 mnd</option>
+    <option value="2025">Hele 2025</option>
+    <option value="2024">Hele 2024 (Brreg)</option>
+  </select>
+  <div class="spacer"></div>
+  <button>📤 Eksporter (HTML)</button>
+  <button>📊 Send til ServiceAlliansen</button>
+  <button class="primary">↻ Oppdater fra PowerOffice</button>
+</div>
+
+<main>
+
+  <!-- Eksekutiv KPI-er -->
+  <div class="section">
+    <h2 class="section-title">Eksekutiv oversikt — hittil 2026 (Jan–Apr)</h2>
+    <div class="kpis-top">
+      <div class="kpi-big income">
+        <div class="l">Omsetning</div>
+        <div class="v">18,5 <small>MNOK</small></div>
+        <div class="d">Fakturert + opptjent <span class="delta up">+9 % vs 2025</span></div>
+      </div>
+      <div class="kpi-big lonn">
+        <div class="l">Lønnskost</div>
+        <div class="v">8,8 <small>MNOK</small></div>
+        <div class="d">32 ansatte · 47,6 % av omsetning</div>
+      </div>
+      <div class="kpi-big material">
+        <div class="l">Materialkost</div>
+        <div class="v">5,1 <small>MNOK</small></div>
+        <div class="d">27,6 % av omsetning <span class="delta dn">+2,1 %p</span></div>
+      </div>
+      <div class="kpi-big ebit">
+        <div class="l">Driftsresultat (EBIT)</div>
+        <div class="v">1,4 <small>MNOK</small></div>
+        <div class="d">2024 helår: 0,4 MNOK <span class="delta up">+SA-effekt</span></div>
+      </div>
+      <div class="kpi-big margin">
+        <div class="l">EBIT-margin</div>
+        <div class="v">7,5 <small>%</small></div>
+        <div class="d">2024 helår 0,6 % · markant marginløft</div>
+      </div>
+    </div>
+    <div class="footnote">
+      <b>Marginløftet er hovedfortellingen for Trondheim Q1 2026:</b> Fra 0,6 % EBIT-margin i 2024 til 7,5 % YTD 2026. Drevet av ny DL Øyvind Berggren (tiltrådt 2025-09), strammere kalkulasjons-disiplin via SA-felles prosesser, og tydeligere prisingspolitikk på rammeavtaler. Trenden må vedvare gjennom resten av 2026 for at base-scenarioet skal holde.
+    </div>
+  </div>
+
+  <!-- 12-mnd trend -->
+  <div class="section">
+    <h2 class="section-title">Periode-trend — siste 12 måneder</h2>
+    <div class="trend-card">
+      <h3>Omsetning og driftsresultat per måned</h3>
+      <div class="lead">Lyse stolper er omsetning; mørkegrønne er driftsresultat (negativt = rødt). Marginløftet etter SA-overtagelse synes tydelig fra Q4 2025.</div>
+      <div class="trend-chart" id="trendChart"></div>
+      <div class="trend-legend">
+        <div class="it"><span class="sw" style="background:rgba(63,185,80,0.6)"></span>Omsetning (MNOK)</div>
+        <div class="it"><span class="sw" style="background:var(--good)"></span>Driftsresultat (MNOK)</div>
+        <div class="it"><span class="sw" style="background:var(--bad)"></span>Negativt resultat</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aktive prosjekter -->
+  <div class="section">
+    <h2 class="section-title">Aktive prosjekter — plan vs faktisk (live fra PowerOffice Go)</h2>
+    <table class="proj">
+      <thead>
+        <tr>
+          <th>Prosjekt / kunde</th>
+          <th class="num">Plan timer</th>
+          <th class="num">Faktisk timer</th>
+          <th class="num">Avvik</th>
+          <th class="num">Tilbudssum</th>
+          <th class="num">Faktisk kost</th>
+          <th class="num">Margin</th>
+          <th>Fremdrift</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="pname">Charlottenlund vgs — garderobe og dusj</div><div class="pkunde">Trøndelag fylkeskommune · BS-2025-018</div></td>
+          <td class="num">680</td>
+          <td class="num">624</td>
+          <td class="num"><span class="marg-pill up">−8,2 %</span></td>
+          <td class="num">3 400 000</td>
+          <td class="num">2 660 000</td>
+          <td class="num"><span class="marg-pill up">+8,3 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:75%;background:var(--good)"></div><span class="lbl">75 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">St. Olavs hospital — Bevegelsessenteret innvendig rehab</div><div class="pkunde">Helse Midt-Norge RHF · BS-2025-022</div></td>
+          <td class="num">920</td>
+          <td class="num">587</td>
+          <td class="num"><span class="marg-pill up">−36 %</span></td>
+          <td class="num">5 200 000</td>
+          <td class="num">3 110 000</td>
+          <td class="num"><span class="marg-pill flat">+6,4 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:60%;background:var(--accent)"></div><span class="lbl">60 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Trondheim rådhus — Bytårnet kontorflate 5. etg</div><div class="pkunde">Trondheim kommune · BS-2025-024</div></td>
+          <td class="num">410</td>
+          <td class="num">388</td>
+          <td class="num"><span class="marg-pill up">−5,4 %</span></td>
+          <td class="num">2 100 000</td>
+          <td class="num">1 720 000</td>
+          <td class="num"><span class="marg-pill up">+8,1 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:100%;background:var(--good)"></div><span class="lbl">Ferdig</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Heimdal vgs — innvendig oppussing fløy A</div><div class="pkunde">Trøndelag fylkeskommune · BS-2025-027</div></td>
+          <td class="num">280</td>
+          <td class="num">258</td>
+          <td class="num"><span class="marg-pill up">−7,9 %</span></td>
+          <td class="num">1 300 000</td>
+          <td class="num">1 095 000</td>
+          <td class="num"><span class="marg-pill up">+9,2 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:92%;background:var(--good)"></div><span class="lbl">92 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Selsbakk skole — dør- og vindusutskifting</div><div class="pkunde">Trondheim kommune · BS-2025-029</div></td>
+          <td class="num">810</td>
+          <td class="num">385</td>
+          <td class="num"><span class="marg-pill up">−52 %</span></td>
+          <td class="num">4 600 000</td>
+          <td class="num">2 010 000</td>
+          <td class="num"><span class="marg-pill flat">+6,8 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:45%;background:var(--accent)"></div><span class="lbl">45 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">NTNU Gløshaugen — Inst.bygg kontorrehab</div><div class="pkunde">Statsbygg Midt-Norge · BS-2026-002</div></td>
+          <td class="num">1 480</td>
+          <td class="num">388</td>
+          <td class="num"><span class="marg-pill up">−74 %</span></td>
+          <td class="num">7 800 000</td>
+          <td class="num">2 010 000</td>
+          <td class="num"><span class="marg-pill flat">+7,2 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:28%;background:var(--accent)"></div><span class="lbl">28 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Persaunet leir — bolig 12 totalrehab</div><div class="pkunde">Forsvarsbygg · BS-2026-005</div></td>
+          <td class="num">680</td>
+          <td class="num">235</td>
+          <td class="num"><span class="marg-pill up">−65 %</span></td>
+          <td class="num">3 500 000</td>
+          <td class="num">1 230 000</td>
+          <td class="num"><span class="marg-pill up">+8,9 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:35%;background:var(--accent)"></div><span class="lbl">35 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Brundalen omsorgsboliger — innvendig maling</div><div class="pkunde">Trondheim Eiendom KF · BS-2026-007</div></td>
+          <td class="num">220</td>
+          <td class="num">202</td>
+          <td class="num"><span class="marg-pill up">−8,2 %</span></td>
+          <td class="num">1 100 000</td>
+          <td class="num">935 000</td>
+          <td class="num"><span class="marg-pill up">+7,8 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:88%;background:var(--good)"></div><span class="lbl">88 %</span></div></td>
+        </tr>
+        <tr style="background:rgba(248,81,73,0.05)">
+          <td><div class="pname">Lade barnehage — byggeteknisk rehab ⚠</div><div class="pkunde">Trondheim kommune · BS-2026-009</div></td>
+          <td class="num">1 020</td>
+          <td class="num">348</td>
+          <td class="num"><span class="marg-pill dn">+12 %</span></td>
+          <td class="num">4 800 000</td>
+          <td class="num">1 920 000</td>
+          <td class="num"><span class="marg-pill dn">+1,4 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:25%;background:var(--bad)"></div><span class="lbl">25 % · varsel</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Olavshallen — innvendig oppgradering foaje</div><div class="pkunde">Trondheim Eiendom KF · BS-2026-011</div></td>
+          <td class="num">485</td>
+          <td class="num">62</td>
+          <td class="num"><span class="marg-pill up">−87 %</span></td>
+          <td class="num">2 400 000</td>
+          <td class="num">295 000</td>
+          <td class="num"><span class="marg-pill up">+10,2 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:12%;background:var(--accent)"></div><span class="lbl">12 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Trondheim havn — administrasjonsbygg fasade</div><div class="pkunde">Trondheim Havn IKS · BS-2026-013</div></td>
+          <td class="num">1 240</td>
+          <td class="num">752</td>
+          <td class="num"><span class="marg-pill up">−39 %</span></td>
+          <td class="num">8 200 000</td>
+          <td class="num">4 020 000</td>
+          <td class="num"><span class="marg-pill flat">+6,1 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:60%;background:var(--accent)"></div><span class="lbl">60 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Skarvegen senior — utskifting vinduer</div><div class="pkunde">Trondheim Eiendom KF · BS-2026-015</div></td>
+          <td class="num">295</td>
+          <td class="num">238</td>
+          <td class="num"><span class="marg-pill up">−19 %</span></td>
+          <td class="num">1 700 000</td>
+          <td class="num">1 240 000</td>
+          <td class="num"><span class="marg-pill up">+8,2 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:80%;background:var(--good)"></div><span class="lbl">80 %</span></div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="footnote">
+      <b>Lade barnehage</b> er flagget rødt — 348 timer brukt ved 25 % fremdrift når plan er 1 020 timer totalt. Kost-fremdrift er ute av takt med tids-fremdrift, og projisert margin har glidd ned fra plan 9 % til 1,4 %. Krever befaring og prosjektmøte uke 18. <b>NTNU Gløshaugen</b> og <b>Persaunet</b> er strategisk viktige store prosjekter — fortsatt for tidlig å lese margin (* projisert).
+    </div>
+  </div>
+
+  <!-- Timeføring + Lønn -->
+  <div class="section">
+    <h2 class="section-title">Timeføring og lønn — hittil 2026</h2>
+    <div class="twocol">
+
+      <div class="panel">
+        <h3>Timeføring</h3>
+        <div class="lead">Live fra PowerOffice Go endepunkt <code>/timeentries</code>.</div>
+        <div class="stat-row"><div class="label">Total timer registrert <small>32 ansatte · jan–apr</small></div><div class="val">19 870 t</div></div>
+        <div class="stat-row"><div class="label">Fakturerbart <small>direkte mot prosjekt</small></div><div class="val">15 980 t · 80,4 %</div></div>
+        <div class="stat-row"><div class="label">Internt / opplæring / HMS</div><div class="val">2 380 t · 12,0 %</div></div>
+        <div class="stat-row"><div class="label">Sykefravær / permisjon</div><div class="val">1 510 t · 7,6 %</div></div>
+
+        <h4>Timer per prosjekt — topp 6</h4>
+        <div class="bar-strip"><div class="nm">Trondheim havn fasade</div><div class="b"><div class="f green" style="width:60%"></div></div><div class="v">752 t</div></div>
+        <div class="bar-strip"><div class="nm">Charlottenlund vgs</div><div class="b"><div class="f green" style="width:50%"></div></div><div class="v">624 t</div></div>
+        <div class="bar-strip"><div class="nm">St. Olavs Bevegelsessenteret</div><div class="b"><div class="f green" style="width:47%"></div></div><div class="v">587 t</div></div>
+        <div class="bar-strip"><div class="nm">NTNU Gløshaugen</div><div class="b"><div class="f green" style="width:31%"></div></div><div class="v">388 t</div></div>
+        <div class="bar-strip"><div class="nm">Trondheim rådhus</div><div class="b"><div class="f green" style="width:31%"></div></div><div class="v">388 t</div></div>
+        <div class="bar-strip"><div class="nm">Selsbakk skole</div><div class="b"><div class="f green" style="width:31%"></div></div><div class="v">385 t</div></div>
+
+        <h4>Per stillingskategori (Q1 hittil)</h4>
+        <div class="bar-strip"><div class="nm">Tømrer / snekker</div><div class="b"><div class="f" style="width:65%"></div></div><div class="v">12 940 t</div></div>
+        <div class="bar-strip"><div class="nm">Maler</div><div class="b"><div class="f" style="width:30%"></div></div><div class="v">3 230 t</div></div>
+        <div class="bar-strip"><div class="nm">Prosjektleder + adm</div><div class="b"><div class="f" style="width:18%"></div></div><div class="v">3 700 t</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Lønn per prosjekt og samlet</h3>
+        <div class="lead">PowerOffice Go-endepunkt <code>/transactions</code> filtrert på lønnskonti (5000–5999) med prosjekt-dimensjon.</div>
+        <div class="stat-row"><div class="label">Total lønnskost <small>inkl. AGA, OTP, feriepenger</small></div><div class="val">8,8 MNOK</div></div>
+        <div class="stat-row"><div class="label">Lønn / omsetning</div><div class="val">47,6 %</div></div>
+        <div class="stat-row"><div class="label">Prosjekt-tildelt lønn</div><div class="val">7,1 MNOK · 80,7 %</div></div>
+        <div class="stat-row"><div class="label">Indirekte (admin, opplæring)</div><div class="val">1,7 MNOK · 19,3 %</div></div>
+
+        <h4>Lønn per prosjekt — topp 6</h4>
+        <div class="bar-strip"><div class="nm">Trondheim havn fasade</div><div class="b"><div class="f" style="width:65%"></div></div><div class="v">485 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Charlottenlund vgs</div><div class="b"><div class="f" style="width:53%"></div></div><div class="v">395 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">St. Olavs Bevegelsessenteret</div><div class="b"><div class="f" style="width:48%"></div></div><div class="v">360 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Trondheim rådhus</div><div class="b"><div class="f" style="width:33%"></div></div><div class="v">245 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Selsbakk skole</div><div class="b"><div class="f" style="width:32%"></div></div><div class="v">240 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">NTNU Gløshaugen</div><div class="b"><div class="f" style="width:32%"></div></div><div class="v">240 kNOK</div></div>
+
+        <h4>Snitt-tall</h4>
+        <div class="stat-row"><div class="label">Snitt timepris (lønn)</div><div class="val">552 kr/t</div></div>
+        <div class="stat-row"><div class="label">Snitt månedslønn (inkl. sosiale)</div><div class="val">91,7 kNOK</div></div>
+        <div class="stat-row"><div class="label">Fakturerbar timepris (snitt)</div><div class="val">1 158 kr/t</div></div>
+        <div class="stat-row"><div class="label">Lønnsdekningsgrad <small>fakt.timer × snittpris ÷ lønn</small></div><div class="val">168 %</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Resultatregnskap -->
+  <div class="section">
+    <h2 class="section-title">Resultatregnskap — hittil 2026 (akkumulert per måned)</h2>
+    <table class="pl">
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th class="num">Jan</th>
+          <th class="num">Feb</th>
+          <th class="num">Mar</th>
+          <th class="num">Apr</th>
+          <th class="num">Hittil</th>
+          <th class="num">% oms</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Driftsinntekter</td><td class="num">4 250</td><td class="num">4 580</td><td class="num">4 920</td><td class="num">4 750</td><td class="num">18 500</td><td class="num">100 %</td></tr>
+        <tr class="subtotal"><td>Driftsinntekter sum</td><td class="num">4 250</td><td class="num">4 580</td><td class="num">4 920</td><td class="num">4 750</td><td class="num">18 500</td><td class="num">100 %</td></tr>
+
+        <tr><td>Varekostnad / materialer</td><td class="num">−1 180</td><td class="num">−1 270</td><td class="num">−1 380</td><td class="num">−1 280</td><td class="num">−5 110</td><td class="num">−27,6 %</td></tr>
+        <tr><td>Underentreprenører</td><td class="num">−225</td><td class="num">−240</td><td class="num">−270</td><td class="num">−255</td><td class="num">−990</td><td class="num">−5,4 %</td></tr>
+        <tr><td>Lønn og sosiale kost</td><td class="num">−2 050</td><td class="num">−2 180</td><td class="num">−2 290</td><td class="num">−2 280</td><td class="num">−8 800</td><td class="num">−47,6 %</td></tr>
+        <tr><td class="indent">— direkte prosjekt</td><td class="num">−1 670</td><td class="num">−1 760</td><td class="num">−1 850</td><td class="num">−1 820</td><td class="num">−7 100</td><td class="num">−38,4 %</td></tr>
+        <tr><td class="indent">— indirekte / admin</td><td class="num">−380</td><td class="num">−420</td><td class="num">−440</td><td class="num">−460</td><td class="num">−1 700</td><td class="num">−9,2 %</td></tr>
+        <tr><td>Andre driftskostnader <small style="color:var(--muted)">(inkl. leasing)</small></td><td class="num">−490</td><td class="num">−530</td><td class="num">−540</td><td class="num">−550</td><td class="num">−2 110</td><td class="num">−11,4 %</td></tr>
+
+        <tr class="subtotal"><td>Driftskostnader sum</td><td class="num">−3 945</td><td class="num">−4 220</td><td class="num">−4 480</td><td class="num">−4 365</td><td class="num">−17 010</td><td class="num">−92,0 %</td></tr>
+
+        <tr class="total"><td>Driftsresultat (EBIT)</td><td class="num">305</td><td class="num">360</td><td class="num">440</td><td class="num">385</td><td class="num">1 490</td><td class="num">8,1 %</td></tr>
+        <tr><td style="color:var(--muted);font-style:italic">Driftsmargin %</td><td class="num">7,2 %</td><td class="num">7,9 %</td><td class="num">8,9 %</td><td class="num">8,1 %</td><td class="num">8,1 %</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <div class="footnote">
+      Tall i kNOK. Hentes daglig fra PowerOffice Go via <code>/transactions</code>-endepunktet, gruppert på kontoklasse 3xxx/4xxx/5xxx/6xxx-7xxx. <b>Andre driftskostnader</b> inkluderer leasing (biler, maskiner, IT) som er en strukturell post i driftsselskaper. Leasingsandel av kostbase er ~3,5 %p.
+      <br><b>Marginutviklingen er sterk Q1 2026:</b> 7–9 % per måned, opp fra 0,6 % i 2024. Drevet av strammere kalkulasjons-disiplin og tydeligere prising på rammeavtaler. <b>Forbehold:</b> En del prosjekter er fortsatt i tidlig fase; sluttmargin avhenger av om prosjekter som NTNU og Persaunet leverer som forventet.
+    </div>
+  </div>
+
+  <!-- Bemanning og rekruttering -->
+  <div class="section">
+    <h2 class="section-title">Bemanning, lønn og rekrutteringsplan</h2>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Nåværende bemanning og lønnsmasse</h3>
+      <div class="lead">Henter live fra PowerOffice Go endepunktene <code>/employees</code> + lønnskonti. Snitt-lønn inkluderer arbeidsgiveravgift (14,1 %), OTP, feriepenger og forsikringer.</div>
+
+      <table class="proj">
+        <thead>
+          <tr>
+            <th>Stillingskategori</th>
+            <th class="num">Antall</th>
+            <th class="num">Snitt-lønn</th>
+            <th class="num">Total lønnsmasse</th>
+            <th>Kommentar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Tømrer / snekker (faglært)</td><td class="num">18</td><td class="num">645 kNOK</td><td class="num">11,6 MNOK</td><td>Kjernekompetanse · NACE 43.320 fokus</td></tr>
+          <tr><td>Maler (faglært)</td><td class="num">5</td><td class="num">625 kNOK</td><td class="num">3,1 MNOK</td><td>Mindre maler-avdeling enn Bodø-enheten — vurderes utvidet</td></tr>
+          <tr><td>Murer / grunnarbeid</td><td class="num">3</td><td class="num">665 kNOK</td><td class="num">2,0 MNOK</td><td>Knapp ressurs i Trondheim-marked</td></tr>
+          <tr><td>Prosjektleder / byggeleder</td><td class="num">3</td><td class="num">860 kNOK</td><td class="num">2,6 MNOK</td><td>Kapasitetstak — krevende på store prosjekter (NTNU, havn)</td></tr>
+          <tr><td>Kalkulator</td><td class="num">1</td><td class="num">790 kNOK</td><td class="num">0,8 MNOK</td><td><b>Flaskehals</b> — én kalkulator på 58 MNOK omsetning</td></tr>
+          <tr><td>Adm / regnskap / tilbud</td><td class="num">1</td><td class="num">615 kNOK</td><td class="num">0,6 MNOK</td><td>Avlastet av SA-felles tjenester</td></tr>
+          <tr><td>Daglig leder</td><td class="num">1</td><td class="num">1 200 kNOK</td><td class="num">1,2 MNOK</td><td>Øyvind Berggren · tiltrådt sept 2025</td></tr>
+          <tr style="background:var(--panel-2);font-weight:600">
+            <td>Konsolidert</td>
+            <td class="num">32</td>
+            <td class="num">—</td>
+            <td class="num">21,9 MNOK</td>
+            <td>Helårsbasis · YTD 8,8 MNOK</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footnote" style="margin-top:8px">
+        <b>Strukturelt funn:</b> Trondheim-enheten har samme kalkulator-flaskehalsen som Bodø — én person på 58 MNOK omsetning. Bull case (137 MNOK ROT i 2029) krever 2–3 kalkulatorer. <b>Maler-avdelingen er liten</b> (5 personer) — eksponert mot kapasitetsbegrensning hvis offentlig ROT etterspør integrert tømrer+maler-leveranse.
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Rekrutteringsplan per scenario — Trondheim</h3>
+      <div class="lead">
+        Oversettelse fra strategiske ambisjoner til <i>konkret rekrutteringsbehov</i> i Trondheim. Tallene er netto — eksisterende ansatte beholdes, vist tall er ny kapasitet.
+      </div>
+
+      <div class="scenario-grid">
+        <div class="scen-box base">
+          <div class="head"><h4>Base case</h4><span class="tag">Forsiktig</span></div>
+          <div class="target">+6 <small>nye over 3 år</small></div>
+          <ul>
+            <li>2 tømrere</li>
+            <li>2 malere (maler-utvidelse)</li>
+            <li>1 prosjektleder</li>
+            <li>1 lærling</li>
+          </ul>
+          <div class="meta">
+            <b>Tempo:</b> 2/år · <b>Kostnad:</b> ~ 1,0 MNOK rekruttering<br>
+            <b>Fokus:</b> margin-konsolidering, ikke vekst
+          </div>
+        </div>
+
+        <div class="scen-box off">
+          <div class="head"><h4>Offensiv</h4><span class="tag">Trøndelag</span></div>
+          <div class="target">+18 <small>nye over 3 år</small></div>
+          <ul>
+            <li>8 tømrere</li>
+            <li>4 malere</li>
+            <li>2 prosjektledere</li>
+            <li>1 kalkulator (kritisk)</li>
+            <li>1 byggeleder Innherred</li>
+            <li>2 lærlinger</li>
+          </ul>
+          <div class="meta">
+            <b>Tempo:</b> 6/år · <b>Kostnad:</b> ~ 3,1 MNOK rekruttering<br>
+            <b>Risiko:</b> Middels · krever Trøndelag-bredde
+          </div>
+        </div>
+
+        <div class="scen-box bull">
+          <div class="head"><h4>Bull case</h4><span class="tag">Midt-Norge</span></div>
+          <div class="target">+43 <small>nye over 3 år</small></div>
+          <ul>
+            <li>20 tømrere</li>
+            <li>10 malere</li>
+            <li>5 prosjektledere</li>
+            <li>3 kalkulatorer</li>
+            <li>3 byggeledere (Stjørdal, Innherred, Fosen)</li>
+            <li>2 lærlinger</li>
+          </ul>
+          <div class="meta">
+            <b>Tempo:</b> 14/år · <b>Kostnad:</b> ~ 7,5 MNOK rekruttering<br>
+            <b>Risiko:</b> <span style="color:var(--bad)">Høy</span> · krever import + oppkjøp
+          </div>
+        </div>
+      </div>
+
+      <div class="footnote" style="margin-top:14px">
+        <b>Trondheim-rekrutteringsmarked:</b> Større pool enn Salten (NTNU + tekniske skoler gir tilgang på lærlinger og fagfolk), men også mer konkurranse fra de nasjonale aktørene (Veidekke, NCC, Skanska, Backe har alle store Trondheim-avdelinger). Tid per ansettelse ~10 uker tømrer · ~18 uker prosjektleder · ~24 uker kalkulator.
+      </div>
+    </div>
+  </div>
+
+  <!-- Handover-prosess -->
+  <div class="section">
+    <h2 class="section-title">Handover — fra vunnet anbud til prosjekt i drift</h2>
+    <div class="panel">
+      <h3>Lifecycle for et anbud — automatisert flyt mot PowerOffice Go</h3>
+      <div class="lead">
+        Identisk prosess for Trondheim som for Bodø — SA-konsernfelles arbeidsflyt. Når Berggren setter status «Vunnet» i pipelinen, trigges automatisk seks stadier i bakgrunnen. Manuell tid ned fra 60–90 min til 5–10 min per nytt prosjekt.
+      </div>
+
+      <div class="stage-flow">
+        <div class="stage done"><div class="lbl">Stadie 1</div><h5>Vunnet</h5><p>Pipeline → status</p><code>POST /projects</code></div>
+        <div class="stage done"><div class="lbl">Stadie 2</div><h5>Prosjekt opprettet</h5><p>PO med tilbudssum og plan</p><code>POST /budgets</code></div>
+        <div class="stage now"><div class="lbl">Stadie 3</div><h5>Ressursallokert</h5><p>Byggeleder + crew tildelt</p><code>PATCH /projects</code></div>
+        <div class="stage next"><div class="lbl">Stadie 4</div><h5>Materialbestilling</h5><p>UE og leverandør-PO</p><code>POST /vouchers</code></div>
+        <div class="stage next"><div class="lbl">Stadie 5</div><h5>I produksjon</h5><p>Timer + kost akkumuleres</p><code>GET /timeentries</code></div>
+        <div class="stage next"><div class="lbl">Stadie 6</div><h5>Fakturering</h5><p>Delfaktura ved milestones</p><code>POST /invoices</code></div>
+        <div class="stage next"><div class="lbl">Stadie 7</div><h5>Lukket</h5><p>Sluttoppgjør + læring</p><code>PATCH /projects</code></div>
+      </div>
+
+      <div class="footnote">
+        <b>Pågående handover Q2 2026:</b> Tre prosjekter i stadie 3 (ressursallokering): NTNU Gløshaugen (krever PL Geir Aas), Persaunet bolig 12 (krever fukt-protokoll-sertifisert tømrer), og Olavshallen (krever spesialist på akustikk-vegger). Lade barnehage flagg fanget tidlig fordi marginvarsel triggeret ved 5 % avvik mellom plan og faktisk kost.
+      </div>
+    </div>
+  </div>
+
+  <!-- HR-integrasjon -->
+  <div class="section">
+    <h2 class="section-title">HR-integrasjon mot ServiceAlliansen sentralt</h2>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Sentralisert HR via SA-konsernet — felles for Bodø og Trondheim</h3>
+      <div class="lead">
+        Trondheim-enheten har samme HR-tilkobling som Bodø. SA-rekrutterer (Trondheim-stasjonert for nærmere kontakt med markedet) jobber for begge porteføljebedrifter. Onboarding-pakke, lønn-system, og kompetanseutvikling kommer fra SA sentralt.
+      </div>
+
+      <div class="hr-panels">
+        <div class="hr-card">
+          <h4>📋 Aktive rekrutteringer Q2 2026</h4>
+          <div class="src">SA HR-system → vår portal · Synkronisert daglig</div>
+          <div class="hr-track">
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">Maler (1 stk) — utvider maler-avdelingen<small>Stilling utlyst 14.04.26</small></div>
+              <div class="when">15 søkere</div>
+            </div>
+            <div class="row">
+              <div class="dot now"></div>
+              <div class="l">Prosjektleder — Innherred-fokus<small>SA-rekrutterer screener; 8 kvalifiserte</small></div>
+              <div class="when">pågår</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">Kalkulator (kritisk flaskehals)<small>Krever NTNU/HiST-bakgrunn eller 5+ års erfaring</small></div>
+              <div class="when">utlyses uke 19</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">Lærling tømrer (1)<small>Via opplæringskontoret BNL Trøndelag</small></div>
+              <div class="when">aug 2026</div>
+            </div>
+          </div>
+          <div class="footnote" style="margin-top:10px">
+            <b>Trondheim-fortrinn:</b> NTNU og Trondheim Fagskole gir bredere kandidatpool enn Bodø. Tid per ansettelse er omtrent halvparten for prosjektleder-stillinger.
+          </div>
+        </div>
+
+        <div class="hr-card" style="border-top-color:var(--good)">
+          <h4>🎯 Pågående onboarding</h4>
+          <div class="src">SA Onboarding-platform · Trigges ved signert kontrakt</div>
+          <div class="hr-track">
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">Magnus Aune (tømrer)<small>Oppstart 03.03.26 · 90-dagers eval. juni 2026</small></div>
+              <div class="when">dag 60</div>
+            </div>
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">Kjersti Holm (maler)<small>Oppstart 02.04.26 · pågående HMS-kurs</small></div>
+              <div class="when">dag 30</div>
+            </div>
+            <div class="row">
+              <div class="dot now"></div>
+              <div class="l">Stian Fagerli (prosjektleder)<small>Pre-boarding · oppstart 02.06.26</small></div>
+              <div class="when">T-31</div>
+            </div>
+          </div>
+          <div class="footnote" style="margin-top:10px">
+            <b>Mentor-system:</b> Hver nyansatt får tildelt mentor (etablert ansatt, 90 dager). Sparer DL og PL ~3 t/uke i de første 12 ukene.
+          </div>
+        </div>
+
+        <div class="hr-card" style="border-top-color:var(--accent)">
+          <h4>💰 Lønnssystem og fravær</h4>
+          <div class="src">SA Lønn (Visma Lønn 5.0) ↔ PowerOffice Go · Daglig sync</div>
+          <p style="font-size:11.5px;color:var(--text);margin:0 0 8px;line-height:1.55">
+            Felles SA-lønn for begge porteføljebedrifter — én lønnsavdeling betjener både Bodø og Trondheim. Lokal kontekst:
+          </p>
+          <ul style="font-size:11px;color:var(--muted);margin:0;padding-left:16px;line-height:1.6">
+            <li>Sykefravær Q1 2026: 7,6 % (under bransjesnitt 8,1 %)</li>
+            <li>Ingen alvorlige HMS-hendelser hittil 2026</li>
+            <li>Snittlønn 2 % høyere i Trondheim enn Bodø — kompenserer for høyere boligkost</li>
+            <li>Lønnsforhandlinger 2026 sentralt på SA-konsernnivå</li>
+          </ul>
+        </div>
+
+        <div class="hr-card" style="border-top-color:var(--warn)">
+          <h4>📚 Kompetanseutvikling</h4>
+          <div class="src">SA-læringsplattform · Individuelle planer per ansatt</div>
+          <p style="font-size:11.5px;color:var(--text);margin:0 0 8px;line-height:1.55">
+            Aktive utdanningsløp Q1 2026 i Trondheim:
+          </p>
+          <ul style="font-size:11px;color:var(--muted);margin:0;padding-left:16px;line-height:1.6">
+            <li><b>BREEAM AP</b> — 1 prosjektleder under utdanning (samme som Bodø — felles SA-finansiert)</li>
+            <li><b>Fuktprotokoll</b> — 3 tømrere sertifisert · åpner for SA forsikrings-onboarding</li>
+            <li><b>Brann-rehabkurs</b> — 2 tømrere planlagt høst 2026</li>
+            <li><b>1 lærling tømrer</b> via opplæringskontoret BNL Trøndelag</li>
+            <li><b>Medarbeidersamtaler (MAS)</b> — felles SA-mal · gjennomført Q1 2026 for alle 32</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Margin-mix -->
+  <div class="section">
+    <h2 class="section-title">Margin-mix — Trondheim-spesifikk</h2>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Inntektsstrømmer og marginprofil — 2024 vs 2029-scenarier</h3>
+      <div class="lead">
+        Trondheim starter fra et helt annet utgangspunkt enn Bodø — 2024 EBIT-margin var 0,6 %, men strukturelt med samme inntektsmiks. Marginløftet i 2026 er primært operasjonelt; videre vekst krever miks-endring (forsikring + EPC).
+      </div>
+
+      <div class="mix-bar-chart">
+        <h4>Omsetnings-miks og samlet EBIT-margin · Trondheim</h4>
+        <div class="mix-bars">
+          <div class="mix-bar">
+            <div class="stack" style="height:30%"><div class="seg rot" style="height:100%"></div></div>
+            <div class="total">58</div>
+            <div class="ebit" style="color:var(--bad)">EBIT 0,6 %</div>
+            <div class="label">2024 faktisk</div>
+          </div>
+          <div class="mix-bar">
+            <div class="stack" style="height:48%"><div class="seg rot" style="height:81%"></div><div class="seg fors" style="height:19%"></div></div>
+            <div class="total">95</div>
+            <div class="ebit">EBIT 5,5 %</div>
+            <div class="label">2029 base</div>
+          </div>
+          <div class="mix-bar">
+            <div class="stack" style="height:64%"><div class="seg rot" style="height:81%"></div><div class="seg fors" style="height:19%"></div></div>
+            <div class="total">127</div>
+            <div class="ebit">EBIT 7,0 %</div>
+            <div class="label">2029 offensiv</div>
+          </div>
+          <div class="mix-bar">
+            <div class="stack" style="height:86%"><div class="seg rot" style="height:79%"></div><div class="seg fors" style="height:19%"></div><div class="seg epc" style="height:2%"></div></div>
+            <div class="total">172</div>
+            <div class="ebit">EBIT 8,0 %</div>
+            <div class="label">2029 bull</div>
+          </div>
+        </div>
+        <div class="mix-legend">
+          <div class="it"><span class="sw" style="background:#d29922"></span>ROT-anbud (offentlig)</div>
+          <div class="it"><span class="sw" style="background:#e85d75"></span>Forsikringsstrøm</div>
+          <div class="it"><span class="sw" style="background:var(--accent-2)"></span>EPC / energirehab</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mix-grid">
+      <div class="panel">
+        <h3 style="color:var(--hi)">2029 Base · 95 MNOK · EBIT 5,5 %</h3>
+        <div class="lead">Trondheim-konsolidering: marginløft fra 0,6 % til 5,5 % via SA-disiplin. Ingen geografisk vekst.</div>
+        <table class="mixmath">
+          <thead><tr><th>Inntektsstrøm</th><th class="num">Omsetning</th><th class="num">Margin</th><th class="num">EBIT</th></tr></thead>
+          <tbody>
+            <tr><td>ROT-anbud (offentlig)</td><td class="num">77</td><td class="num">5,5 %</td><td class="num">4,2</td></tr>
+            <tr><td>Forsikringsstrøm</td><td class="num">18</td><td class="num">6,5 %</td><td class="num">1,2</td></tr>
+            <tr class="total"><td>Konsolidert</td><td class="num">95</td><td class="num">5,7 %</td><td class="num">5,4</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel" style="border-top:3px solid var(--accent)">
+        <h3 style="color:var(--accent)">2029 Offensiv · 127 MNOK · EBIT 7,0 %</h3>
+        <div class="lead">Trøndelag-bredde: Innherred + Fosen + Stjørdal. Marginstabilisert via volumdrag og bedre rammeavtaler.</div>
+        <table class="mixmath">
+          <thead><tr><th>Inntektsstrøm</th><th class="num">Omsetning</th><th class="num">Margin</th><th class="num">EBIT</th></tr></thead>
+          <tbody>
+            <tr><td>ROT-anbud (offentlig)</td><td class="num">102</td><td class="num">7,0 %</td><td class="num">7,1</td></tr>
+            <tr><td>Forsikringsstrøm</td><td class="num">25</td><td class="num">6,5 %</td><td class="num">1,6</td></tr>
+            <tr class="total"><td>Konsolidert</td><td class="num">127</td><td class="num">6,9 %</td><td class="num">8,7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel" style="border-top:3px solid var(--good)">
+        <h3 style="color:var(--good)">2029 Bull · 172 MNOK · EBIT 8,0 %</h3>
+        <div class="lead">Hele Midt-Norge inkl. Møre-grenseland. EPC-divisjon etablert. Skalafordeler trekker margin opp.</div>
+        <table class="mixmath">
+          <thead><tr><th>Inntektsstrøm</th><th class="num">Omsetning</th><th class="num">Margin</th><th class="num">EBIT</th></tr></thead>
+          <tbody>
+            <tr><td>ROT-anbud (offentlig)</td><td class="num">132</td><td class="num">8,0 %</td><td class="num">10,6</td></tr>
+            <tr><td>Forsikringsstrøm</td><td class="num">35</td><td class="num">7,0 %</td><td class="num">2,5</td></tr>
+            <tr><td>EPC / energirehab</td><td class="num">5</td><td class="num">12,0 %</td><td class="num">0,6</td></tr>
+            <tr class="total"><td>Konsolidert</td><td class="num">172</td><td class="num">7,9 %</td><td class="num">13,7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel" style="border-top:3px solid var(--accent)">
+        <h3>Trondheim vs Bodø — strategisk forskjell</h3>
+        <ul style="font-size:12.5px;line-height:1.65;padding-left:20px">
+          <li><b>Trondheim spiller catch-up på margin.</b> Hovedfokus 2026–2027 er konsolidering — løfte fra 0,6 % til 5,5 %+ stabilt. Vekst er sekundært.</li>
+          <li><b>Bodø spiller catch-up på posisjonering.</b> Hovedfokus er geografisk og strukturell — marginen er allerede god.</li>
+          <li><b>Forsikringsstrøm er proporsjonalt viktigere for Trondheim.</b> 18–35 MNOK forsikring gir ~19 % volumandel, vesentlig høyere enn i Bodø.</li>
+          <li><b>EPC-pilot bør startes i Bodø først, rulles til Trondheim år 2.</b> Kompetansen kan deles, men Bodø har lokal-marked-fit raskere (Helse Nord, Forsvarsbygg).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PowerOffice integrasjonsstatus -->
+  <div class="section">
+    <h2 class="section-title">PowerOffice Go-integrasjon — datatilkobling Trondheim</h2>
+    <div class="panel">
+      <h3>Live datatilkobling — felles arkitektur med Bodø</h3>
+      <div class="lead">
+        Trondheim-enheten kjører samme PowerOffice Go-tenant som Bodø, men på egen klient. Pipeline-portalen segmenterer per selskap så DL Berggren ser bare Trondheim-data, mens SA-COO ser konsolidert.
+      </div>
+      <div class="endpoints">
+        <div class="ep"><code>GET /projects</code><h5>Prosjekter</h5><p>12 aktive prosjekter pr 30.04. Filtrert på selskap-dimensjon = Braa og Sørvåg.</p><div class="sync">↻ hver 30. min</div></div>
+        <div class="ep"><code>GET /timeentries</code><h5>Timeføring</h5><p>19 870 timer Q1 fra 32 ansatte. Direkte mot Lade/Olavshallen/havn osv.</p><div class="sync">↻ daglig 06:00</div></div>
+        <div class="ep"><code>GET /transactions</code><h5>Transaksjoner</h5><p>Driver P&amp;L og lønn-per-prosjekt. Filtrert på selskap-dimensjon.</p><div class="sync">↻ daglig 06:00</div></div>
+        <div class="ep"><code>GET /vouchers</code><h5>Bilag</h5><p>Inngående faktura per prosjekt — material- og UE-tracking.</p><div class="sync">↻ daglig 06:00</div></div>
+        <div class="ep"><code>GET /employees</code><h5>Ansatte</h5><p>32 ansatte i Trondheim-tenant. SA HR-system synker per natt.</p><div class="sync">↻ daglig 06:00</div></div>
+        <div class="ep"><code>GET /orders, /invoices</code><h5>Fakturering</h5><p>Utgående fakturering. Driver omsetnings-tracking og prognose.</p><div class="sync">↻ hver 4. time</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <b>Datakilde:</b> Eksempel-tallene i dette dashboardet er fiktive, men strukturen reflekterer faktisk integrasjonsmønster PowerOffice Go ↔ HoltePortalen ↔ pipeline-portal etter M5/M6. Resultatregnskapet er bygget etter NS 4102 hovedklasser.
+    <br><b>Merknad om balansetall:</b> Vi viser ikke konsolidert balanse her fordi den i denne typen driftsselskaper er sterkt preget av leasing-finansiering og konsernbidrag-disposisjoner. Balansen alene gir ikke et godt bilde av operativ helse — derfor fokuseres dette dashboardet på drifts-KPI-er (omsetning, margin, prosjekt-performance).
+    <br><b>Tilkoblede dashboards:</b>
+    <a href="index.html">Hovedside</a> ·
+    <a href="okonomi.html">Bodø-økonomi</a> ·
+    <a href="anbud-trondheim.html">Trondheim anbud</a> ·
+    <a href="sa-rapport.html">SA-konsernrapport</a> ·
+    <a href="implementering.html">Teknisk plan</a>
+  </div>
+
+</main>
+
+<script>
+// 12-mnd trend chart — Trondheim-tall
+(() => {
+  const data = [
+    { m: 'mai 25', oms: 4.2, ebit: 0.05 },
+    { m: 'jun 25', oms: 4.6, ebit: 0.08 },
+    { m: 'jul 25', oms: 3.8, ebit: -0.05 },
+    { m: 'aug 25', oms: 4.9, ebit: 0.12 },
+    { m: 'sep 25', oms: 5.1, ebit: 0.18 },
+    { m: 'okt 25', oms: 5.4, ebit: 0.28 },
+    { m: 'nov 25', oms: 5.2, ebit: 0.32 },
+    { m: 'des 25', oms: 4.6, ebit: 0.21 },
+    { m: 'jan 26', oms: 4.25, ebit: 0.31 },
+    { m: 'feb 26', oms: 4.58, ebit: 0.36 },
+    { m: 'mar 26', oms: 4.92, ebit: 0.44 },
+    { m: 'apr 26', oms: 4.75, ebit: 0.39 },
+  ];
+  const max = Math.max(...data.map(d => d.oms));
+  const el = document.getElementById('trendChart');
+  el.innerHTML = data.map(d => {
+    const oh = (d.oms / max) * 100;
+    const eh = (Math.abs(d.ebit) / max) * 100;
+    const cls = d.ebit >= 0 ? 'ebit-pos' : 'ebit-neg';
+    return `<div class="trend-bar">
+      <div class="v">${d.oms.toFixed(1)}</div>
+      <div class="stack" style="height:${oh}%">
+        <div class="seg oms" style="height:${oh - eh}%"></div>
+        <div class="seg ${cls}" style="height:${eh}%"></div>
+      </div>
+      <div class="lbl">${d.m}</div>
+    </div>`;
+  }).join('');
+})();
+</script>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

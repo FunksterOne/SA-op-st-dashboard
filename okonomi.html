@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Økonomi — Byggmester Fritzøe</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --panel-3: #262d38;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #4f9da6;
+    --accent-2: #66c2cc;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --pending: #a371f7;
+    --po: #ff6b35;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #2d6e76; --accent-2: #4a8a92;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35;
+    --hi: #2a6dc7; --pending: #7c5fce; --po: #d4660a;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  .theme-toggle { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 15px; display: inline-flex; align-items: center; justify-content: center }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0 }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14.5px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header.top {
+    padding: 20px 36px 16px;
+    background: var(--header-grad);
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  }
+  header.top .crumb { font-size: 12px; color: var(--muted); margin-bottom: 4px }
+  header.top .crumb a { color: var(--accent); text-decoration: none }
+  header.top h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em }
+  header.top .sub { color: var(--muted); font-size: 12px; margin-top: 4px }
+  .po-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,107,53,0.12); border: 1px solid var(--po);
+    padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .po-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); animation: pulse 2s infinite }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,185,80,0.6) }
+    50% { opacity: 0.5; box-shadow: 0 0 0 5px rgba(63,185,80,0) }
+  }
+  .toolbar {
+    padding: 12px 36px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .toolbar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px }
+  .toolbar select, .toolbar button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 6px 10px; border-radius: 4px; font: inherit; font-size: 13px;
+  }
+  .toolbar button { cursor: pointer }
+  .toolbar button.primary { background: var(--accent); border-color: var(--accent); color: #fff }
+  .toolbar .spacer { flex: 1 }
+
+  main { padding: 24px 36px 80px; max-width: 1280px; margin: 0 auto }
+  .section { margin-bottom: 22px }
+  h2.section-title {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+    font-weight: 600; margin: 0 0 10px; padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* Top KPIs */
+  .kpis-top {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  }
+  .kpi-big {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .kpi-big .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em }
+  .kpi-big .v { font-size: 24px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1.1 }
+  .kpi-big .v small { font-size: 13px; color: var(--muted); font-weight: 400 }
+  .kpi-big .d { color: var(--muted); font-size: 11px; margin-top: 4px }
+  .kpi-big .delta { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 8px; font-weight: 500; margin-left: 4px }
+  .delta.up { background: rgba(63,185,80,0.18); color: var(--good) }
+  .delta.dn { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .delta.neu { background: var(--panel-2); color: var(--muted) }
+  .kpi-big.income { border-top: 3px solid var(--good) }
+  .kpi-big.lonn { border-top: 3px solid var(--hi) }
+  .kpi-big.material { border-top: 3px solid var(--warn) }
+  .kpi-big.ebit { border-top: 3px solid var(--accent) }
+  .kpi-big.margin { border-top: 3px solid var(--pending) }
+
+  /* 12-mnd trend */
+  .trend-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px;
+  }
+  .trend-card h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600 }
+  .trend-card .lead { color: var(--muted); font-size: 12px; margin-bottom: 14px }
+  .trend-chart {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; height: 160px;
+    margin-bottom: 6px;
+  }
+  .trend-bar { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: end }
+  .trend-bar .stack {
+    width: 100%; display: flex; flex-direction: column-reverse;
+    border-radius: 3px; overflow: hidden;
+  }
+  .trend-bar .seg.oms { background: rgba(63,185,80,0.7) }
+  .trend-bar .seg.ebit-pos { background: var(--good) }
+  .trend-bar .seg.ebit-neg { background: var(--bad) }
+  .trend-bar .lbl { font-size: 9px; color: var(--muted); text-align: center; margin-top: 4px }
+  .trend-bar .v { font-size: 9px; color: var(--text); text-align: center; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-variant-numeric: tabular-nums; opacity: 0; transition: 0.15s }
+  .trend-bar:hover .v { opacity: 1 }
+  .trend-legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 8px }
+  .trend-legend .it { display: flex; gap: 6px; align-items: center }
+  .trend-legend .sw { width: 10px; height: 10px; border-radius: 2px }
+
+  /* Prosjektmatrise */
+  table.proj { width: 100%; border-collapse: collapse; font-size: 12px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  table.proj th {
+    text-align: left; padding: 10px 12px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+    white-space: nowrap;
+  }
+  table.proj th.num { text-align: right }
+  table.proj td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.proj td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.proj tbody tr:hover { background: rgba(88,166,255,0.04) }
+  table.proj tbody tr:last-child td { border-bottom: 0 }
+  .pname { font-weight: 500; font-size: 12.5px }
+  .pkunde { color: var(--muted); font-size: 10.5px; margin-top: 1px }
+  .progress-bar {
+    width: 100%; background: var(--panel-2); border-radius: 3px; height: 14px; position: relative; overflow: hidden;
+  }
+  .progress-bar .fill {
+    height: 100%; background: var(--accent);
+    border-radius: 3px;
+  }
+  .progress-bar .lbl {
+    position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+    font-size: 9.5px; text-align: center; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .marg-pill {
+    display: inline-block; padding: 2px 7px; border-radius: 8px; font-size: 11px; font-weight: 600; min-width: 50px; text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .marg-pill.up { background: rgba(63,185,80,0.18); color: var(--good) }
+  .marg-pill.flat { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .marg-pill.dn { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .badge-co { font-size: 9.5px; padding: 1.5px 6px; border-radius: 8px; font-weight: 500; margin-right: 4px }
+  .badge-co.fritzoe { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .badge-co.areal { background: rgba(63,185,80,0.18); color: var(--good) }
+  .badge-co.komb { background: rgba(79,157,166,0.18); color: var(--accent) }
+
+  /* Two-col: timeføring + lønn */
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px;
+  }
+  .panel h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 12px; margin-bottom: 14px }
+  .panel h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 12px 0 6px }
+  .stat-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12px;
+  }
+  .stat-row:last-child { border-bottom: 0 }
+  .stat-row .label { color: var(--text) }
+  .stat-row .label small { color: var(--muted); font-size: 10.5px; display: block; margin-top: 1px }
+  .stat-row .val { font-variant-numeric: tabular-nums; font-weight: 600 }
+  .bar-strip {
+    display: grid; grid-template-columns: 110px 1fr 70px; align-items: center; gap: 8px;
+    margin: 4px 0; font-size: 11.5px;
+  }
+  .bar-strip .nm { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .bar-strip .b { background: var(--panel-2); border-radius: 3px; height: 16px; position: relative; overflow: hidden }
+  .bar-strip .b .f { background: var(--hi); height: 100%; border-radius: 3px }
+  .bar-strip .b .f.green { background: var(--good) }
+  .bar-strip .b .f.warn { background: var(--warn) }
+  .bar-strip .v { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums }
+
+  /* Resultatregnskap */
+  table.pl {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  table.pl th {
+    text-align: left; padding: 9px 14px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+  }
+  table.pl th.num { text-align: right }
+  table.pl td { padding: 7px 14px; border-bottom: 1px solid var(--line) }
+  table.pl td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.pl tr.subtotal { background: var(--panel-2) }
+  table.pl tr.subtotal td { font-weight: 600; border-top: 1px solid var(--line) }
+  table.pl tr.total { background: var(--panel-3) }
+  table.pl tr.total td { font-weight: 700; border-top: 2px solid var(--accent); font-size: 13.5px }
+  table.pl td.indent { padding-left: 32px; color: var(--muted) }
+
+  /* Integrasjonsstatus */
+  .endpoints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+  .ep {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px 14px; border-left: 3px solid var(--good);
+  }
+  .ep code { font-family: 'SF Mono', Consolas, monospace; font-size: 11px; color: var(--accent-2) }
+  .ep h5 { margin: 4px 0; font-size: 12px }
+  .ep p { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
+  .ep .sync { font-size: 10px; color: var(--good); margin-top: 4px }
+
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 16px; line-height: 1.6 }
+  /* Bemanning */
+  .bem-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px }
+  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px }
+  .scen-box {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; border-top: 3px solid var(--accent);
+  }
+  .scen-box.base { border-top-color: var(--hi) }
+  .scen-box.off { border-top-color: var(--warn) }
+  .scen-box.bull { border-top-color: var(--good) }
+  .scen-box .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px }
+  .scen-box h4 { margin: 0; font-size: 13px; font-weight: 600 }
+  .scen-box .tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 10px; font-weight: 600 }
+  .scen-box.base .tag { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .scen-box.off .tag { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .scen-box.bull .tag { background: rgba(63,185,80,0.18); color: var(--good) }
+  .scen-box .target {
+    font-size: 22px; font-weight: 600; margin: 6px 0; font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .scen-box .target small { font-size: 12px; color: var(--muted); font-weight: 400 }
+  .scen-box ul { margin: 6px 0 8px; padding-left: 16px; font-size: 12px; line-height: 1.6 }
+  .scen-box .meta { font-size: 11px; color: var(--muted); padding-top: 8px; border-top: 1px dashed var(--line); margin-top: 8px }
+  .scen-box .meta b { color: var(--text); font-weight: 600 }
+  .recruit-status {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 18px; margin-top: 10px;
+  }
+  .recruit-status h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .signal {
+    display: grid; grid-template-columns: 1fr 60px 60px 60px; gap: 8px; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12px;
+  }
+  .signal:last-child { border-bottom: 0 }
+  .signal .l { color: var(--text) }
+  .signal .v { text-align: center; font-variant-numeric: tabular-nums; font-size: 11.5px; padding: 3px 6px; border-radius: 4px; font-weight: 600 }
+  .signal .v.green { background: rgba(63,185,80,0.18); color: var(--good) }
+  .signal .v.warn { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .signal .v.bad { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .signal .head { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; font-weight: 600 }
+  /* Handover-flyt */
+  .stage-flow {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: stretch;
+    margin: 14px 0 18px;
+  }
+  .stage {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px 10px; position: relative; text-align: center;
+  }
+  .stage.done { background: rgba(63,185,80,0.10); border-color: var(--good); border-top: 3px solid var(--good) }
+  .stage.now { background: rgba(210,153,34,0.12); border-color: var(--warn); border-top: 3px solid var(--warn) }
+  .stage.next { border-top: 3px solid var(--line) }
+  .stage::after {
+    content: "▶"; position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 11px; z-index: 2;
+  }
+  .stage:last-child::after { display: none }
+  .stage .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; margin-bottom: 3px }
+  .stage h5 { margin: 0 0 4px; font-size: 12px; color: var(--text); font-weight: 600 }
+  .stage p { margin: 0; font-size: 10.5px; color: var(--muted); line-height: 1.45 }
+  .stage code { font-family: 'SF Mono', Consolas, monospace; font-size: 9.5px; color: var(--accent-2); background: var(--panel); padding: 1px 4px; border-radius: 2px; display: inline-block; margin-top: 4px }
+  .stage-detail {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 8px;
+  }
+  .stage-card {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--accent);
+  }
+  .stage-card h5 { margin: 0 0 6px; font-size: 12px; color: var(--accent-2) }
+  .stage-card p { margin: 0; font-size: 11.5px; color: var(--text); line-height: 1.55 }
+  .stage-card ul { margin: 4px 0 0; padding-left: 16px; font-size: 11px; color: var(--muted); line-height: 1.55 }
+  .stage-card code { font-family: 'SF Mono', Consolas, monospace; font-size: 10px; color: var(--accent-2); background: var(--panel); padding: 1px 5px; border-radius: 2px }
+  /* HR integrasjon */
+  .hr-panels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px }
+  .hr-card {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 20px; border-top: 3px solid #a371f7;
+  }
+  .hr-card h4 { margin: 0 0 8px; font-size: 13px; font-weight: 600 }
+  .hr-card .src { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px }
+  .hr-track { font-size: 12px; line-height: 1.6 }
+  .hr-track .row { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); align-items: center }
+  .hr-track .row:last-child { border-bottom: 0 }
+  .hr-track .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); margin: 0 auto }
+  .hr-track .dot.done { background: var(--good) }
+  .hr-track .dot.now { background: var(--warn) }
+  .hr-track .dot.next { background: var(--panel-3); border: 1px solid var(--muted) }
+  .hr-track .row .l { color: var(--text); font-size: 12px }
+  .hr-track .row .l small { color: var(--muted); font-size: 10.5px; display: block; margin-top: 1px }
+  .hr-track .row .when { font-size: 10px; color: var(--muted); white-space: nowrap }
+  /* Margin-mix */
+  .mix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .mix-bar-chart {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px;
+  }
+  .mix-bar-chart h4 { margin: 0 0 10px; font-size: 13px; font-weight: 600 }
+  .mix-bars {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: end;
+    height: 220px; margin: 14px 0 4px;
+  }
+  .mix-bar {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .mix-bar .stack {
+    width: 70%; display: flex; flex-direction: column-reverse; border-radius: 4px;
+    overflow: hidden; position: relative;
+  }
+  .mix-bar .seg.rot { background: linear-gradient(180deg, #5db5bc, #2d6e76) }
+  .mix-bar .seg.fors { background: repeating-linear-gradient(45deg, #e85d75, #e85d75 4px, #c44558 4px, #c44558 8px) }
+  .mix-bar .seg.epc { background: linear-gradient(180deg, #66c2cc, #4f9da6) }
+  .mix-bar .seg.tilbud { background: linear-gradient(180deg, #b89067, #8a6740) }
+  .mix-bar .total {
+    font-size: 14px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums;
+  }
+  .mix-bar .ebit { font-size: 11px; color: var(--good); font-weight: 600; margin-top: 2px }
+  .mix-bar .label {
+    font-size: 11px; color: var(--muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .mix-legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 16px; flex-wrap: wrap }
+  .mix-legend .it { display: flex; align-items: center; gap: 6px }
+  .mix-legend .sw { width: 12px; height: 12px; border-radius: 2px }
+  table.mixmath {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    overflow: hidden;
+  }
+  table.mixmath th {
+    background: var(--panel-3); padding: 8px 12px; text-align: left;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700;
+  }
+  table.mixmath th.num, table.mixmath td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.mixmath td { padding: 7px 12px; border-bottom: 1px solid var(--line) }
+  table.mixmath tr.rot td:first-child::before { content: "■ "; color: #2d6e76 }
+  table.mixmath tr.fors td:first-child::before { content: "▦ "; color: #e85d75 }
+  table.mixmath tr.epc td:first-child::before { content: "● "; color: var(--accent) }
+  table.mixmath tr.tilbud td:first-child::before { content: "▲ "; color: #b89067 }
+  table.mixmath tr.total td { background: var(--panel-3); font-weight: 700; border-top: 2px solid var(--accent); border-bottom: 0 }
+  table.mixmath tr.total td:first-child::before { content: "" }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="okonomi"></div>
+
+<header class="top">
+  <div>
+    <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a> · <a href="okonomi-trondheim.html">Braa og Sørvåg →</a></div>
+    <h1>Økonomi — Byggmester Fritzøe</h1>
+    <div class="sub">DL Brynjar Storvik · Påls vei 1B, 8008 Bodø · 59 ansatte (Fritzøe + Areal) · regnskap fra PowerOffice Go</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="po-badge"><span class="dot"></span>PowerOffice Go · sist synket 2026-04-30 06:14</div>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <label>Periode</label>
+  <select id="period">
+    <option value="hittil2026" selected>Hittil 2026 (Jan–Apr)</option>
+    <option value="q12026">Q1 2026</option>
+    <option value="apr2026">April 2026</option>
+    <option value="mnd-12">Siste 12 mnd</option>
+    <option value="2025">Hele 2025</option>
+  </select>
+  <label>Selskap</label>
+  <select id="company">
+    <option value="konsern" selected>Konsern (Byggmester Fritzøe)</option>
+    <option value="fritzoe">Byggmester Fritzøe AS</option>
+    <option value="areal">Areal Byggservice AS</option>
+  </select>
+  <div class="spacer"></div>
+  <button>📤 Eksporter (HTML)</button>
+  <button>📊 Send til ServiceAlliansen</button>
+  <button class="primary">↻ Oppdater fra PowerOffice</button>
+</div>
+
+<main>
+
+  <!-- Top KPIs -->
+  <div class="section">
+    <h2 class="section-title">Eksekutiv oversikt — hittil 2026 (Jan–Apr)</h2>
+    <div class="kpis-top">
+      <div class="kpi-big income">
+        <div class="l">Omsetning</div>
+        <div class="v">38,2 <small>MNOK</small></div>
+        <div class="d">Fakturert + opptjent <span class="delta up">+12 % vs 2025</span></div>
+      </div>
+      <div class="kpi-big lonn">
+        <div class="l">Lønnskost</div>
+        <div class="v">22,4 <small>MNOK</small></div>
+        <div class="d">59 ansatte · 58,6 % av omsetning</div>
+      </div>
+      <div class="kpi-big material">
+        <div class="l">Materialkost</div>
+        <div class="v">8,9 <small>MNOK</small></div>
+        <div class="d">23,3 % av omsetning <span class="delta dn">+1,2 %p</span></div>
+      </div>
+      <div class="kpi-big ebit">
+        <div class="l">Driftsresultat (EBIT)</div>
+        <div class="v">3,1 <small>MNOK</small></div>
+        <div class="d">Hittil i år <span class="delta up">+0,4 MNOK vs plan</span></div>
+      </div>
+      <div class="kpi-big margin">
+        <div class="l">EBIT-margin</div>
+        <div class="v">8,1 <small>%</small></div>
+        <div class="d">Plan 7,5 % · 2024 helår 7,5 %</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12 mnd trend -->
+  <div class="section">
+    <h2 class="section-title">Periode-trend — siste 12 måneder</h2>
+    <div class="trend-card">
+      <h3>Omsetning og driftsresultat per måned</h3>
+      <div class="lead">Lyse stolper er omsetning (skala til høyre); mørkegrønne er driftsresultat. Klikk en måned for å bore ned (kommer i M6).</div>
+      <div class="trend-chart" id="trendChart"></div>
+      <div class="trend-legend">
+        <div class="it"><span class="sw" style="background:rgba(63,185,80,0.7)"></span>Omsetning (MNOK)</div>
+        <div class="it"><span class="sw" style="background:var(--good)"></span>Driftsresultat (MNOK)</div>
+        <div class="it"><span class="sw" style="background:var(--bad)"></span>Negativt resultat</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prosjektmatrise -->
+  <div class="section">
+    <h2 class="section-title">Aktive prosjekter — plan vs faktisk (live fra PowerOffice Go)</h2>
+    <table class="proj">
+      <thead>
+        <tr>
+          <th>Prosjekt / kunde</th>
+          <th>Selskap</th>
+          <th class="num">Plan timer</th>
+          <th class="num">Faktisk timer</th>
+          <th class="num">Avvik</th>
+          <th class="num">Tilbudssum</th>
+          <th class="num">Faktisk kost</th>
+          <th class="num">Margin</th>
+          <th>Fremdrift</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="pname">Saltstraumen skole — dør og vindu</div><div class="pkunde">Bodø kommune · AN-2025-014</div></td>
+          <td><span class="badge-co komb">Komb</span></td>
+          <td class="num">1 280</td>
+          <td class="num">1 198</td>
+          <td class="num"><span class="marg-pill up">−6,4 %</span></td>
+          <td class="num">6 800 000</td>
+          <td class="num">5 010 000</td>
+          <td class="num"><span class="marg-pill up">+9,2 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:85%;background:var(--good)"></div><span class="lbl">85 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Hunstad ungdomsskole — garderoberehab</div><div class="pkunde">Bodø kommune · AN-2025-017</div></td>
+          <td><span class="badge-co komb">Komb</span></td>
+          <td class="num">740</td>
+          <td class="num">812</td>
+          <td class="num"><span class="marg-pill flat">+9,7 %</span></td>
+          <td class="num">3 800 000</td>
+          <td class="num">3 250 000</td>
+          <td class="num"><span class="marg-pill flat">+5,8 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:95%;background:var(--good)"></div><span class="lbl">95 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Aspåsen skole — tak og taksrenner</div><div class="pkunde">Bodø kommune · AN-2025-018</div></td>
+          <td><span class="badge-co fritzoe">Fritzøe</span></td>
+          <td class="num">820</td>
+          <td class="num">765</td>
+          <td class="num"><span class="marg-pill up">−6,7 %</span></td>
+          <td class="num">4 200 000</td>
+          <td class="num">3 350 000</td>
+          <td class="num"><span class="marg-pill up">+11,4 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:100%;background:var(--good)"></div><span class="lbl">Ferdig</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Forsvarsbygg Bodøsjøen — kontorrehab</div><div class="pkunde">Forsvarsbygg · AN-2025-023</div></td>
+          <td><span class="badge-co komb">Komb</span></td>
+          <td class="num">980</td>
+          <td class="num">312</td>
+          <td class="num"><span class="marg-pill up">−68 %</span></td>
+          <td class="num">5 400 000</td>
+          <td class="num">1 730 000</td>
+          <td class="num"><span class="marg-pill flat">+7,2 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:32%;background:var(--accent)"></div><span class="lbl">32 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Mørkved barnehage — vinduer</div><div class="pkunde">Bodø kommune · AN-2025-022</div></td>
+          <td><span class="badge-co komb">Komb</span></td>
+          <td class="num">340</td>
+          <td class="num">295</td>
+          <td class="num"><span class="marg-pill up">−13 %</span></td>
+          <td class="num">1 900 000</td>
+          <td class="num">1 290 000</td>
+          <td class="num"><span class="marg-pill up">+10,8 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:78%;background:var(--good)"></div><span class="lbl">78 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Saltstraumen brygge — kafé-rehab</div><div class="pkunde">Bodø kommune · AN-2025-028</div></td>
+          <td><span class="badge-co komb">Komb</span></td>
+          <td class="num">520</td>
+          <td class="num">498</td>
+          <td class="num"><span class="marg-pill up">−4,2 %</span></td>
+          <td class="num">2 800 000</td>
+          <td class="num">2 220 000</td>
+          <td class="num"><span class="marg-pill up">+8,4 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:92%;background:var(--good)"></div><span class="lbl">92 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Nordlandssykehuset — personalkantine</div><div class="pkunde">Helse Nord · AN-2026-001</div></td>
+          <td><span class="badge-co komb">Komb</span></td>
+          <td class="num">580</td>
+          <td class="num">241</td>
+          <td class="num"><span class="marg-pill up">−58 %</span></td>
+          <td class="num">3 200 000</td>
+          <td class="num">1 320 000</td>
+          <td class="num"><span class="marg-pill flat">+6,1 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:42%;background:var(--accent)"></div><span class="lbl">42 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Bankgata skole — maling fløy A</div><div class="pkunde">Bodø kommune · AN-2026-002</div></td>
+          <td><span class="badge-co areal">Areal</span></td>
+          <td class="num">175</td>
+          <td class="num">163</td>
+          <td class="num"><span class="marg-pill up">−6,9 %</span></td>
+          <td class="num">950 000</td>
+          <td class="num">782 000</td>
+          <td class="num"><span class="marg-pill up">+7,9 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:100%;background:var(--good)"></div><span class="lbl">Ferdig</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Hunstad bibliotek — innvendig</div><div class="pkunde">Bodø kommune · AN-2026-004</div></td>
+          <td><span class="badge-co areal">Areal</span></td>
+          <td class="num">210</td>
+          <td class="num">228</td>
+          <td class="num"><span class="marg-pill flat">+8,6 %</span></td>
+          <td class="num">1 100 000</td>
+          <td class="num">964 000</td>
+          <td class="num"><span class="marg-pill flat">+5,1 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:97%;background:var(--good)"></div><span class="lbl">97 %</span></div></td>
+        </tr>
+        <tr style="background:rgba(248,81,73,0.05)">
+          <td><div class="pname">Skarmoen barnehage — byggeteknisk</div><div class="pkunde">Bodø kommune · AN-2026-005 ⚠</div></td>
+          <td><span class="badge-co fritzoe">Fritzøe</span></td>
+          <td class="num">920</td>
+          <td class="num">298</td>
+          <td class="num"><span class="marg-pill dn">+18 %</span></td>
+          <td class="num">4 800 000</td>
+          <td class="num">1 590 000</td>
+          <td class="num"><span class="marg-pill dn">+0,8 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:25%;background:var(--bad)"></div><span class="lbl">25 % · varsel</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Sølvsuper helsesenter — tak</div><div class="pkunde">Bodø kommune · AN-2026-007</div></td>
+          <td><span class="badge-co fritzoe">Fritzøe</span></td>
+          <td class="num">490</td>
+          <td class="num">82</td>
+          <td class="num"><span class="marg-pill up">−83 %</span></td>
+          <td class="num">2 600 000</td>
+          <td class="num">395 000</td>
+          <td class="num"><span class="marg-pill flat">+8,5 %*</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:15%;background:var(--accent)"></div><span class="lbl">15 %</span></div></td>
+        </tr>
+        <tr>
+          <td><div class="pname">Bodø sykehjem — korridormaling</div><div class="pkunde">Bodø kommune · AN-2026-008</div></td>
+          <td><span class="badge-co areal">Areal</span></td>
+          <td class="num">130</td>
+          <td class="num">98</td>
+          <td class="num"><span class="marg-pill up">−25 %</span></td>
+          <td class="num">700 000</td>
+          <td class="num">512 000</td>
+          <td class="num"><span class="marg-pill up">+12,6 %</span></td>
+          <td><div class="progress-bar"><div class="fill" style="width:74%;background:var(--good)"></div><span class="lbl">74 %</span></div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="footnote">
+      <b>Avvik</b> viser faktisk timer ift. plan (negativt = under plan). <b>Margin</b> er estimert sluttmargin (ferdige prosjekter) eller projisert basert på fremdrift (* markerer projeksjon). <b>Skarmoen barnehage</b> har rødt avvik — daglig leder bør ta dialog med byggeleder denne uken.
+    </div>
+  </div>
+
+  <!-- Timeføring + Lønn -->
+  <div class="section">
+    <h2 class="section-title">Timeføring og lønn — hittil 2026</h2>
+    <div class="twocol">
+
+      <div class="panel">
+        <h3>Timeføring</h3>
+        <div class="lead">Live fra PowerOffice Go endepunkt <code>/timeentries</code>. Kategorisert etter prosjekt og avdeling.</div>
+
+        <div class="stat-row">
+          <div class="label">Total timer registrert <small>59 ansatte · jan–apr</small></div>
+          <div class="val">38 420 t</div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Fakturerbart <small>direkte mot prosjekt</small></div>
+          <div class="val">31 690 t · 82,5 %</div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Internt / opplæring / HMS</div>
+          <div class="val">3 870 t · 10,1 %</div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Sykefravær / permisjon</div>
+          <div class="val">2 860 t · 7,4 %</div>
+        </div>
+
+        <h4>Timer per prosjekt — topp 6</h4>
+        <div class="bar-strip"><div class="nm">Saltstraumen skole</div><div class="b"><div class="f green" style="width:60%"></div></div><div class="v">1 198 t</div></div>
+        <div class="bar-strip"><div class="nm">Forsvarsbygg Bodøsjøen</div><div class="b"><div class="f green" style="width:55%"></div></div><div class="v">312 t</div></div>
+        <div class="bar-strip"><div class="nm">Hunstad ungdomsskole</div><div class="b"><div class="f green" style="width:48%"></div></div><div class="v">812 t</div></div>
+        <div class="bar-strip"><div class="nm">Aspåsen skole tak</div><div class="b"><div class="f green" style="width:45%"></div></div><div class="v">765 t</div></div>
+        <div class="bar-strip"><div class="nm">Saltstraumen brygge kafé</div><div class="b"><div class="f green" style="width:30%"></div></div><div class="v">498 t</div></div>
+        <div class="bar-strip"><div class="nm">Skarmoen barnehage</div><div class="b"><div class="f warn" style="width:18%"></div></div><div class="v">298 t ⚠</div></div>
+
+        <h4>Per selskap</h4>
+        <div class="bar-strip"><div class="nm">Fritzøe (31 ansatte)</div><div class="b"><div class="f" style="width:65%"></div></div><div class="v">21 850 t</div></div>
+        <div class="bar-strip"><div class="nm">Areal (28 ansatte)</div><div class="b"><div class="f" style="width:50%"></div></div><div class="v">16 570 t</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Lønn per prosjekt og samlet</h3>
+        <div class="lead">PowerOffice Go-endepunkt <code>/transactions</code> filtrert på lønnskonti (5000–5999) med prosjekt-dimensjon.</div>
+
+        <div class="stat-row">
+          <div class="label">Total lønnskost <small>inkl. AGA, OTP, feriepenger</small></div>
+          <div class="val">22,4 MNOK</div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Lønn / omsetning</div>
+          <div class="val">58,6 %</div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Prosjekt-tildelt lønn</div>
+          <div class="val">18,5 MNOK · 82,4 %</div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Indirekte (admin, opplæring)</div>
+          <div class="val">3,9 MNOK · 17,6 %</div>
+        </div>
+
+        <h4>Lønn per prosjekt — topp 6</h4>
+        <div class="bar-strip"><div class="nm">Saltstraumen skole</div><div class="b"><div class="f" style="width:65%"></div></div><div class="v">760 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Hunstad ungdomsskole</div><div class="b"><div class="f" style="width:48%"></div></div><div class="v">555 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Aspåsen skole tak</div><div class="b"><div class="f" style="width:46%"></div></div><div class="v">525 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Forsvarsbygg Bodøsjøen</div><div class="b"><div class="f" style="width:30%"></div></div><div class="v">340 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Saltstraumen brygge kafé</div><div class="b"><div class="f" style="width:28%"></div></div><div class="v">325 kNOK</div></div>
+        <div class="bar-strip"><div class="nm">Hunstad bibliotek</div><div class="b"><div class="f" style="width:14%"></div></div><div class="v">160 kNOK</div></div>
+
+        <h4>Snitt-tall</h4>
+        <div class="stat-row"><div class="label">Snitt timepris (lønn)</div><div class="val">583 kr/t</div></div>
+        <div class="stat-row"><div class="label">Snitt månedslønn (inkl. sosiale)</div><div class="val">95,2 kNOK</div></div>
+        <div class="stat-row"><div class="label">Fakturerbar timepris (snitt)</div><div class="val">1 205 kr/t</div></div>
+        <div class="stat-row"><div class="label">Lønnsdekningsgrad <small>fakt.timer × snitt-fakturapris ÷ lønn</small></div><div class="val">170 %</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Resultatregnskap -->
+  <div class="section">
+    <h2 class="section-title">Resultatregnskap — hittil 2026 (akkumulert per måned)</h2>
+    <table class="pl">
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th class="num">Jan</th>
+          <th class="num">Feb</th>
+          <th class="num">Mar</th>
+          <th class="num">Apr</th>
+          <th class="num">Hittil</th>
+          <th class="num">% oms</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Driftsinntekter</td><td class="num">9 050</td><td class="num">9 480</td><td class="num">10 220</td><td class="num">9 460</td><td class="num">38 210</td><td class="num">100 %</td></tr>
+        <tr class="subtotal"><td>Driftsinntekter sum</td><td class="num">9 050</td><td class="num">9 480</td><td class="num">10 220</td><td class="num">9 460</td><td class="num">38 210</td><td class="num">100 %</td></tr>
+
+        <tr><td>Varekostnad / materialer</td><td class="num">−2 030</td><td class="num">−2 240</td><td class="num">−2 410</td><td class="num">−2 220</td><td class="num">−8 900</td><td class="num">−23,3 %</td></tr>
+        <tr><td>Underentreprenører</td><td class="num">−460</td><td class="num">−480</td><td class="num">−530</td><td class="num">−520</td><td class="num">−1 990</td><td class="num">−5,2 %</td></tr>
+        <tr><td>Lønn og sosiale kost</td><td class="num">−5 240</td><td class="num">−5 480</td><td class="num">−5 920</td><td class="num">−5 760</td><td class="num">−22 400</td><td class="num">−58,6 %</td></tr>
+        <tr><td class="indent">— direkte prosjekt</td><td class="num">−4 320</td><td class="num">−4 510</td><td class="num">−4 880</td><td class="num">−4 740</td><td class="num">−18 450</td><td class="num">−48,3 %</td></tr>
+        <tr><td class="indent">— indirekte / admin</td><td class="num">−920</td><td class="num">−970</td><td class="num">−1 040</td><td class="num">−1 020</td><td class="num">−3 950</td><td class="num">−10,3 %</td></tr>
+        <tr><td>Andre driftskostnader</td><td class="num">−490</td><td class="num">−490</td><td class="num">−500</td><td class="num">−490</td><td class="num">−1 970</td><td class="num">−5,2 %</td></tr>
+
+        <tr class="subtotal"><td>Driftskostnader sum</td><td class="num">−8 220</td><td class="num">−8 690</td><td class="num">−9 360</td><td class="num">−8 990</td><td class="num">−35 260</td><td class="num">−92,3 %</td></tr>
+
+        <tr class="total"><td>Driftsresultat (EBIT)</td><td class="num">830</td><td class="num">790</td><td class="num">860</td><td class="num">470</td><td class="num">2 950</td><td class="num">7,7 %</td></tr>
+
+        <tr><td style="color:var(--muted);font-style:italic">Driftsmargin %</td><td class="num">9,2 %</td><td class="num">8,3 %</td><td class="num">8,4 %</td><td class="num">5,0 %</td><td class="num">7,7 %</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <div class="footnote">
+      Tall i kNOK. Hentes daglig fra PowerOffice Go via <code>/transactions</code>-endepunktet, gruppert på kontoklasse 3xxx (inntekt), 4xxx (vare), 5xxx (lønn), 6xxx-7xxx (drift).
+      <b>April-margin (5,0 %)</b> er svakere enn snitt — drevet av Skarmoen-prosjektet med over-forbruk timer. Krever oppfølging.
+    </div>
+  </div>
+
+  <!-- Handover og pågående prosjekt-monitor -->
+  <div class="section">
+    <h2 class="section-title">Handover — fra vunnet anbud til prosjekt i drift</h2>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Lifecycle for et anbud — automatisert flyt mot PowerOffice Go</h3>
+      <div class="lead">
+        Når et anbud vinnes, skal det ikke bli «liggende» i pipeline. Det skal automatisk flyte gjennom 7 stadier som hver er knyttet til konkrete PowerOffice Go-API-kall. Stadie 1–3 er handover (oppstart), 4–6 er produksjon (live margin-overvåkning), 7 er lukking. Hvert steg utløser standardiserte handlinger uten manuell innlegging.
+      </div>
+
+      <div class="stage-flow">
+        <div class="stage done">
+          <div class="lbl">Stadie 1</div>
+          <h5>Vunnet</h5>
+          <p>Pipeline → status «Vunnet»</p>
+          <code>POST /projects</code>
+        </div>
+        <div class="stage done">
+          <div class="lbl">Stadie 2</div>
+          <h5>Prosjekt opprettet</h5>
+          <p>PowerOffice prosjekt med kunde, tilbudssum, plan</p>
+          <code>POST /budgets</code>
+        </div>
+        <div class="stage now">
+          <div class="lbl">Stadie 3</div>
+          <h5>Ressursallokert</h5>
+          <p>Byggeleder + crew tildelt</p>
+          <code>PATCH /projects</code>
+        </div>
+        <div class="stage next">
+          <div class="lbl">Stadie 4</div>
+          <h5>Materialbestilling</h5>
+          <p>UE og leverandør-PO opprettet</p>
+          <code>POST /vouchers</code>
+        </div>
+        <div class="stage next">
+          <div class="lbl">Stadie 5</div>
+          <h5>I produksjon</h5>
+          <p>Timer registreres, kost akkumuleres</p>
+          <code>GET /timeentries</code>
+        </div>
+        <div class="stage next">
+          <div class="lbl">Stadie 6</div>
+          <h5>Fakturering</h5>
+          <p>Delfaktura ved milestones</p>
+          <code>POST /invoices</code>
+        </div>
+        <div class="stage next">
+          <div class="lbl">Stadie 7</div>
+          <h5>Lukket</h5>
+          <p>Sluttoppgjør + læring</p>
+          <code>PATCH /projects · status</code>
+        </div>
+      </div>
+
+      <div class="stage-detail">
+        <div class="stage-card">
+          <h5>Stadie 1–3 · Handover (auto, &lt;5 min etter vunnet anbud)</h5>
+          <p>Når DL setter status til «Vunnet» i pipelinen, trigges automatisk:</p>
+          <ul>
+            <li><code>POST /projects</code> til PowerOffice — oppretter prosjekt med kunde, tilbudssum, plan timer, prosjekt-ansvarlig</li>
+            <li><code>POST /budgets</code> — flytter SmartKalk-kalkylen som planbudsjett (timer per fag, materialkost, andre kost)</li>
+            <li><code>PATCH /projects</code> — DL eller byggeleder velger crew fra tilgjengelige ansatte (vist i UI med kapasitet)</li>
+            <li>Notifikasjon til byggeleder og crew via Teams</li>
+            <li>Prosjekt-ID returneres og lagres i pipeline-oppføringen</li>
+          </ul>
+        </div>
+        <div class="stage-card">
+          <h5>Stadie 4–6 · Pågående produksjon (kontinuerlig sync)</h5>
+          <p>I drift hentes data automatisk hver 30. minutt:</p>
+          <ul>
+            <li><code>GET /timeentries</code> — alle timer registrert mot prosjektet siden forrige sync</li>
+            <li><code>GET /vouchers</code> — leverandørfakturaer og UE-fakturaer per prosjekt</li>
+            <li><code>GET /transactions</code> — bokførte direkte kost</li>
+            <li>Beregner faktisk kost vs plan, fremdrift, projisert margin</li>
+            <li>Marginvarsel ved &gt;5 % avvik trigges til DL</li>
+            <li><code>POST /invoices</code> ved milestone — utløser delfaktura med dokumentasjon</li>
+          </ul>
+        </div>
+        <div class="stage-card">
+          <h5>Stadie 7 · Lukking og læring</h5>
+          <p>Når prosjekt er ferdig og siste faktura sendt:</p>
+          <ul>
+            <li><code>PATCH /projects</code> — status «Lukket», sluttdato, faktisk margin lagres</li>
+            <li>Sluttkalkyle i SmartKalk oppdateres med faktiske enhetstider</li>
+            <li>Lærdomslogg automatisk: hva tok lenger tid enn antatt, hvilke materialvalg slo til</li>
+            <li>Data inn i historisk margin-database for benchmarking ved nye tilbud</li>
+          </ul>
+        </div>
+        <div class="stage-card">
+          <h5>Hva DL må gjøre manuelt (5–10 min per nytt prosjekt)</h5>
+          <p>Selv om mye er automatisk, krever handover noen menneskelige beslutninger:</p>
+          <ul>
+            <li>Bekrefte/justere automatisk crew-forslag (UI viser kapasitet og kompetansematch)</li>
+            <li>Sette kritiske milestones som trigger faktura</li>
+            <li>Avklare med kunde om kontaktperson og rapporteringsfrekvens</li>
+            <li>Risiko-flagge prosjekt hvis det er spesielle forhold (vintervær, krevende kunde, knapp tidsplan)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footnote" style="margin-top:14px">
+        <b>Tidsbesparelse:</b> Manuell handover (uten integrasjon) tar typisk 60–90 min per prosjekt — DL eller adm må opprette i PowerOffice, kopiere kalkyle, sende info til byggeleder, etc. Med integrasjon: 5–10 min for de menneskelige beslutningene. På 50–60 vunne prosjekter i året = <b>~50–80 timer frigjort</b>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Bemanning, lønn og rekruttering -->
+  <div class="section">
+    <h2 class="section-title">Bemanning, lønn og rekrutteringsplan</h2>
+
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Nåværende bemanning og lønnsmasse</h3>
+      <div class="lead">Henter live fra PowerOffice Go endepunktene <code>/employees</code> + lønnskonti. Snitt-lønn inkluderer arbeidsgiveravgift (14,1 %), OTP, feriepenger og forsikringer — det reelle lønnsbidraget per ansatt.</div>
+
+      <table class="proj">
+        <thead>
+          <tr>
+            <th>Stillingskategori</th>
+            <th class="num">Fritzøe</th>
+            <th class="num">Areal</th>
+            <th class="num">Totalt</th>
+            <th class="num">Snitt-lønn</th>
+            <th class="num">Total lønnsmasse</th>
+            <th>Kommentar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Tømrer / snekker (faglært)</td><td class="num">18</td><td class="num">14</td><td class="num">32</td><td class="num">640 kNOK</td><td class="num">20,5 MNOK</td><td>Kjernekompetanse · høy etterspørsel i Bodø-marked</td></tr>
+          <tr><td>Maler (faglært)</td><td class="num">0</td><td class="num">11</td><td class="num">11</td><td class="num">620 kNOK</td><td class="num">6,8 MNOK</td><td>Kun Areal — strategisk vekst-segment</td></tr>
+          <tr><td>Murer / grunn / betong</td><td class="num">5</td><td class="num">0</td><td class="num">5</td><td class="num">660 kNOK</td><td class="num">3,3 MNOK</td><td>Knapp ressurs nasjonalt</td></tr>
+          <tr><td>Prosjektleder / byggeleder</td><td class="num">4</td><td class="num">2</td><td class="num">6</td><td class="num">850 kNOK</td><td class="num">5,1 MNOK</td><td>Kapasitetstak ved vekst</td></tr>
+          <tr><td>Kalkulator</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">780 kNOK</td><td class="num">0,8 MNOK</td><td><b>Flaskehals</b> — én person på 117 MNOK omsetning</td></tr>
+          <tr><td>Adm / regnskap / tilbud</td><td class="num">2</td><td class="num">1</td><td class="num">3</td><td class="num">600 kNOK</td><td class="num">1,8 MNOK</td><td>Felles tjenester via SA-konsern på sikt</td></tr>
+          <tr><td>Daglig leder</td><td class="num">1*</td><td class="num">—</td><td class="num">1</td><td class="num">1 200 kNOK</td><td class="num">1,2 MNOK</td><td>Felles for begge selskap (Brynjar Storvik)</td></tr>
+          <tr style="background:var(--panel-2);font-weight:600">
+            <td>Konsolidert</td>
+            <td class="num">31</td>
+            <td class="num">28</td>
+            <td class="num">59</td>
+            <td class="num">—</td>
+            <td class="num">39,5 MNOK*</td>
+            <td>* Helårsbasis · YTD 22,4 MNOK</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footnote" style="margin-top:8px">
+        <b>Strukturelt funn:</b> Én kalkulator på 117 MNOK omsetning er en <b>kritisk flaskehals</b> ved vekst. Bull case (280 MNOK) krever 3–4 kalkulatorer. Dette er en av rekrutteringene som må prioriteres uavhengig av valgt scenario.
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Rekrutteringsplan per scenario — fag-fordeling og tempo</h3>
+      <div class="lead">
+        Oversettelse fra strategiske ambisjoner til <i>konkret rekrutteringsbehov</i>. Tallene er netto — eksisterende ansatte beholdes, og det vi ser er ny kapasitet som må komme på plass.
+      </div>
+
+      <div class="scenario-grid">
+        <div class="scen-box base">
+          <div class="head"><h4>Base case</h4><span class="tag">Forsiktig</span></div>
+          <div class="target">+8 <small>nye over 3 år</small></div>
+          <ul>
+            <li>3 tømrere</li>
+            <li>2 malere</li>
+            <li>1 prosjektleder</li>
+            <li>1 kalkulator (kritisk)</li>
+            <li>1 lærling</li>
+          </ul>
+          <div class="meta">
+            <b>Tempo:</b> 2–3/år · <b>Kostnad:</b> ~ 1,3 MNOK rekruttering<br>
+            <b>Risiko:</b> Lav · realistisk i Bodø-marked
+          </div>
+        </div>
+
+        <div class="scen-box off">
+          <div class="head"><h4>Offensiv</h4><span class="tag">Regional</span></div>
+          <div class="target">+30 <small>nye over 3 år</small></div>
+          <ul>
+            <li>12 tømrere</li>
+            <li>6 malere</li>
+            <li>4 prosjektledere</li>
+            <li>2 kalkulatorer</li>
+            <li>3 byggeledere (Salten-stedlige)</li>
+            <li>3 lærlinger</li>
+          </ul>
+          <div class="meta">
+            <b>Tempo:</b> 10/år · <b>Kostnad:</b> ~ 5,2 MNOK rekruttering<br>
+            <b>Risiko:</b> Middels · krever aktiv rekruttering ut av Bodø
+          </div>
+        </div>
+
+        <div class="scen-box bull">
+          <div class="head"><h4>Bull case</h4><span class="tag">Aggressiv</span></div>
+          <div class="target">+80 <small>nye over 3 år</small></div>
+          <ul>
+            <li>32 tømrere</li>
+            <li>16 malere</li>
+            <li>8 prosjektledere</li>
+            <li>4 kalkulatorer</li>
+            <li>10 byggeledere (Salten/Helgeland/Lofoten)</li>
+            <li>10 lærlinger</li>
+          </ul>
+          <div class="meta">
+            <b>Tempo:</b> 27/år · <b>Kostnad:</b> ~ 14 MNOK rekruttering<br>
+            <b>Risiko:</b> <span style="color:var(--bad)">Høy</span> · krever import (utenlandske/Sør-Norge)
+          </div>
+        </div>
+      </div>
+
+      <div class="footnote" style="margin-top:14px">
+        <b>Rekrutteringskostnad per ansettelse</b> ~150–200 kNOK (annonse + employer branding 15–30 kNOK + HR/DL-tid 12–24 kNOK + redusert produktivitet første 3 mnd 80–120 kNOK). Lærlinger har lavere kost (~50 kNOK) men lengre tilbakebetalingstid.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Rekrutteringsmarked og tidlige varselsignaler</h3>
+      <div class="lead">
+        Sanntidsindikatorer for hvor stramt rekrutteringsmarkedet i Salten er. Brukes som kvartalsvis sanity check mot valgt scenario — hvis vi ikke klarer å rekruttere i takt, må scenariovalg revurderes.
+      </div>
+
+      <div class="bem-grid">
+        <div>
+          <table class="proj">
+            <thead>
+              <tr>
+                <th>Indikator (siste 12 mnd)</th>
+                <th class="num">Tømrer</th>
+                <th class="num">Maler</th>
+                <th class="num">Prosj.leder</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Søkere per stilling</td><td class="num">2,8</td><td class="num">3,5</td><td class="num">1,4</td></tr>
+              <tr><td>Hit-rate (% som blir tilbudt)</td><td class="num">36 %</td><td class="num">42 %</td><td class="num">22 %</td></tr>
+              <tr><td>Tid fra utlysning til ansatt (uker)</td><td class="num">12</td><td class="num">10</td><td class="num">22</td></tr>
+              <tr><td>Aksept-rate</td><td class="num">68 %</td><td class="num">71 %</td><td class="num">55 %</td></tr>
+              <tr><td>Sluttårsrate (siste 12 mnd)</td><td class="num">8 %</td><td class="num">11 %</td><td class="num">5 %</td></tr>
+              <tr style="background:var(--panel-2)"><td>Estimert årlig nettokapasitet</td><td class="num"><b>4–5</b></td><td class="num"><b>3–4</b></td><td class="num"><b>1–2</b></td></tr>
+            </tbody>
+          </table>
+          <div class="footnote" style="margin-top:8px">
+            <b>Realitetstest:</b> Bull case krever 27 nyansettelser/år. Maks netto via lokal rekruttering: ~10/år. <b>Differansen 17 må komme via aktiv arbeidsinnvandring, oppkjøp av selskap (med crew), eller import fra Sør-Norge.</b>
+          </div>
+        </div>
+
+        <div class="recruit-status">
+          <h4>Tidlige varselsignaler — kvartalsvis</h4>
+          <div class="signal"><div></div><div class="head">Sunnt</div><div class="head">Varsel</div><div class="head">Stopp</div></div>
+          <div class="signal"><div class="l">Ny ansatte-andel</div><div class="v green">&lt;15%</div><div class="v warn">15–30%</div><div class="v bad">&gt;30%</div></div>
+          <div class="signal"><div class="l">Sykefravær konsern</div><div class="v green">&lt;7%</div><div class="v warn">7–10%</div><div class="v bad">&gt;10%</div></div>
+          <div class="signal"><div class="l">Tid per ansettelse (uker)</div><div class="v green">&lt;14</div><div class="v warn">14–22</div><div class="v bad">&gt;22</div></div>
+          <div class="signal"><div class="l">Aksept-rate</div><div class="v green">&gt;65%</div><div class="v warn">50–65%</div><div class="v bad">&lt;50%</div></div>
+          <div class="signal"><div class="l">Sluttårsrate</div><div class="v green">&lt;10%</div><div class="v warn">10–15%</div><div class="v bad">&gt;15%</div></div>
+          <div class="signal"><div class="l">Marginavvik plan vs. faktisk</div><div class="v green">&lt;3%p</div><div class="v warn">3–7%p</div><div class="v bad">&gt;7%p</div></div>
+
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)">
+            <b>Faktisk Q1 2026:</b> Ny ansatte-andel <span class="v green" style="display:inline-block;padding:1px 6px">9 %</span>, sykefravær <span class="v green" style="display:inline-block;padding:1px 6px">7,4 %</span>, tid per ansettelse <span class="v warn" style="display:inline-block;padding:1px 6px">15 uker</span> — ett varsel-signal.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Margin-mix-analyse -->
+  <div class="section">
+    <h2 class="section-title">Margin-mix — hvordan inntektsstrømmene driver bunnlinjen</h2>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Topplinje vs bunnlinje — hver inntektsstrøm har sin egen marginprofil</h3>
+      <div class="lead">
+        Strategi-diskusjonen handler ofte om <i>topplinjen</i> (total omsetning), men EBIT bestemmes av <i>miksen</i> mellom strømmer med ulik margin. Forsikringsstrøm gir lavere margin enn ROT, men forutsigbar volum. EPC gir høy margin, men krever sertifisering. Tilbudsforespørsler fra borettslag/private gir høy margin når kapasitet tillater. Tabellen viser hvordan miksen utvikler seg fra 2024 til 2029 i hvert scenario.
+      </div>
+
+      <div class="mix-bar-chart">
+        <h4>Omsetnings-miks og samlet EBIT-margin</h4>
+        <div class="mix-bars">
+          <!-- 2024 -->
+          <div class="mix-bar">
+            <div class="stack" style="height:35%">
+              <div class="seg rot" style="height:100%"></div>
+            </div>
+            <div class="total">117</div>
+            <div class="ebit">EBIT 7,5 %</div>
+            <div class="label">2024 faktisk</div>
+          </div>
+          <!-- 2029 base -->
+          <div class="mix-bar">
+            <div class="stack" style="height:50%">
+              <div class="seg rot" style="height:90%"></div>
+              <div class="seg fors" style="height:10%"></div>
+            </div>
+            <div class="total">167</div>
+            <div class="ebit">EBIT 7,3 %</div>
+            <div class="label">2029 base</div>
+          </div>
+          <!-- 2029 offensiv -->
+          <div class="mix-bar">
+            <div class="stack" style="height:69%">
+              <div class="seg rot" style="height:88%"></div>
+              <div class="seg fors" style="height:9%"></div>
+              <div class="seg epc" style="height:3%"></div>
+            </div>
+            <div class="total">237</div>
+            <div class="ebit">EBIT 7,7 %</div>
+            <div class="label">2029 offensiv</div>
+          </div>
+          <!-- 2029 bull -->
+          <div class="mix-bar">
+            <div class="stack" style="height:93%">
+              <div class="seg rot" style="height:84%"></div>
+              <div class="seg fors" style="height:9%"></div>
+              <div class="seg epc" style="height:7%"></div>
+            </div>
+            <div class="total">320</div>
+            <div class="ebit">EBIT 8,1 %</div>
+            <div class="label">2029 bull</div>
+          </div>
+        </div>
+        <div class="mix-legend">
+          <div class="it"><span class="sw" style="background:#2d6e76"></span>ROT-anbud (offentlig)</div>
+          <div class="it"><span class="sw" style="background:#e85d75"></span>Forsikringsstrøm</div>
+          <div class="it"><span class="sw" style="background:var(--accent)"></span>EPC / energirehab</div>
+          <div class="it"><span class="sw" style="background:#b89067"></span>Tilbudsforespørsler</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mix-grid">
+      <!-- 2029 Base regnestykke -->
+      <div class="panel">
+        <h3 style="color:var(--hi)">2029 Base case · 167 MNOK</h3>
+        <div class="lead">Lokal Bodø-strategi pluss SA forsikringsstrøm. EBIT-margin 7,3 % er lavere enn dagens 7,7 % fordi miksen tilfører forsikring (lavere margin) uten EPC eller annet høy-marginsegment.</div>
+        <table class="mixmath">
+          <thead><tr><th>Inntektsstrøm</th><th class="num">Omsetning</th><th class="num">Margin</th><th class="num">EBIT</th></tr></thead>
+          <tbody>
+            <tr class="rot"><td>ROT-anbud (offentlig)</td><td class="num">151</td><td class="num">7,5 %</td><td class="num">11,3</td></tr>
+            <tr class="fors"><td>Forsikringsstrøm</td><td class="num">16</td><td class="num">6,5 %</td><td class="num">1,0</td></tr>
+            <tr class="total"><td>Konsolidert</td><td class="num">167</td><td class="num">7,3 %</td><td class="num">12,3</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6">
+          <b>Kommentar:</b> Selv om absolutt EBIT øker (12,3 vs 9 MNOK i 2024), faller margin %-vis. Akseptabelt fordi forutsigbarhet i forsikringsstrøm gir lavere risiko og lavere kapitalbinding.
+        </div>
+      </div>
+
+      <!-- 2029 Offensiv regnestykke -->
+      <div class="panel" style="border-top:3px solid var(--warn)">
+        <h3 style="color:var(--warn)">2029 Offensiv · 237 MNOK</h3>
+        <div class="lead">Salten-dekning, M&A på spesialfag, EPC-pilot etablert. EBIT-margin tilbake på 7,7 % takket være premium-segmentet EPC.</div>
+        <table class="mixmath">
+          <thead><tr><th>Inntektsstrøm</th><th class="num">Omsetning</th><th class="num">Margin</th><th class="num">EBIT</th></tr></thead>
+          <tbody>
+            <tr class="rot"><td>ROT-anbud (offentlig)</td><td class="num">207</td><td class="num">7,8 %</td><td class="num">16,1</td></tr>
+            <tr class="fors"><td>Forsikringsstrøm</td><td class="num">22</td><td class="num">6,5 %</td><td class="num">1,4</td></tr>
+            <tr class="epc"><td>EPC / energirehab</td><td class="num">8</td><td class="num">12,0 %</td><td class="num">1,0</td></tr>
+            <tr class="total"><td>Konsolidert</td><td class="num">237</td><td class="num">7,8 %</td><td class="num">18,5</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6">
+          <b>Kommentar:</b> EPC-segmentet (8 MNOK med 12 % margin) løfter total-marginen tilbake til 7,8 %. Forsikrings-vekt er ~10 % av miksen — håndterbart.
+        </div>
+      </div>
+
+      <!-- 2029 Bull regnestykke -->
+      <div class="panel" style="border-top:3px solid var(--good)">
+        <h3 style="color:var(--good)">2029 Bull case · 320 MNOK</h3>
+        <div class="lead">Hele Nordland-dekning, etablert EPC-divisjon, økt bredde i tilbudsforespørsler. EBIT 8,1 % drevet av skalafordeler i administrasjon og volum-forhandlinger.</div>
+        <table class="mixmath">
+          <thead><tr><th>Inntektsstrøm</th><th class="num">Omsetning</th><th class="num">Margin</th><th class="num">EBIT</th></tr></thead>
+          <tbody>
+            <tr class="rot"><td>ROT-anbud (offentlig)</td><td class="num">270</td><td class="num">8,2 %</td><td class="num">22,1</td></tr>
+            <tr class="fors"><td>Forsikringsstrøm</td><td class="num">30</td><td class="num">7,0 %</td><td class="num">2,1</td></tr>
+            <tr class="epc"><td>EPC / energirehab</td><td class="num">15</td><td class="num">12,5 %</td><td class="num">1,9</td></tr>
+            <tr class="tilbud"><td>Tilbudsforespørsler (privat/borettslag)</td><td class="num">5</td><td class="num">9,5 %</td><td class="num">0,5</td></tr>
+            <tr class="total"><td>Konsolidert</td><td class="num">320</td><td class="num">8,3 %</td><td class="num">26,6</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.6">
+          <b>Kommentar:</b> Fire diversifiserte strømmer reduserer kunderisiko betydelig. EPC økt til 15 MNOK gir tydelig margin-løft. Skalafordeler trekker også ROT-margin fra 7,5 → 8,2 %.
+        </div>
+      </div>
+
+      <!-- Insikt -->
+      <div class="panel" style="border-top:3px solid var(--accent)">
+        <h3>Tre strategiske mix-erkjennelser</h3>
+        <ul style="font-size:12.5px;line-height:1.65;padding-left:20px">
+          <li><b>Forsikringsstrøm fortynner margin på kort sikt.</b> Når vi går fra 100 % ROT til 90 % ROT + 10 % forsikring, faller marginen 0,2–0,4 %p. Det er prisen for forutsigbarhet.</li>
+          <li><b>EPC er den eneste reelle margin-løfteren.</b> Med 12 % margin på 8–15 MNOK volum, gir EPC mellom 1 og 1,9 MNOK ekstra EBIT — nok til å få total-marginen over 8 %.</li>
+          <li><b>Tilbudsforespørsler er marginalt verdifulle.</b> 9–10 % margin er bra, men volumet er lavt. Vi tar dem når kapasitet tillater, ikke som strategisk satsning.</li>
+        </ul>
+        <div class="footnote" style="margin-top:14px">
+          <b>Bunnlinje-effekt fra 2024 til 2029:</b> Base case dobler EBIT (9 → 12,3 MNOK) tross lavere margin. Offensiv dobler igjen (18,5 MNOK). Bull tredobler 2024 (26,6 MNOK). <b>EBIT-veksten er sterkere enn omsetningsveksten</b> i alle scenarier — det er konsernverdien.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HR-integrasjon mot SA sentralt -->
+  <div class="section">
+    <h2 class="section-title">HR-integrasjon mot ServiceAlliansen sentralt</h2>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Sentralisert HR via SA-konsernet — hva som flyter til oss</h3>
+      <div class="lead">
+        ServiceAlliansen har sentralisert HR-tjenester for porteføljebedriftene. Rekrutteringsplan, lønn-system, kompetanseutvikling og onboarding kjøres på konsernnivå med data-flyt til hvert lokalt selskap. Det fjerner duplikatfunksjon på HR i Bodø og gir oss tilgang til SA-felles ressurser (rekrutterer, employer brand, læringsplattform).
+      </div>
+
+      <div class="hr-panels">
+        <div class="hr-card">
+          <h4>📋 Rekrutteringsplan levert fra SA-HR</h4>
+          <div class="src">SA HR-system → vår portal · Synkronisert daglig</div>
+          <div class="hr-track">
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">Behovsmelding inn i SA HR-system <small>DL flagger nye stillinger via SA-portalen</small></div>
+              <div class="when">04.04.26</div>
+            </div>
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">SA-rekrutterer overtar stillingen <small>Sentral rekrutterer (Trondheim) jobber for alle SA-selskap</small></div>
+              <div class="when">07.04.26</div>
+            </div>
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">Stillingsannonse publisert <small>Finn.no, LinkedIn, byggebransjens nettsted, SA-employer brand</small></div>
+              <div class="when">10.04.26</div>
+            </div>
+            <div class="row">
+              <div class="dot now"></div>
+              <div class="l">Søknader screenes av SA-rekrutterer <small>14 søknader · 4 kvalifiserte for førstegangsintervju</small></div>
+              <div class="when">pågår</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">Lokal intervjurunde <small>DL og prosjektleder vurderer kandidater</small></div>
+              <div class="when">~02.05.26</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">Tilbud + signert kontrakt <small>SA leverer kontrakts-mal og signering via Posten Signering</small></div>
+              <div class="when">~16.05.26</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">Oppstart + onboarding <small>Krevd oppstartsdato 01.07.26 · onboarding-pakke automatisk</small></div>
+              <div class="when">01.07.26</div>
+            </div>
+          </div>
+          <div class="footnote" style="margin-top:10px">
+            <b>Aktive rekrutteringer Q2 2026:</b> 1 tømrer (Hunstad-distrikt), 1 prosjektleder, 1 kalkulator. Sistnevnte er den kritiske flaskehalsen.
+          </div>
+        </div>
+
+        <div class="hr-card" style="border-top-color:var(--good)">
+          <h4>🎯 Onboarding — automatisk pakke fra SA</h4>
+          <div class="src">SA Onboarding-platform · Trigges ved signert kontrakt</div>
+          <div class="hr-track">
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">Pre-boarding pakke (4 uker før oppstart) <small>Velkomstmail, dokumenter, info om Bodø-kontoret, tilgang til SA-læringsplattform</small></div>
+              <div class="when">auto</div>
+            </div>
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">IT-tilgang og verktøy bestilt <small>PC, mobil, SmartKalk-lisens, PowerOffice-bruker, Microsoft 365-konto</small></div>
+              <div class="when">auto T-7</div>
+            </div>
+            <div class="row">
+              <div class="dot done"></div>
+              <div class="l">HMS-kort registrert hos SA <small>SHA-plan, byggekort, sikkerhetsopplæring tilgjengelig digitalt</small></div>
+              <div class="when">auto T-3</div>
+            </div>
+            <div class="row">
+              <div class="dot now"></div>
+              <div class="l">Dag 1: Mottak i Bodø + mentor tildelt <small>DL gjennomfører introduksjon, mentor (etablert ansatt) følger opp første 90 dager</small></div>
+              <div class="when">dag 1</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">SA-kursportefølje første 30 dager <small>HMS, kvalitet, ServiceAlliansen-verdier, PowerOffice-grunnkurs</small></div>
+              <div class="when">dag 1–30</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">90-dagers evaluering <small>DL + mentor evaluerer mot SA-felles standard. Funn deles med SA-HR for forbedring av onboarding</small></div>
+              <div class="when">dag 90</div>
+            </div>
+            <div class="row">
+              <div class="dot next"></div>
+              <div class="l">Inngang i SA kompetanseutvikling <small>Individuell utviklingsplan via SA-læringsplattform</small></div>
+              <div class="when">dag 91+</div>
+            </div>
+          </div>
+          <div class="footnote" style="margin-top:10px">
+            <b>Onboarding nå (1 ny ansatt 2026 H1):</b> Bjørnar Karlsen, tømrer, oppstart 02.05.26. Dag 1 gjennomført.
+          </div>
+        </div>
+
+        <div class="hr-card" style="border-top-color:var(--accent)">
+          <h4>💰 Lønnssystem og fravær — felles SA-tjeneste</h4>
+          <div class="src">SA Lønn (Visma Lønn 5.0) ↔ PowerOffice Go · Daglig sync</div>
+          <p style="font-size:11.5px;color:var(--text);margin:0 0 8px;line-height:1.55">
+            Lønn kjøres sentralt hos SA, integrert med PowerOffice Go via standard Visma Lønn-API. Data flyter slik:
+          </p>
+          <ul style="font-size:11px;color:var(--muted);margin:0;padding-left:16px;line-height:1.6">
+            <li><b>Timer fra HoltePortalen</b> → PowerOffice Go (M5/M6 i implementeringsplan)</li>
+            <li><b>PowerOffice Go</b> → Visma Lønn (allerede etablert integrasjon hos SA)</li>
+            <li><b>Visma Lønn</b> → utbetaling, AGA-rapportering, A-melding, rapporter</li>
+            <li><b>Fravær</b> registreres i SA HR-system, vises live i pipeline-portalen som kapasitetsindikator</li>
+            <li><b>Sykefravær Q1 2026:</b> 7,4 % konsolidert (under bransje-snitt 8,1 %) — synkroniseres direkte fra Visma Lønn til DL-dashboardet</li>
+          </ul>
+        </div>
+
+        <div class="hr-card" style="border-top-color:var(--warn)">
+          <h4>📚 Kompetanseutvikling og MAS</h4>
+          <div class="src">SA-læringsplattform · Individuelle planer per ansatt</div>
+          <p style="font-size:11.5px;color:var(--text);margin:0 0 8px;line-height:1.55">
+            ServiceAlliansens læringsplattform leverer kompetanseheving som er felles for porteføljen. Spesielt verdifullt for Fritzøe/Areal i overgangen til mer ROT- og forsikringsoppdrag:
+          </p>
+          <ul style="font-size:11px;color:var(--muted);margin:0;padding-left:16px;line-height:1.6">
+            <li><b>BREEAM AP</b> — sertifisering for energirehab (krever for offensiv/bull)</li>
+            <li><b>Fuktprotokoll</b> — kreves for kvalifisering hos forsikringsselskap (M9)</li>
+            <li><b>Brann-rehabkurs</b> — åpner for brannskadestoppdrag</li>
+            <li><b>SHA og HMS</b> — kontinuerlig oppdatering, lovpålagt</li>
+            <li><b>Mestere og lærlinger</b> — administrasjon, fagprøver, opplæringskontor</li>
+            <li><b>Medarbeidersamtale (MAS)</b> — felles SA-mal, datapunkter inn til konsernrapport</li>
+          </ul>
+          <div class="footnote" style="margin-top:8px">
+            <b>Aktive utdanningsløp:</b> 3 lærlinger (tømrer), 1 BREEAM AP (Areal-leder), 2 fuktprotokoll (Fritzøe-tømrere)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PowerOffice integrasjonsstatus -->
+  <div class="section">
+    <h2 class="section-title">PowerOffice Go-integrasjon — hva dashboardet leverer</h2>
+    <div class="panel">
+      <h3>Live datatilkobling — hva vi kobler oss på</h3>
+      <div class="lead">
+        Dashboardet over henter alt direkte fra PowerOffice Go's REST API. Hvert endepunkt har klar funksjon og synkroniseringsfrekvens. Total syncload: ~150 API-kall per dag, langt under quota.
+      </div>
+      <div class="endpoints">
+        <div class="ep">
+          <code>GET /projects</code>
+          <h5>Prosjekter</h5>
+          <p>Henter alle aktive prosjekter med status, kunde, ansvarlig, planlagt budsjett og tilbudssum. Driver prosjektmatrisen.</p>
+          <div class="sync">↻ Synkronisert hver 30. min</div>
+        </div>
+        <div class="ep">
+          <code>GET /timeentries</code>
+          <h5>Timeføring</h5>
+          <p>Hentes per prosjekt og per ansatt. Plan-vs-faktisk timer, fakturerbarhet, fordeling per fag og avdeling.</p>
+          <div class="sync">↻ Synkronisert daglig kl. 06:00</div>
+        </div>
+        <div class="ep">
+          <code>GET /transactions</code>
+          <h5>Bokførte transaksjoner</h5>
+          <p>Filtrert på prosjekt-dimensjon for kost-tracking, og på kontoklasse for resultatregnskap. Driver P&amp;L og lønn-per-prosjekt.</p>
+          <div class="sync">↻ Synkronisert daglig kl. 06:00</div>
+        </div>
+        <div class="ep">
+          <code>GET /vouchers</code>
+          <h5>Bilag</h5>
+          <p>Inngående faktura-bilag knyttet til prosjekt — driver materialkost og UE-kost per prosjekt.</p>
+          <div class="sync">↻ Synkronisert daglig kl. 06:00</div>
+        </div>
+        <div class="ep">
+          <code>GET /employees</code>
+          <h5>Ansatte</h5>
+          <p>Master-data for personalanalyse: avdeling, stilling, tilknyttet selskap (Fritzøe / Areal). Sjelden endring, daglig snapshot.</p>
+          <div class="sync">↻ Synkronisert daglig kl. 06:00</div>
+        </div>
+        <div class="ep">
+          <code>GET /orders, /invoices</code>
+          <h5>Fakturering og ordre</h5>
+          <p>Utgående fakturaer og åpne ordre. Driver omsetnings-tracking og prognose for resterende fakturering på pågående prosjekt.</p>
+          <div class="sync">↻ Synkronisert hver 4. time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h3>Hva dette gir daglig leder som ingen andre dashboard gir</h3>
+      <div class="lead">Tre konkrete egenskaper som er unike for denne integrasjonen — og som søsterselskaper i ServiceAlliansen sannsynligvis <i>ikke</i> har i dag.</div>
+      <table class="pl">
+        <thead>
+          <tr>
+            <th style="width:24%">Egenskap</th>
+            <th style="width:38%">Hva det gjør</th>
+            <th>Hvorfor det er sjeldent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Margin live underveis</b></td>
+            <td>Plan vs faktisk timer og kost oppdateres daglig per prosjekt. Avvik &gt;5 % gir varsel før prosjektet er ferdig.</td>
+            <td>Krever at SmartKalk-data (plan) og PowerOffice-data (faktisk) er i samme system. De fleste byggservicebedrifter har dem i to siloer.</td>
+          </tr>
+          <tr>
+            <td><b>Lønn knyttet til prosjekt</b></td>
+            <td>Fordeler 18,5 MNOK direkte lønn på 12 aktive prosjekter — gjør det mulig å se reell prosjektmargin og ikke bare bokført resultat.</td>
+            <td>Forutsetter at timeføring er prosjekt-tagget (HoltePortalen-integrasjon i M5 sikrer dette automatisk).</td>
+          </tr>
+          <tr>
+            <td><b>Periode-P&amp;L per måned for konsernet</b></td>
+            <td>Resultatregnskap som oppdateres månedlig basert på faktiske bokførte transaksjoner — uten å vente på regnskapsfører-frist.</td>
+            <td>De fleste mellomstore byggselskaper får første resultattall ~3 uker etter månedsskifte. Vi får dem dagen etter.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <b>Datakilde:</b> Eksempeltallene i dette dashboardet er fiktive, men strukturen reflekterer det faktiske integrasjonsmønsteret PowerOffice Go ↔ HoltePortalen ↔ pipeline-portal vil produsere etter Modul 5 og 6 i <a href="implementering.html" style="color:var(--accent)">teknisk implementeringsplan</a>. Resultatregnskapet er bygget etter NS 4102 hovedklasser.
+    <br><b>Varsler:</b> Skarmoen-prosjektet er flagget rødt fordi faktisk timer (298) er bare 32 % av plan (920) ved 25 % fremdrift — ikke et over-forbruk i seg selv, men et avvik som krever sjekk av prosjektplan og fakturering.
+    <br><b>Tilkoblede dashboards:</b>
+    <a href="index.html" style="color:var(--accent)">Hovedside</a> ·
+    <a href="anbud.html" style="color:var(--accent)">Anbudsportal</a> ·
+    <a href="dashboard.html" style="color:var(--accent)">Bransjedashboard</a> ·
+    <a href="implementering.html" style="color:var(--accent)">Teknisk plan</a> ·
+    <a href="oversikt.html" style="color:var(--accent)">Én-side oversikt</a>
+  </div>
+
+</main>
+
+<script>
+// 12-mnd trend chart
+(() => {
+  const data = [
+    { m: 'mai 25', oms: 8.4, ebit: 0.62 },
+    { m: 'jun 25', oms: 8.0, ebit: 0.51 },
+    { m: 'jul 25', oms: 6.8, ebit: 0.34 },
+    { m: 'aug 25', oms: 9.2, ebit: 0.71 },
+    { m: 'sep 25', oms: 10.1, ebit: 0.84 },
+    { m: 'okt 25', oms: 11.0, ebit: 0.92 },
+    { m: 'nov 25', oms: 10.4, ebit: 0.78 },
+    { m: 'des 25', oms: 8.6, ebit: 0.45 },
+    { m: 'jan 26', oms: 9.05, ebit: 0.83 },
+    { m: 'feb 26', oms: 9.48, ebit: 0.79 },
+    { m: 'mar 26', oms: 10.22, ebit: 0.86 },
+    { m: 'apr 26', oms: 9.46, ebit: 0.47 },
+  ];
+  const max = Math.max(...data.map(d => d.oms));
+  const el = document.getElementById('trendChart');
+  el.innerHTML = data.map(d => {
+    const oh = (d.oms / max) * 100;
+    const eh = (Math.abs(d.ebit) / max) * 100;
+    const cls = d.ebit >= 0 ? 'ebit-pos' : 'ebit-neg';
+    return `<div class="trend-bar">
+      <div class="v">${d.oms.toFixed(1)}</div>
+      <div class="stack" style="height:${oh}%">
+        <div class="seg oms" style="height:${oh - eh}%"></div>
+        <div class="seg ${cls}" style="height:${eh}%"></div>
+      </div>
+      <div class="lbl">${d.m}</div>
+    </div>`;
+  }).join('');
+})();
+</script>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

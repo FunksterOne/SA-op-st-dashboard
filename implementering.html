@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Teknisk implementeringsplan — ServiceAlliansen</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  /* Lokale custom-farger (utover style.css) */
+  :root { --orange: #ff6b35 }
+
+  body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+
+  header.top {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  header.top .crumb { font-size: 12px; color: var(--muted) }
+  header.top .crumb a { color: var(--accent); text-decoration: none }
+  header.top .crumb a:hover { text-decoration: underline }
+  header.top h1 {
+    margin: 8px 0 6px; font-size: 24px; font-weight: 600; letter-spacing: -0.015em;
+  }
+  header.top .sub { color: var(--muted); font-size: 13px; max-width: 920px }
+
+  main { padding: 32px 40px 80px; max-width: 1500px; margin: 0 auto }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 24px 28px; margin-bottom: 20px;
+  }
+  .panel h2 {
+    margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  }
+  .panel h2 .num {
+    display: inline-block; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff; text-align: center; line-height: 22px;
+    font-size: 11px; font-weight: 700; margin-right: 9px; vertical-align: 2px;
+  }
+  .panel .lead { color: var(--muted); font-size: 13px; max-width: 920px; line-height: 1.7; margin-bottom: 16px }
+  .panel.intro {
+    background: linear-gradient(180deg, rgba(79,157,166,0.10) 0%, var(--panel) 70%);
+    border-left: 3px solid var(--accent);
+  }
+
+  /* Headline KPIs */
+  .head-kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px;
+  }
+  .hkpi {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .hkpi .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em }
+  .hkpi .v { font-size: 24px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums }
+  .hkpi .d { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .hkpi.fast { border-left: 3px solid var(--good) }
+  .hkpi.full { border-left: 3px solid var(--accent) }
+  .hkpi.cost { border-left: 3px solid var(--warn) }
+  .hkpi.team { border-left: 3px solid var(--hi) }
+
+  /* Gantt */
+  .gantt-wrap { overflow-x: auto; margin-top: 12px }
+  table.gantt { width: 100%; border-collapse: collapse; min-width: 1100px }
+  table.gantt th, table.gantt td {
+    border: 1px solid var(--line); padding: 0; vertical-align: middle;
+  }
+  table.gantt th {
+    background: var(--panel-2); padding: 8px 6px; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+    text-align: center; min-width: 38px;
+  }
+  table.gantt th.task { text-align: left; padding-left: 12px; min-width: 240px; max-width: 240px }
+  table.gantt td.task {
+    padding: 8px 12px; font-size: 12px; font-weight: 500;
+    background: var(--panel-2); border-right: 2px solid var(--line);
+  }
+  table.gantt td.task .ord { color: var(--muted); font-size: 10px; font-weight: 400; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em }
+  table.gantt td.cell { height: 36px; position: relative; padding: 0 }
+  table.gantt td.cell.milestone::after {
+    content: "◆"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: var(--warn); font-size: 18px;
+  }
+  .bar-segment {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    height: 18px; border-radius: 3px; left: 0; right: 0;
+  }
+  .bar-segment.dev   { background: linear-gradient(90deg, #3fb950cc, #3fb950) }
+  .bar-segment.deps  { background: linear-gradient(90deg, #58a6ffcc, #58a6ff) }
+  .bar-segment.deal  { background: linear-gradient(90deg, #d29922cc, #d29922) }
+  .bar-segment.test  { background: linear-gradient(90deg, #a371f7cc, #a371f7) }
+  .bar-segment.live  { background: repeating-linear-gradient(45deg, #ff6b35, #ff6b35 6px, #c25022 6px, #c25022 12px) }
+
+  .gantt-legend { display: flex; gap: 18px; margin-top: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap }
+  .gantt-legend .it { display: flex; align-items: center; gap: 7px }
+  .gantt-legend .sw { width: 16px; height: 12px; border-radius: 2px }
+
+  /* Modules */
+  .modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px }
+  .mod {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px; border-left: 3px solid var(--accent);
+  }
+  .mod.green { border-left-color: var(--good) }
+  .mod.blue { border-left-color: var(--hi) }
+  .mod.orange { border-left-color: var(--orange) }
+  .mod.yellow { border-left-color: var(--warn) }
+  .mod.purple { border-left-color: var(--pending) }
+  .mod .head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px }
+  .mod h3 { margin: 0; font-size: 14px; font-weight: 600 }
+  .mod .ord { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em }
+  .mod .status {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+    padding: 3px 8px; border-radius: 10px; white-space: nowrap;
+  }
+  .mod .status.ready { background: rgba(63,185,80,0.18); color: var(--good) }
+  .mod .status.config { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .mod .status.dev { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .mod .status.deal { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .mod .desc { color: var(--text); font-size: 12px; line-height: 1.6; margin-bottom: 10px }
+  .mod h4 {
+    margin: 12px 0 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  }
+  .mod ul { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6 }
+  .mod ul li { margin-bottom: 3px }
+  .mod .meta {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px;
+    padding-top: 12px; border-top: 1px dashed var(--line);
+  }
+  .mod .meta .mt {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  }
+  .mod .meta .mv { font-size: 13px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums }
+
+  /* SA reporting */
+  .sa-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .sa-col {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px;
+  }
+  .sa-col.op { border-top: 3px solid var(--good) }
+  .sa-col.str { border-top: 3px solid var(--accent) }
+  .sa-col h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .sa-col .who { color: var(--muted); font-size: 11px; margin-bottom: 12px }
+  .sa-col h4 {
+    margin: 12px 0 5px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  }
+  .sa-col table { width: 100%; border-collapse: collapse; font-size: 12px }
+  .sa-col th, .sa-col td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--line) }
+  .sa-col th {
+    color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .sa-col tbody tr:last-child td { border-bottom: 0 }
+  .freq {
+    display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px;
+    background: var(--panel-3); color: var(--accent-2); white-space: nowrap;
+  }
+
+  /* Cost grid */
+  .costs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px;
+  }
+  .cost-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  .cost-table th {
+    background: var(--panel-3); padding: 10px 14px; text-align: left;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+  }
+  .cost-table th.num { text-align: right }
+  .cost-table td { padding: 9px 14px; border-bottom: 1px solid var(--line) }
+  .cost-table td.num { text-align: right; font-variant-numeric: tabular-nums }
+  .cost-table tfoot td {
+    background: var(--panel-3); font-weight: 600; border-top: 2px solid var(--accent); border-bottom: 0;
+  }
+
+  /* Decisions */
+  .dec-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px }
+  .dec {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .dec.dl { border-top: 3px solid var(--good) }
+  .dec.styre { border-top: 3px solid var(--accent) }
+  .dec.sa { border-top: 3px solid var(--orange) }
+  .dec h3 { margin: 0 0 4px; font-size: 13px }
+  .dec .role { color: var(--muted); font-size: 11px; margin-bottom: 10px }
+  .dec ul { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.65 }
+  .dec ul li { margin-bottom: 4px }
+
+  .tip {
+    background: rgba(255,107,53,0.08); border-left: 3px solid var(--orange);
+    padding: 14px 18px; margin: 16px 0 0; border-radius: 0 6px 6px 0;
+    font-size: 13px;
+  }
+  .tip b { color: var(--orange) }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="implementering"></div>
+
+<header class="top">
+  <div class="crumb" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;text-transform:uppercase;letter-spacing:0.12em;font-weight:600;font-size:10.5px">
+    <span class="mode-pill" data-mode="implementering">Implementering</span>
+    <span>Teknisk plan</span>
+  </div>
+  <h1>Teknisk implementeringsplan — fra null til full integrasjon på 14 uker</h1>
+  <div class="sub">
+    Hver modul er beskrevet med teknisk arkitektur, tidsestimat (offensivt), kostnad, avhengigheter og hva ServiceAlliansen-konsernet får ut av det. Tidslinjen er bygget for å levere <b>operativ verdi raskt</b> — pipeline-portalen alene gir DL nytte fra dag 1, mens hele integrasjonsstacken er på plass på under fire måneder.
+  </div>
+</header>
+
+<main>
+
+  <div class="panel intro">
+    <h2>Eksekutiv oversikt — tre faser, ikke én</h2>
+    <div class="lead">
+      Med moderne AI-assistert utvikling og standardisert REST/JSON-tilgang er forholdet mellom <i>første brukbare versjon</i> og <i>full produksjons-stack</i> blitt veldig annerledes enn for fem år siden. Vi planlegger derfor i tre spor: <b>beta på 2 uker</b> (intern bruk, manuell sync), <b>quick wins på 5 uker</b> (operativ verdi for DL), og <b>full stack på 14 uker</b> (konsernrapportering, margin live, alle integrasjoner).
+    </div>
+    <div class="head-kpis">
+      <div class="hkpi" style="border-left:3px solid var(--orange)">
+        <div class="l">Beta-versjon klar</div>
+        <div class="v">2 uker</div>
+        <div class="d">Pipeline-portal + manuell import — interndrift</div>
+      </div>
+      <div class="hkpi fast">
+        <div class="l">Quick wins ferdig</div>
+        <div class="v">5 uker</div>
+        <div class="d">Auto-fanging fra Mercell, Doffin, CoBrief</div>
+      </div>
+      <div class="hkpi full">
+        <div class="l">Full stack ferdig</div>
+        <div class="v">14 uker</div>
+        <div class="d">PowerOffice live + SA-rapportering</div>
+      </div>
+      <div class="hkpi cost">
+        <div class="l">Beta-budsjett</div>
+        <div class="v">~ 250 kNOK</div>
+        <div class="d">Setup-budsjett år 1 totalt: 1,43 MNOK (10 moduler)</div>
+      </div>
+    </div>
+    <div class="tip">
+      <b>Beta-sporet er nytt:</b> Pipeline-portalen vi har bygget i denne sesjonen er allerede 80 % beta-klar — den mangler bare hosting og brukertilgang. På 2 uker kan DL og tilbudsleder bruke den i daglig drift med <i>manuell</i> import av tilbud og anbud (drag-and-drop fra e-post + manuell innlegging av Mercell-varsler). Det gir verdi fra dag 14 — og lar oss validere arbeidsflyten før vi bygger automatisk integrasjon i ukene etter.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GANTT                                                        -->
+  <!-- ============================================================ -->
+  <div class="panel">
+    <h2><span class="num">1</span>Tidslinje — alle åtte moduler over 14 uker</h2>
+    <div class="lead">
+      Stolper viser eksekveringsuker. Diamanter (◆) er milepæler. Modulene er sortert etter når de starter. Modul 1, 2, 3 starter alle uke 1 — dette er det viktigste tempogrepet.
+    </div>
+    <div class="gantt-wrap">
+      <table class="gantt">
+        <thead>
+          <tr>
+            <th class="task">Modul</th>
+            <th>U1</th><th>U2</th><th>U3</th><th>U4</th><th>U5</th><th>U6</th><th>U7</th>
+            <th>U8</th><th>U9</th><th>U10</th><th>U11</th><th>U12</th><th>U13</th><th>U14</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- M1: Pipeline-portal i drift -->
+          <tr>
+            <td class="task"><div class="ord">M1 · ferdig kode</div>Pipeline-portal i produksjon</td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M2: Doffin-monitor -->
+          <tr>
+            <td class="task"><div class="ord">M2 · åpen data</div>Doffin-monitor</td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M3: CoBrief -->
+          <tr>
+            <td class="task"><div class="ord">M3 · SaaS</div>CoBrief Pro — abonnement og oppsett</td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M4: Mercell e-post -->
+          <tr>
+            <td class="task"><div class="ord">M4 · Microsoft Graph</div>Mercell e-post-bro (felles innboks)</td>
+            <td class="cell"></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment test"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M5: HoltePortalen ↔ PowerOffice Go -->
+          <tr>
+            <td class="task"><div class="ord">M5 · konfigurasjon</div>HoltePortalen ↔ PowerOffice Go</td>
+            <td class="cell"></td>
+            <td class="cell"></td>
+            <td class="cell"><div class="bar-segment deps"></div></td>
+            <td class="cell"><div class="bar-segment deps"></div></td>
+            <td class="cell"><div class="bar-segment deps"></div></td>
+            <td class="cell"><div class="bar-segment test"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M6: PowerOffice Go REST → portal -->
+          <tr>
+            <td class="task"><div class="ord">M6 · REST API</div>PowerOffice Go API → pipeline</td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment test"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M7: Mercell Supplier API + TendSign -->
+          <tr>
+            <td class="task"><div class="ord">M7 · enterprise-avtale</div>Mercell Supplier API + TendSign</td>
+            <td class="cell"></td><td class="cell"></td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment deal"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment test"></div></td>
+            <td class="cell milestone"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+          </tr>
+          <!-- M8: ServiceAlliansen-rapporteringslag -->
+          <tr>
+            <td class="task"><div class="ord">M8 · konsernrapport</div>ServiceAlliansen rapporteringslag</td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell"></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment dev"></div></td>
+            <td class="cell"><div class="bar-segment test"></div></td>
+            <td class="cell"><div class="bar-segment test"></div></td>
+            <td class="cell milestone live"><div class="bar-segment live"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gantt-legend">
+      <div class="it"><span class="sw" style="background:#3fb950"></span>Utvikling</div>
+      <div class="it"><span class="sw" style="background:#58a6ff"></span>Konfigurasjon (avh. tredjepart)</div>
+      <div class="it"><span class="sw" style="background:#d29922"></span>Avtaleforhandling / SaaS-oppsett</div>
+      <div class="it"><span class="sw" style="background:#a371f7"></span>Test og brukerinnføring</div>
+      <div class="it"><span class="sw" style="background:repeating-linear-gradient(45deg,#ff6b35,#ff6b35 6px,#c25022 6px,#c25022 12px)"></span>Full stack live</div>
+      <div class="it">◆ Milepæl</div>
+    </div>
+    <div class="tip">
+      <b>Den offensive eksekveringsoppskriften:</b> Ikke vent med M2 og M3 til M1 er ferdig — de kan kjøre parallelt med ulike ressurser. M5 (HoltePortalen ↔ PowerOffice Go) er den ene avhengigheten som ikke kan akselereres internt — den krever konfigurasjonsarbeid hos Holte/PowerOffice som tar 2–3 uker uavhengig av hvor raskt vi pusher. <b>Start den i uke 3</b>, ikke senere.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODUL-KORT                                                   -->
+  <!-- ============================================================ -->
+  <div class="panel">
+    <h2><span class="num">2</span>Modulene — teknisk detalj og leveranse</h2>
+    <div class="lead">
+      Hver modul er en selvstendig leveranse med klar nytte. Status «Klar til start» betyr at det ikke finnes blokkerende avhengigheter — vi kan begynne i morgen.
+    </div>
+    <div class="modules">
+
+      <!-- M1 -->
+      <div class="mod green">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 1</div>
+            <h3>Pipeline-portal i produksjon</h3>
+          </div>
+          <span class="status ready">Kode ferdig</span>
+        </div>
+        <div class="desc">Anbud-portalen vi har bygget i denne sessionen — speedometre, anbudsregister, pipeline-fane med kilde-segmentering, lagring i localStorage. Trenger bare hosting og brukertilgang.</div>
+        <h4>Hva som gjenstår</h4>
+        <ul>
+          <li>Deploy til intern server eller Azure Static Web Apps</li>
+          <li>Brukertilgang via Microsoft Entra (samme konto som Office 365)</li>
+          <li>Bytt localStorage til serverside DB (Supabase eller Postgres)</li>
+          <li>2 timers brukeropplæring for tilbudsleder + kalkulator</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Timer</div><div class="mv">40 t</div></div>
+          <div><div class="mt">Kostnad</div><div class="mv">60 kNOK</div></div>
+          <div><div class="mt">Avh.</div><div class="mv">Ingen</div></div>
+        </div>
+      </div>
+
+      <!-- M2 -->
+      <div class="mod blue">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 2</div>
+            <h3>Doffin-monitor</h3>
+          </div>
+          <span class="status ready">Klar til start</span>
+        </div>
+        <div class="desc">Daglig parser for offentlig data fra data.norge.no. Filtrerer på CPV-koder for bygg + Nordland-region + verdi &gt;2 MNOK. Pusher rammeavtale-utlysninger til pipelinen som strategiske varsler.</div>
+        <h4>Teknisk arkitektur</h4>
+        <ul>
+          <li>Node.js cron-job (1× daglig, kl. 06:00)</li>
+          <li>Henter daglig eForms-XML fra data.norge.no</li>
+          <li>Parser med <code>eforms-sdk-nor</code> fra DFØ (GitHub)</li>
+          <li>CPV-filter: 45000000, 45200000, 45260000, 45400000, 45440000</li>
+          <li>NUTS-filter: NO081 (Nordland)</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Timer</div><div class="mv">60 t</div></div>
+          <div><div class="mt">Kostnad</div><div class="mv">90 kNOK</div></div>
+          <div><div class="mt">Drift/år</div><div class="mv">~ 5 kNOK</div></div>
+        </div>
+      </div>
+
+      <!-- M3 -->
+      <div class="mod orange">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 3</div>
+            <h3>CoBrief Pro — AI-evaluering</h3>
+          </div>
+          <span class="status deal">Tegn abonnement</span>
+        </div>
+        <div class="desc">CoBrief er allerede et fungerende AI-anbudsverktøy med dekning over Doffin og nordiske kilder. Tegn Pro/Max-plan, sett opp selskapsprofil med konkurransefortrinn og fagsammensetning, koble e-postvarsel til pipelinen som varslingskilde. Vi får AI-match-score og evaluering ut av boksen.</div>
+        <h4>Steg</h4>
+        <ul>
+          <li>Velg plan (Pro for 1–2 brukere; Max for 5+)</li>
+          <li>Sett opp selskapsprofil + lagrede søk (Bodø, Salten, byggebransje, ROT)</li>
+          <li>Aktivér Teams-varsel i Cobrief til tilbudsleder</li>
+          <li>CSV-eksport eller webhook til pipelinen</li>
+          <li>CV Partner-integrasjon for referanseprosjekter (hvis ServiceAlliansen har)</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Setup</div><div class="mv">~ 1 uke</div></div>
+          <div><div class="mt">Abonnement</div><div class="mv">60–150 kNOK/år</div></div>
+          <div><div class="mt">Wiring</div><div class="mv">40 t / 60 kNOK</div></div>
+        </div>
+      </div>
+
+      <!-- M4 -->
+      <div class="mod purple">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 4</div>
+            <h3>Mercell e-post-bro</h3>
+          </div>
+          <span class="status dev">Krever utvikling</span>
+        </div>
+        <div class="desc">Felles innboks <code>anbud@fritzoe.no</code> mottar varsler fra Mercell og TendSign. Microsoft Graph API poller innboksen hver 5. minutt, parser kunde, frist, rammeavtale, og pusher som pipelinepost. Fanger en stor andel av anbudsvolumet uten enterprise-avtale.</div>
+        <h4>Teknisk arkitektur</h4>
+        <ul>
+          <li>Microsoft 365 Graph API (delegated permission)</li>
+          <li>Webhook subscription på innboksen</li>
+          <li>Regex-parser for Mercell-mailmal (kunde, frist, lenke)</li>
+          <li>Manuell sjekk-fallback for e-poster med ufullstendig info</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Timer</div><div class="mv">80 t</div></div>
+          <div><div class="mt">Kostnad</div><div class="mv">120 kNOK</div></div>
+          <div><div class="mt">Avh.</div><div class="mv">M1</div></div>
+        </div>
+      </div>
+
+      <!-- M5 -->
+      <div class="mod yellow">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 5</div>
+            <h3>HoltePortalen ↔ PowerOffice Go</h3>
+          </div>
+          <span class="status config">Konfigurasjon</span>
+        </div>
+        <div class="desc">EG (Holte) tilbyr en native, ferdigstøttet integrasjon mellom HoltePortalen og PowerOffice Go. Prosjekter, timer og kostnader fra SmartKalk strømmer automatisk gjennom HoltePortalen til PowerOffice Go. Mest sannsynlig en konfigurasjonsoppgave hos Holte/PowerOffice — ikke utvikling fra vår side.</div>
+        <h4>Steg</h4>
+        <ul>
+          <li>Verifisér nåværende HoltePortalen-lisens og PowerOffice Go-modul</li>
+          <li>Bestill aktivering av integrasjonen (Holte konfigurerer)</li>
+          <li>Mapping: prosjekt-ID, kontoplan, timetyper, avdelinger</li>
+          <li>Test data-flyt på et faktisk pågående prosjekt</li>
+          <li>Brukerinnføring kalkulator + lønningsansvarlig</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Konfigurasjon</div><div class="mv">2–3 uker</div></div>
+          <div><div class="mt">Engangskost</div><div class="mv">~ 50–100 kNOK</div></div>
+          <div><div class="mt">Lisens/år</div><div class="mv">Inkludert</div></div>
+        </div>
+      </div>
+
+      <!-- M6 -->
+      <div class="mod yellow">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 6</div>
+            <h3>PowerOffice Go REST API → pipeline</h3>
+          </div>
+          <span class="status dev">Avh. M5</span>
+        </div>
+        <div class="desc">Når data ligger i PowerOffice Go, abonnerer pipeline-portalen på endepunktene for prosjekter, timer og leverandørtransaksjoner. Vi får sanntids margin live på pågående prosjekter — planlagt vs faktisk timeforbruk og materialkost. DL kan gripe inn før tap er bokført.</div>
+        <h4>Teknisk arkitektur</h4>
+        <ul>
+          <li>OAuth2 mot PowerOffice Go API</li>
+          <li>Endepunkter: <code>/projects</code>, <code>/timeentries</code>, <code>/transactions</code>, <code>/suppliers</code></li>
+          <li>Synkronisering hver 30. minutt; webhook hvis tilgjengelig</li>
+          <li>Beregner margin-snitt og avvik per prosjekt</li>
+          <li>Marginvarsel-trigger ved &gt;5 % avvik mellom plan og faktisk</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Timer</div><div class="mv">120 t</div></div>
+          <div><div class="mt">Kostnad</div><div class="mv">180 kNOK</div></div>
+          <div><div class="mt">Avh.</div><div class="mv">M5 ferdig</div></div>
+        </div>
+      </div>
+
+      <!-- M7 -->
+      <div class="mod blue">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 7</div>
+            <h3>Mercell Supplier API + TendSign</h3>
+          </div>
+          <span class="status deal">Enterprise-avtale</span>
+        </div>
+        <div class="desc">Direkte API mot Mercell-konsernets leverandørplattform (dekker både Mercell og TendSign). Erstatter e-post-broen i M4. Full automatisering: liste rammeavtaler, hente nye mini-konkurranser med metadata, laste ned dokumenter, evt. levere svar tilbake.</div>
+        <h4>Steg</h4>
+        <ul>
+          <li>Initiér forhandling med Mercell — krever enterprise-avtale</li>
+          <li>Vurder å forhandle på konsernnivå med ServiceAlliansen som part</li>
+          <li>Tekniske workshops med Mercell ifb. mapping</li>
+          <li>OAuth + API-nøkkel oppsett</li>
+          <li>Migrér fra M4 e-post-bro til API som primærkilde</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Forhandling</div><div class="mv">5 uker</div></div>
+          <div><div class="mt">Lisens/år</div><div class="mv">~ 100–200 kNOK</div></div>
+          <div><div class="mt">Utvikling</div><div class="mv">80 t / 120 kNOK</div></div>
+        </div>
+      </div>
+
+      <!-- M8 -->
+      <div class="mod orange">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 8</div>
+            <h3>ServiceAlliansen rapporteringslag</h3>
+          </div>
+          <span class="status dev">Krever utvikling</span>
+        </div>
+        <div class="desc">Eget rapporteringslag som aggregerer data fra pipelinen + PowerOffice Go til formatet ServiceAlliansen-konsernet bruker for KPI-oppfølging. Operativ rapportering ukentlig til SA-COO; strategisk rapportering kvartalsvis til SA-styret. Bygges på toppen av M1, M6 og M7.</div>
+        <h4>Leveranser</h4>
+        <ul>
+          <li>Ukentlig dashboard-lenke (HTML) til SA-COO</li>
+          <li>Kvartalsvis strategirapport (omsetning vs scenario, M&amp;A-pipeline, geografi)</li>
+          <li>Sammenligningsdata med SA-søsterselskaper (anonymisert)</li>
+          <li>API-endepunkter for SAs egne rapporteringsverktøy</li>
+        </ul>
+        <div class="meta">
+          <div><div class="mt">Timer</div><div class="mv">100 t</div></div>
+          <div><div class="mt">Kostnad</div><div class="mv">150 kNOK</div></div>
+          <div><div class="mt">Avh.</div><div class="mv">M1 + M6 + M7</div></div>
+        </div>
+      </div>
+
+      <!-- M10 - HR-integrasjon mot SA sentralt -->
+      <div class="mod" style="border-left:3px solid #a371f7;grid-column:1 / -1">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 10 · HR-integrasjon</div>
+            <h3>Sentralisert HR via ServiceAlliansen — rekruttering, ansettelse, onboarding</h3>
+          </div>
+          <span class="status config">Konsernintegrasjon</span>
+        </div>
+        <div class="desc">
+          ServiceAlliansen sentraliserer HR-funksjoner for porteføljebedriftene — rekruttering, kontraktsignering, onboarding, lønn, kompetanseutvikling. Vår jobb er ikke å bygge HR-systemet, men å koble pipeline-portalen og økonomi-dashboardet på de relevante datapunktene fra SA-HR. Det reduserer dublisering, gir oss tilgang til SA-felles ressurser (rekrutterer, employer brand, læringsplattform), og holder lokal HR-kost lav.
+        </div>
+        <h4>Datastrøm — fire spor mot SA sentralt</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+          <div>
+            <h4 style="margin-top:0">Rekrutteringsplan</h4>
+            <ul>
+              <li>DL flagger behov i SA-portalen</li>
+              <li>SA-rekrutterer overtar stillingen</li>
+              <li>Annonse, screening, presentasjon av kandidater</li>
+              <li>Lokal intervjurunde (DL + prosjektleder)</li>
+              <li>Tilbud + Posten Signering for kontrakt</li>
+              <li>Status synkes til pipeline-portalen — DL ser progresjon live</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="margin-top:0">Onboarding-pakke</h4>
+            <ul>
+              <li>Trigges automatisk ved signert kontrakt</li>
+              <li>Pre-boarding 4 uker før oppstart</li>
+              <li>IT-tilgang automatisk (PC, lisenser, kontoer)</li>
+              <li>HMS-kort + sertifiseringer registrert</li>
+              <li>Mentor tildelt for første 90 dager</li>
+              <li>SA-kursportefølje første 30 dager</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="margin-top:0">Lønn og fravær</h4>
+            <ul>
+              <li>Visma Lønn 5.0 sentralt hos SA</li>
+              <li>Timer fra HoltePortalen → PowerOffice → Visma Lønn (M5/M6 setup)</li>
+              <li>A-melding, AGA, OTP håndteres sentralt</li>
+              <li>Sykefravær registreres lokalt, synkes til DL-dashboard</li>
+              <li>Lønnsutvikling forhandles på SA-konsernnivå</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="margin-top:0">Kompetanseutvikling og MAS</h4>
+            <ul>
+              <li>SA-læringsplattform med felles kursportefølje</li>
+              <li>Strategisk relevante kurs: BREEAM AP, fuktprotokoll, brannrehab</li>
+              <li>Lærling-administrasjon (opplæringskontor, fagprøver)</li>
+              <li>Medarbeidersamtaler (MAS) i felles SA-mal</li>
+              <li>Datapunkter inn til konsernrapport (kompetansemiks, sertifiseringer)</li>
+            </ul>
+          </div>
+        </div>
+        <h4>Tekniske integrasjonspunkter</h4>
+        <ul>
+          <li><b>SA HR-system → vår portal:</b> Webhook ved status-endring (ny stilling utlyst, kandidat tilbudt, oppstartsdato satt)</li>
+          <li><b>Posten Signering:</b> Automatisk signering av arbeidsavtaler — tilbakemelding via API</li>
+          <li><b>Visma Lønn 5.0 ↔ PowerOffice Go:</b> Eksisterende standard-integrasjon — vi forbruker resultatet</li>
+          <li><b>SA-læringsplattform:</b> Single sign-on via Microsoft Entra (samme som PO)</li>
+          <li><b>HMS-kort-system:</b> SA-felles registreringssystem, oppslag via API</li>
+        </ul>
+        <h4>Hva SA tar ansvar for vs hva vi gjør lokalt</h4>
+        <table class="cost-table" style="margin-top:6px;font-size:11.5px">
+          <thead>
+            <tr><th>Område</th><th>SA sentralt</th><th>Lokalt (Fritzøe/Areal)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Rekrutteringsstrategi og employer brand</td><td>✓</td><td></td></tr>
+            <tr><td>Stillingsannonse + screening</td><td>✓</td><td></td></tr>
+            <tr><td>Lokal intervjurunde og endelig vurdering</td><td></td><td>✓ (DL + prosjektleder)</td></tr>
+            <tr><td>Kontraktsmal og signering</td><td>✓</td><td></td></tr>
+            <tr><td>Onboarding-prosess og system-tilgang</td><td>✓ (automatisert)</td><td>Mottak dag 1 + mentor</td></tr>
+            <tr><td>Lønn, AGA, A-melding</td><td>✓</td><td></td></tr>
+            <tr><td>Sykefravær — registrering</td><td></td><td>✓ (synkes til SA)</td></tr>
+            <tr><td>Sykefravær — oppfølging og IA-rolle</td><td>✓ (HR-rådgiver)</td><td>DL praktisk</td></tr>
+            <tr><td>Kompetanseplanlegging og kursportefølje</td><td>✓</td><td>Identifisere behov</td></tr>
+            <tr><td>Medarbeidersamtaler</td><td>Mal og oppfølging</td><td>✓ (DL gjennomfører)</td></tr>
+            <tr><td>Lønnsforhandlinger og policy</td><td>✓ (SA-konsernnivå)</td><td>Innspill via DL</td></tr>
+          </tbody>
+        </table>
+        <h4>Hva dette gir Fritzøe/Areal</h4>
+        <ul>
+          <li>Sterkere employer brand i Salten (alle SA-selskap nyter godt)</li>
+          <li>Tilgang til profesjonell rekrutterer uten å ansette egen</li>
+          <li>Lavere HR-kost lokalt (anslagsvis 200–300 kNOK/år frigjort)</li>
+          <li>Konsistent kvalitet på onboarding — ny ansatt produktiv 2 uker raskere</li>
+          <li>Felles læringsplattform gir mindre sårbarhet ved at én ansatt forsvinner med kompetansen</li>
+        </ul>
+        <div class="meta" style="grid-template-columns:repeat(4,1fr)">
+          <div><div class="mt">Konfigurasjon</div><div class="mv">3–4 uker</div></div>
+          <div><div class="mt">Tekn. utvikling</div><div class="mv">40 t · 60 kNOK</div></div>
+          <div><div class="mt">Lokal HR-kost frigjort</div><div class="mv">~ 250 kNOK/år</div></div>
+          <div><div class="mt">Avh.</div><div class="mv">M1 + M5</div></div>
+        </div>
+      </div>
+
+      <!-- M9 - SA Forsikringsstrøm -->
+      <div class="mod" style="border-left:3px solid #e85d75;grid-column:1 / -1">
+        <div class="head">
+          <div>
+            <div class="ord">Modul 9 · ny inntektsstrøm</div>
+            <h3>SA Forsikringsstrøm — claims fra forsikringsselskap</h3>
+          </div>
+          <span class="status deal">Onboarding hos SA</span>
+        </div>
+        <div class="desc">
+          ServiceAlliansens hovedvirksomhet er forsikringsskade-reparasjon på landsbasis — Byggmester Fritzøe har dette ikke i porteføljen i dag, men det er den klareste konsernsynergien som ligger åpen. Ved å bli kvalifisert leverandør i SA-distribusjonsportalen, får vi tilgang til en jevn strøm av småjobber (vannskade, brannskade, stormskade) som balanserer den syklisk offentlige ROT-volumet vårt.
+        </div>
+        <h4>Hvordan det flyter teknisk (forutsetning: SA har distribusjonssystem som kan integreres)</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+          <div>
+            <h4 style="margin-top:0">Datastrøm</h4>
+            <ul>
+              <li>Forsikringsselskap (Gjensidige, If, Tryg, Fremtind) registrerer skade i sitt CMS</li>
+              <li>Takstmann (Crawford, Polygon, ISS) gjør befaring og legger ved takst-PDF</li>
+              <li>Skade rutes til SAs sentrale distribusjonsportal</li>
+              <li>SA-portalen ruter til søsterselskap basert på geografi + fag + kapasitet</li>
+              <li><b>Vår pipeline-portal mottar via webhook/API</b> som ny pipeline-oppføring av type «Forsikringsoppdrag»</li>
+              <li>Vi bekrefter mottak, planlegger befaring, utfører, rapporterer tilbake gjennom samme rør</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="margin-top:0">Sannsynlige integrasjonsmønstre</h4>
+            <ul>
+              <li><b>SA-distribusjonsportal direkte</b> (forutsatt at den eksisterer): REST/JSON webhook ved nytt oppdrag</li>
+              <li><b>Crawford ClaimCenter API</b>: standardisert i bransjen, JSON-format for claim-data</li>
+              <li><b>Insurello / Polygon</b>: digitale plattformer med leverandør-API-er</li>
+              <li><b>E-post-fallback</b>: ved manglende API kan SA sende strukturert e-post som vår eksisterende e-post-bro plukker opp</li>
+              <li><b>EDI / XML</b>: eldre forsikringsselskap kjører fortsatt batch-format</li>
+            </ul>
+          </div>
+        </div>
+        <h4>Operasjonelle krav for å bli kvalifisert hos SA</h4>
+        <ul>
+          <li>Vakttelefon 24/7 for akutt-utrykning (vannskade krever befaring innen 72 t)</li>
+          <li>ISO 9001 + Miljøfyrtårn (allerede planlagt i M5-vinduet)</li>
+          <li>Fuktprotokoll-sertifisering for vannskade</li>
+          <li>Brannrehab-kompetanse (kan kjøpes som kurs eller via UE)</li>
+          <li>Standardisert dokumentasjon — SA krever fotodokumentasjon før/under/etter</li>
+        </ul>
+        <h4>Forretningseffekt</h4>
+        <ul>
+          <li><b>Inntektsstrøm — startpunkt 10 MNOK:</b> SA har etablerte rammeavtaler nasjonalt — når vi er onboardet, kobles vi direkte til Bodø-volumet. Forventet ramp: <b>10 MNOK år 1</b> (post onboarding), 14 MNOK år 2, 18 MNOK år 3, 22 MNOK år 4 (offensiv geografisk dekning). Base ~16 MNOK steady i 2029 (kun Bodø). Bull ~30 MNOK (Nord-Norge-tilstedeværelse).</li>
+          <li><b>Marginer:</b> Standardisert 6–8 % via SA-rammeavtaler — lavere enn offentlig ROT, men mer forutsigbart</li>
+          <li><b>Volum-stabilisator:</b> Skadeoppdrag er motkonjunkturelle — kommer like ofte i svake byggeår</li>
+          <li><b>Kapasitetsutnyttelse:</b> Fyller gap mellom store offentlige prosjekter</li>
+          <li><b>Kompetanse:</b> Nye fagområder (fukt, brann) som åpner for andre rehab-jobber</li>
+        </ul>
+        <div class="meta" style="grid-template-columns:repeat(4,1fr)">
+          <div><div class="mt">SA-onboarding</div><div class="mv">4–8 uker</div></div>
+          <div><div class="mt">Tekn. integrasjon</div><div class="mv">60 t</div></div>
+          <div><div class="mt">Kostnad utvikling</div><div class="mv">90 kNOK</div></div>
+          <div><div class="mt">Inntekt år 1 → år 4</div><div class="mv">10 → 22 MNOK</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SERVICEALLIANSEN-RAPPORTERING                                -->
+  <!-- ============================================================ -->
+  <div class="panel">
+    <h2><span class="num">3</span>ServiceAlliansen-konsernet — operasjonell og strategisk informasjon</h2>
+    <div class="lead">
+      Konsernet trenger to forskjellige informasjonsstrømmer fra Byggmester Fritzøe: <b>operasjonell</b> for å se driftshelse på tvers av porteføljen, og <b>strategisk</b> for å vurdere kapital-allokering og M&amp;A-prioritering. Begge kan automatiseres ut av M1, M6 og M8.
+    </div>
+    <div class="sa-cols">
+      <!-- Operasjonell -->
+      <div class="sa-col op">
+        <h3>Operasjonell rapportering</h3>
+        <div class="who">DL → SA-COO · ukentlig + månedlig</div>
+        <h4>Ukentlig (mandag)</h4>
+        <table>
+          <tbody>
+            <tr><td>Anbud levert siste uke</td><td><span class="freq">Live</span></td></tr>
+            <tr><td>Hit-rate per selskap (Fritzøe / Areal / Kombinert)</td><td><span class="freq">Live</span></td></tr>
+            <tr><td>Verdi i pipeline (aktive Pending)</td><td><span class="freq">Live</span></td></tr>
+            <tr><td>Ordrebok i måneder</td><td><span class="freq">Live</span></td></tr>
+            <tr><td>Frist-flagg neste 14 dager</td><td><span class="freq">Live</span></td></tr>
+          </tbody>
+        </table>
+        <h4>Månedlig (3. virkedag)</h4>
+        <table>
+          <tbody>
+            <tr><td>Marginavvik plan vs faktisk (PowerOffice Go)</td><td><span class="freq">Auto</span></td></tr>
+            <tr><td>Faktiske timer vs kalkulerte (per prosjekt)</td><td><span class="freq">Auto</span></td></tr>
+            <tr><td>Topp 5 vunne / topp 5 tapte med årsak</td><td><span class="freq">Auto</span></td></tr>
+            <tr><td>Sammenligning med SA-søsterselskaper</td><td><span class="freq">Auto</span></td></tr>
+          </tbody>
+        </table>
+        <h4>Hva SA-COO bruker det til</h4>
+        <ul>
+          <li>Identifisere selskaper som henger etter på drift</li>
+          <li>Allokere konsernressurser ved kapasitets-glipp</li>
+          <li>Benchmarke margin på tvers av porteføljen</li>
+          <li>Tidlig varsel om problemer — før kvartalstall</li>
+        </ul>
+      </div>
+
+      <!-- Strategisk -->
+      <div class="sa-col str">
+        <h3>Strategisk rapportering</h3>
+        <div class="who">Styret → SA-styret · kvartalsvis + halvårlig</div>
+        <h4>Kvartalsvis</h4>
+        <table>
+          <tbody>
+            <tr><td>Faktisk omsetning vs scenario-bane (Base/Off./Bull)</td><td><span class="freq">Q-rapport</span></td></tr>
+            <tr><td>Beslutningstrigger-status (eskalere/deeskalere?)</td><td><span class="freq">Q-rapport</span></td></tr>
+            <tr><td>M&amp;A-leads identifisert (med scoring)</td><td><span class="freq">Q-rapport</span></td></tr>
+            <tr><td>Geografisk dekningsutvikling</td><td><span class="freq">Q-rapport</span></td></tr>
+            <tr><td>Konkurrentutvikling (fra dashboard.html-data)</td><td><span class="freq">Q-rapport</span></td></tr>
+          </tbody>
+        </table>
+        <h4>Halvårlig</h4>
+        <table>
+          <tbody>
+            <tr><td>Kapitalavkastning vs plan</td><td><span class="freq">H-rapport</span></td></tr>
+            <tr><td>EBIT-margin på rammeavtaler vs enkeltprosjekt</td><td><span class="freq">H-rapport</span></td></tr>
+            <tr><td>EPC-portefølje status</td><td><span class="freq">H-rapport</span></td></tr>
+            <tr><td>Strategisk vurdering: bytt scenario?</td><td><span class="freq">H-rapport</span></td></tr>
+          </tbody>
+        </table>
+        <h4>Hva SA-styret bruker det til</h4>
+        <ul>
+          <li>Kapital-allokeringsbeslutninger (M&amp;A, ekspansjon)</li>
+          <li>Bekrefte at strategien er på sporet — eller justere</li>
+          <li>Synergi-vurdering med andre SA-selskap</li>
+          <li>Forberede exit eller børsnotering på lengre sikt</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip">
+      <b>Konsern-fordel:</b> Det er ikke noe fluffy ved dette — alle tallene over kommer ut av M6 (PowerOffice Go) og M1 (pipeline-portal) automatisk. Den eneste manuelle jobben i konsernrapporteringen er den strategiske <i>tolkningen</i>, som styret skal gjøre uansett. <b>Vi reduserer rapporteringskostnaden mot 0 og øker frekvensen mot live</b>.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- KOSTNADER                                                    -->
+  <!-- ============================================================ -->
+  <div class="panel">
+    <h2><span class="num">4</span>Kostnadsoversikt — år 1 og videre</h2>
+    <div class="lead">Setup-kostnader er engangsutgifter; drift går inn i kontinuerlig OPEX fra år 2.</div>
+    <div class="costs">
+      <table class="cost-table">
+        <thead>
+          <tr><th colspan="2">År 1 — setup</th></tr>
+          <tr><th>Modul / post</th><th class="num">kNOK</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>M1 — Pipeline produksjonsdeploy</td><td class="num">60</td></tr>
+          <tr><td>M2 — Doffin-monitor</td><td class="num">90</td></tr>
+          <tr><td>M3 — CoBrief setup + wiring</td><td class="num">60</td></tr>
+          <tr><td>M4 — Mercell e-post-bro</td><td class="num">120</td></tr>
+          <tr><td>M5 — HoltePortalen ↔ PowerOffice Go aktivering</td><td class="num">75</td></tr>
+          <tr><td>M6 — PowerOffice Go REST → portal</td><td class="num">180</td></tr>
+          <tr><td>M7 — Mercell Supplier API integrasjon</td><td class="num">120</td></tr>
+          <tr><td>M8 — SA rapporteringslag</td><td class="num">150</td></tr>
+          <tr><td>M9 — SA Forsikringsstrøm-integrasjon</td><td class="num">90</td></tr>
+          <tr><td>M10 — HR-integrasjon mot SA sentralt</td><td class="num">60</td></tr>
+          <tr><td>Hosting + sikkerhet (oppsett)</td><td class="num">40</td></tr>
+          <tr><td>CoBrief Pro (12 mnd)</td><td class="num">100</td></tr>
+          <tr><td>Mercell Supplier API (12 mnd)</td><td class="num">150</td></tr>
+          <tr><td>Reserve / overhead 10 %</td><td class="num">130</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Total år 1</td><td class="num">1 425</td></tr>
+        </tfoot>
+      </table>
+      <table class="cost-table">
+        <thead>
+          <tr><th colspan="2">År 2+ — løpende drift</th></tr>
+          <tr><th>Post</th><th class="num">kNOK/år</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CoBrief Pro/Max</td><td class="num">100</td></tr>
+          <tr><td>Mercell Supplier API</td><td class="num">150</td></tr>
+          <tr><td>Hosting + monitoring</td><td class="num">36</td></tr>
+          <tr><td>Doffin + datakilder</td><td class="num">5</td></tr>
+          <tr><td>Vedlikehold (15 % av setup)</td><td class="num">120</td></tr>
+          <tr><td>Funksjonsutvidelser (estimat)</td><td class="num">80</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Total år 2+</td><td class="num">~ 490</td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="tip">
+      <b>ROI-perspektiv:</b> Estimert tidsbesparelse er 6–8 timer/uke for tilbudsleder + DL = <b>~ 350 timer/år</b>. På timesats 1 200 kr blir det 420 kNOK i frigjort lederkapasitet, allerede i år 1. Hit-rate-løft fra 67 % → 75 % på Fritzøe (oppnåelig med AI-evaluering og bedre kalkulasjons-tilgang) betyr 2–3 ekstra vunne anbud à 4 MNOK = <b>8–12 MNOK ekstra omsetning i år 2</b>. Setup-budsjettet er tjent inn på under 6 måneder.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BESLUTNINGSPUNKTER                                           -->
+  <!-- ============================================================ -->
+  <div class="panel">
+    <h2><span class="num">5</span>Beslutningspunkter — hvem godkjenner hva</h2>
+    <div class="lead">Klar fordeling mellom operativt mandat (DL), strategisk mandat (styret) og konsernmandat (ServiceAlliansen) holder farten oppe.</div>
+    <div class="dec-grid">
+      <div class="dec dl">
+        <h3>Daglig leder beslutter</h3>
+        <div class="role">Operativ ledelse</div>
+        <ul>
+          <li>Igangsettelse M1, M2, M4 (under egen budsjettramme)</li>
+          <li>CoBrief-abonnement (M3) opp til Pro-plan</li>
+          <li>Daglige arbeidsrutiner og morgenmøtestruktur</li>
+          <li>Rekruttering av tilbudsleder eller kalkulator-stilling</li>
+          <li>Margin-policy per kundegruppe</li>
+        </ul>
+      </div>
+      <div class="dec styre">
+        <h3>Styret beslutter</h3>
+        <div class="role">Strategisk retning</div>
+        <ul>
+          <li>Hvilket scenario som skal forfølges (Base/Offensiv/Bull)</li>
+          <li>Kapitalallokering til M&amp;A og geografisk ekspansjon</li>
+          <li>Holte-/PowerOffice-modulutvidelse over 100 kNOK</li>
+          <li>EPC-/energi-rehab-divisjonsetablering</li>
+          <li>Halvårlige scenario-revurderinger</li>
+        </ul>
+      </div>
+      <div class="dec sa">
+        <h3>ServiceAlliansen beslutter</h3>
+        <div class="role">Konsernnivå</div>
+        <ul>
+          <li>M&amp;A-finansiering &gt;10 MNOK</li>
+          <li>Mercell Enterprise-avtale (sannsynlig på konsernnivå)</li>
+          <li>Synergi-prosjekter på tvers av SA-selskap</li>
+          <li>Strategi-justeringer som påvirker porteføljen</li>
+          <li>Eksekvering av exit / børsnotering</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- LENKER                                                       -->
+  <!-- ============================================================ -->
+  <div class="panel">
+    <h2><span class="num">6</span>Tilbake til dashboardet</h2>
+    <div class="lead">Den tekniske planen henger sammen med både operativt og strategisk dashboard.</div>
+    <div class="modules" style="grid-template-columns:repeat(3,1fr)">
+      <a href="index.html" style="text-decoration:none;color:inherit">
+        <div class="mod">
+          <h3>← Operativt og strategisk dashboard</h3>
+          <div class="desc">Hovedinngangen. To-modus visning: pipeline og scenarier.</div>
+        </div>
+      </a>
+      <a href="anbud.html" style="text-decoration:none;color:inherit">
+        <div class="mod green">
+          <h3>→ Anbudsportal</h3>
+          <div class="desc">Den faktiske operative pipelinen med integrasjonsdemoer.</div>
+        </div>
+      </a>
+      <a href="dashboard.html" style="text-decoration:none;color:inherit">
+        <div class="mod blue">
+          <h3>→ Bransjedashboard</h3>
+          <div class="desc">Konkurrentbilde i Bodø-bygg 2024 og strategisk underlag for M&amp;A.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+<script src="sidebar.js"></script>
+</body>
+</html>

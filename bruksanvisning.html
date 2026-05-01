@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Bruksanvisning — Byggmester Fritzøe</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --panel-3: #262d38;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #4f9da6;
+    --accent-2: #66c2cc;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --pending: #a371f7;
+    --orange: #ff6b35;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #2d6e76; --accent-2: #4a8a92;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35;
+    --hi: #2a6dc7; --pending: #7c5fce; --orange: #d4660a;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  .theme-toggle { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 15px; display: inline-flex; align-items: center; justify-content: center }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0 }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header.top {
+    padding: 24px 40px 18px; background: var(--header-grad);
+    border-bottom: 1px solid var(--line);
+  }
+  header.top .crumb { font-size: 12px; color: var(--muted); margin-bottom: 6px }
+  header.top .crumb a { color: var(--accent); text-decoration: none }
+  header.top h1 { margin: 4px 0 6px; font-size: 24px; font-weight: 600; letter-spacing: -0.015em }
+  header.top .sub { color: var(--muted); font-size: 13px; max-width: 880px }
+  main { padding: 32px 40px 80px; max-width: 920px; margin: 0 auto }
+
+  .toc {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 22px; margin-bottom: 24px;
+    border-left: 3px solid var(--accent);
+  }
+  .toc h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .toc ul { margin: 0; padding-left: 18px; columns: 2; font-size: 13px }
+  .toc li { margin-bottom: 4px }
+  .toc a { color: var(--accent-2); text-decoration: none }
+  .toc a:hover { text-decoration: underline }
+
+  .role-section {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 26px 30px; margin-bottom: 22px;
+    border-top: 4px solid var(--accent);
+  }
+  .role-section.dl { border-top-color: var(--good) }
+  .role-section.styre { border-top-color: var(--accent) }
+  .role-section.sa { border-top-color: var(--orange) }
+  .role-section .head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px }
+  .role-section h2 { margin: 0; font-size: 20px; font-weight: 600 }
+  .role-section .who {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px;
+    padding: 6px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-2);
+  }
+  .role-section .lead { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 16px }
+
+  /* Step-by-step */
+  .steps {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 20px; margin: 14px 0;
+  }
+  .steps h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600 }
+  .step-row {
+    display: grid; grid-template-columns: 36px 1fr; gap: 14px; padding: 10px 0;
+    border-bottom: 1px solid var(--line); align-items: flex-start;
+  }
+  .step-row:last-child { border-bottom: 0 }
+  .step-num {
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 700;
+    width: 28px; height: 28px; border-radius: 50%; line-height: 28px; text-align: center;
+  }
+  .step-content h4 { margin: 0 0 4px; font-size: 13px; font-weight: 600 }
+  .step-content p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.6 }
+  .step-content code {
+    font-family: 'SF Mono', Consolas, monospace; font-size: 11px; background: var(--panel-3);
+    padding: 1px 6px; border-radius: 3px; color: var(--accent-2);
+  }
+  .step-content a { color: var(--accent-2); text-decoration: none }
+  .step-content a:hover { text-decoration: underline }
+
+  /* Frequency badges */
+  .freq-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-left: 6px;
+  }
+  .freq-badge.daily { background: rgba(63,185,80,0.18); color: var(--good) }
+  .freq-badge.weekly { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .freq-badge.monthly { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .freq-badge.quarterly { background: rgba(163,113,247,0.18); color: var(--pending) }
+
+  /* Decision tree */
+  .decision {
+    background: rgba(79,157,166,0.06); border-left: 3px solid var(--accent);
+    padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0;
+    font-size: 13px;
+  }
+  .decision b { color: var(--accent-2) }
+  .decision ul { margin: 6px 0 0; padding-left: 20px }
+
+  /* Mini summary */
+  .summary-box {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 14px 18px; margin: 12px 0;
+  }
+  .summary-box h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .summary-box ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.7 }
+
+  /* Process flow */
+  .flow {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 14px 0;
+  }
+  .flow .f-step {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px 10px; text-align: center; position: relative;
+  }
+  .flow .f-step::after {
+    content: "→"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 18px; z-index: 2;
+  }
+  .flow .f-step:last-child::after { display: none }
+  .flow .f-step h5 { margin: 0 0 3px; font-size: 11px; color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.06em }
+  .flow .f-step p { margin: 0; font-size: 11px; color: var(--text); line-height: 1.4 }
+  .flow .f-step .when { font-size: 9px; color: var(--muted); margin-top: 4px; font-weight: 600 }
+
+  /* Quick reference */
+  .quickref {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 22px; margin: 16px 0;
+  }
+  .quickref h3 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .quickref table { width: 100%; border-collapse: collapse; font-size: 12px }
+  .quickref th, .quickref td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left }
+  .quickref th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600 }
+  .quickref tbody tr:last-child td { border-bottom: 0 }
+  .quickref a { color: var(--accent-2); text-decoration: none }
+  .quickref a:hover { text-decoration: underline }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="bruksanvisning"></div>
+
+<header class="top">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+    <div>
+      <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a> · <a href="bruksanvisning-trondheim.html">Braa og Sørvåg →</a></div>
+      <h1>Bruksanvisning — Byggmester Fritzøe</h1>
+      <div class="sub">
+        Tre brukerroller, tre rytmer. Daglig leder kjører pipelinen daglig, styret tar strategiske beslutninger kvartalsvis, ServiceAlliansen-konsernet rapporteres månedlig og kvartalsvis. Denne siden er en oppskrift for hver rolle på <i>hvilken side de starter på, hvilke handlinger de gjør, og hva som er output</i>.
+      </div>
+    </div>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+
+<main>
+
+<div class="toc">
+  <h3>Innhold</h3>
+  <ul>
+    <li><a href="#dl">For daglig leder — daglig drift</a></li>
+    <li><a href="#dl-tilbud">Håndtering av e-post-tilbud (drag-and-drop)</a></li>
+    <li><a href="#styre">For styret — kvartalsmøte</a></li>
+    <li><a href="#sa">For ServiceAlliansen — konsernrapportering</a></li>
+    <li><a href="#quickref">Quick reference — alle sider</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- DAGLIG LEDER                                                  -->
+<!-- ============================================================ -->
+<section class="role-section dl" id="dl">
+  <div class="head">
+    <h2>Slik bruker daglig leder dashboardet</h2>
+    <span class="who">Daglig drift · Brynjar Storvik</span>
+  </div>
+  <div class="lead">
+    DL har <b>tre faste tidspunkter i døgnet</b> der dashboardet er primærverktøyet, pluss to ukentlige punkter som driver rapportering og strategi. Ingen av disse tar lang tid hvis dashboardet brukes som tiltenkt — total daglig tid: 30–45 min.
+  </div>
+
+  <div class="flow">
+    <div class="f-step"><h5>07:30</h5><p>Pipeline-sjekk</p><div class="when">5–10 min</div></div>
+    <div class="f-step"><h5>08:30</h5><p>Morgenmøte</p><div class="when">15 min</div></div>
+    <div class="f-step"><h5>12:30</h5><p>Marginvurdering</p><div class="when">10–15 min</div></div>
+    <div class="f-step"><h5>15:30</h5><p>Tildelinger inn</p><div class="when">5 min</div></div>
+    <div class="f-step"><h5>Mandag</h5><p>SA-ukerapport</p><div class="when">10 min</div></div>
+  </div>
+
+  <div class="steps">
+    <h3>07:30 — Pipeline-sjekk <span class="freq-badge daily">Daglig</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="anbud.html">anbud.html</a> → fanen «Pipeline / Innkommende»</h4>
+        <p>Du ser umiddelbart hvor mange anbud som har kommet inn siden forrige sjekk, fordelt på Mercell, TendSign, Doffin, CoBrief og e-post.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Gå gjennom hver oppføring, vurder AI-match-scoren</h4>
+        <p>Score &gt;75 % og urgent frist: importer som anbud, send til kalkulatør samme dag. Score 50–75 %: vurder mot kapasitet. Score &lt;50 %: les CoBrief AI-tipset, ofte anbefales å ignorere.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Klikk «Importer som anbud» eller «Ignorer»</h4>
+        <p>Importerte anbud får ID, vises i Anbudsregister-fanen, og dukker opp i samtlige speedometre og KPI-er på alle dashboards.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>08:30 — Morgenmøte med tilbudsleder og kalkulator <span class="freq-badge daily">Daglig · 15 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="okonomi.html">okonomi.html</a> — prosjektmatrisen</h4>
+        <p>Sjekk røde flagg (avvik plan vs faktisk). I dag: f.eks. Skarmoen barnehage (32 % timer ved 25 % fremdrift) — bør tas opp på møtet.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Gå gjennom dagens kalkulasjoner i SmartKalk</h4>
+        <p>Hvilke anbud kalkuleres i dag? Når er fristen? Hvem trenger input fra fag? Avgjør prioritering hvis kapasitet er knapp.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Avklar leveranser og UE-er</h4>
+        <p>Hvilke pågående prosjekter trenger materialleveranse eller UE-koordinering denne uken? Margin live i okonomi.html viser hvilke som er på sporet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>12:30 — Marginvurdering på ferdige kalkyler <span class="freq-badge daily">Daglig · etter behov</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>SmartKalk-kalkyle ferdig — varsel i pipelinen</h4>
+        <p>Når en kalkyle er ferdig, oppdateres anbud-status til «Klar for marginvurdering». DL får varsel.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Beslutt marginpåslag</h4>
+        <p>5–7 % på rammeavtaler vi vil holde, 8–12 % på enkeltprosjekter med svak konkurranse, 12–15 % på private der vi vil filtrere bort kunder. okonomi.html viser historisk margin per kunde for benchmarking.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Tilbudsleder leverer i kundens portal</h4>
+        <p>Status oppdateres til «Pending» i pipelinen. KPI-kort oppdateres live på alle dashboards.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>15:30 — Sjekk tildelinger <span class="freq-badge daily">Daglig · 5 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Mercell og Doffin sender tildelingsvarsler</h4>
+        <p>Når et anbud er avgjort, registrer i pipelinen som «Vunnet» eller «Tapt». Ved tap: noter konkurrent og kort årsaksforklaring.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Speedometer-oppdatering automatisk</h4>
+        <p>Hit-rate per selskap og samlet oppdateres umiddelbart. Hvis det går under 65 % på Fritzøe, varsel til DL.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>Mandag morgen — ukeoppsummering til SA-COO <span class="freq-badge weekly">Ukentlig · 10 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="oversikt.html">oversikt.html</a> for én-sides bilde</h4>
+        <p>Én skjermside med operativt, økonomisk, strategisk og implementeringsstatus. Sendes som lenke til SA-COO.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Hvis avvik: åpne dypdykk-side</h4>
+        <p>Marginavvik &gt;3 %p? Åpne <a href="okonomi.html">okonomi.html</a>. Hit-rate fall? Åpne <a href="anbud.html">anbud.html</a>. Investering bak plan? Åpne <a href="implementering.html">implementering.html</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DRAG-AND-DROP TILBUDSFORESPØRSLER                             -->
+<!-- ============================================================ -->
+<section class="role-section dl" id="dl-tilbud">
+  <div class="head">
+    <h2>Tilbudsforespørsler fra borettslag, sameier og private — drag-and-drop</h2>
+    <span class="who">Daglig admin · 5 min per henvendelse</span>
+  </div>
+  <div class="lead">
+    Mens offentlige anbud kommer inn automatisk via Mercell/Doffin, kommer tilbudsforespørsler fra borettslag, sameier og private kunder typisk på e-post med vedlegg. Dashboardet håndterer disse via drag-and-drop, AI-evaluering og standardisert kategorisering ved inngangen til pipelinen.
+  </div>
+
+  <div class="flow">
+    <div class="f-step"><h5>1 · Mottak</h5><p>E-post i innboks med vedlegg</p><div class="when">avhengig</div></div>
+    <div class="f-step"><h5>2 · Drag</h5><p>Dra fil(er) inn i pipeline-portalen</p><div class="when">5 sek</div></div>
+    <div class="f-step"><h5>3 · AI</h5><p>Evaluerer relevans + foreslår fag</p><div class="when">~2 sek</div></div>
+    <div class="f-step"><h5>4 · Beslutt</h5><p>Importer eller avvis</p><div class="when">30 sek</div></div>
+    <div class="f-step"><h5>5 · I drift</h5><p>Pending i pipelinen som anbud</p><div class="when">live</div></div>
+  </div>
+
+  <div class="steps">
+    <h3>Slik gjør du det — steg for steg</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Motta e-post med vedlegg fra ekstern kunde</h4>
+        <p>Eksempler: borettslag som vil ha fasaderehab-tilbud, sameie som trenger vindusutskifting, privatkunde med totalrehab-prosjekt, bedrift som vil ha kontorombygging.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Åpne <a href="anbud.html">anbud.html</a> → fanen «Pipeline / Innkommende»</h4>
+        <p>Øverst på pipeline-fanen ligger drag-zone-en med ikonet 📥 og tittelen «Tilbudsforespørsler fra borettslag og private».</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Dra e-postvedleggene inn i drop-sonen</h4>
+        <p>Aksepterer PDF, .eml, bilder, tegninger, Word-filer. Du kan dra flere filer samtidig — alle blir analysert som én forespørsel.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>AI-evalueringen kjører (~2 sekunder)</h4>
+        <p>Systemet ekstraherer kunde, type bygg, fag-kategorier, estimert verdi. Match-score (0–100) beregnes mot vår selskapsprofil: hva vi er gode på, hva vi prioriterer strategisk, og hva som passer kapasitet.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Resultatkort vises med struktur</h4>
+        <p>Du ser: kunde + kategori (Borettslag / Sameie / Privat / Bedrift), tittel, foreslåtte fag, estimert verdi, anbefalt selskap (Fritzøe / Areal / Kombinert), foreslått frist, og en «AI-vurdering»-tekst som forklarer hvorfor.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Beslutt: «Importer som tilbudsforespørsel» eller «Avvis»</h4>
+        <p>Importerte tilbudsforespørsler får ID-prefiks <code>TF-2026-XXX</code> og legges som <i>Pending</i> i Anbudsregisteret. Avviste fjernes uten at noe lagres.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="decision">
+    <b>Beslutningsregler — når importere vs avvise:</b>
+    <ul>
+      <li><b>Score &gt; 75 %:</b> Alltid importér. Foreslått selskap er trygt valg.</li>
+      <li><b>Score 50–75 %:</b> Importér hvis kapasitet, ellers be tilbudsleder vurdere.</li>
+      <li><b>Score &lt; 50 % og geografisk utenfor kjerneområde:</b> Avvis høflig, evt. henvis til SA-søsterselskap.</li>
+      <li><b>Privat under 1 MNOK:</b> Standard avvis — vi prioriterer offentlig ROT og større private.</li>
+      <li><b>Borettslag/sameie:</b> Nesten alltid importér — kjerneinntekt for ROT-segmentet, høy gjenkjøps-faktor.</li>
+    </ul>
+  </div>
+
+  <div class="summary-box">
+    <h4>Hvorfor dette er viktig</h4>
+    <ul>
+      <li><b>Inngangsstandardisering:</b> Alle tilbud — uansett kilde — havner i samme pipeline med samme kategorisering. Ingen manuell omklassifisering senere.</li>
+      <li><b>Beslutningstid kuttes:</b> Fra 15–20 min manuell vurdering per henvendelse til 2 min med AI-pre-vurdering.</li>
+      <li><b>Sporbarhet:</b> Avviste tilbud loggføres med begrunnelse — gir styret oversikt over hva vi <i>velger bort</i>, ikke bare hva vi vinner.</li>
+      <li><b>Konsernsynergi:</b> Tilbud utenfor vårt kjerneområde kan rutes til andre SA-selskaper i stedet for å forsvinne.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STYRET                                                        -->
+<!-- ============================================================ -->
+<section class="role-section styre" id="styre">
+  <div class="head">
+    <h2>Slik bruker styret dashboardet</h2>
+    <span class="who">Strategisk retning · Kvartalsmøte + halvårlig revisjon</span>
+  </div>
+  <div class="lead">
+    Styret møtes typisk hver tredje måned. Forberedelse til styremøtet skal ta &lt; 30 min — alt nødvendig ligger i dashboardet. Selve møtet bruker dashboardet som «levende presentasjon», ikke som en statisk PowerPoint.
+  </div>
+
+  <div class="flow">
+    <div class="f-step"><h5>Før</h5><p>Forberede materiale</p><div class="when">30 min</div></div>
+    <div class="f-step"><h5>Møte 1</h5><p>Rapporten</p><div class="when">20 min</div></div>
+    <div class="f-step"><h5>Møte 2</h5><p>Scenariovelger</p><div class="when">30 min</div></div>
+    <div class="f-step"><h5>Møte 3</h5><p>Beslutninger</p><div class="when">15 min</div></div>
+    <div class="f-step"><h5>Etter</h5><p>Lagre + send SA</p><div class="when">10 min</div></div>
+  </div>
+
+  <div class="steps">
+    <h3>30 min før møtet — forberedelse <span class="freq-badge quarterly">Hver tredje mnd</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Åpne <a href="oversikt.html">oversikt.html</a></h4>
+        <p>Send lenken til <a href="oversikt.html">oversikt.html</a> til styremedlemmer i forkant. Hver får én skjermside med alle fire dimensjoner (operativt, økonomi, strategisk, implementering). Marker eventuelt risiko-flagg som krever diskusjon.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Åpne <a href="dashboard.html">dashboard.html</a> for konkurrentkontekst</h4>
+        <p>Sjekk om Bodø-konkurrentene har endret posisjon siden forrige møte (nye konkurser, M&amp;A-aktivitet, vekst). Det kan trigge strategiske triggere.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>Under møtet — strukturert agenda <span class="freq-badge quarterly">~80 min totalt</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Punkt 1 (20 min): Rapportgjennomgang via <a href="oversikt.html">oversikt.html</a></h4>
+        <p>Operativ status (DL presenterer) → økonomi-status (DL/regnskap) → strategi-status (styreleder) → implementering (prosjektleder). 5 min per kvadrant.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Punkt 2 (30 min): Strategi-diskusjon i <a href="index.html">index.html</a> → Strategisk view</h4>
+        <p>Bruk den interaktive scenariovelgeren live. Spill med pillvalg (geografi / M&amp;A / EPC) og se omsetning-/kapital-effekt. Diskuter Nord-Norge sanity-check (panel 5) — er antagelsene fortsatt holdbare?</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Punkt 3 (15 min): Beslutning og lagring</h4>
+        <p>Bli enig om hvilket scenario som skal kommuniseres til SA-konsernet og være rettesnor til neste møte. Skriv inn navn (f.eks. «Q2 2026 — vedtatt offensiv med Salten-fokus») og klikk «Lagre scenario». Scenario lagres lokalt og reflekteres i oversikt.html og sa-rapport.html.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>Etter møtet — distribusjon <span class="freq-badge quarterly">10 min</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Generér SA-konsernrapport</h4>
+        <p>Åpne <a href="sa-rapport.html">sa-rapport.html</a>. Strategisk-seksjonen reflekterer det vedtaket styret nettopp lagret. Send lenken til SA-COO og SA-styret.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Følg opp til neste møte</h4>
+        <p>Triggere som ble identifisert (f.eks. «hit-rate &gt;70 % stabilt») må følges via DL ukentlig. Hvis triggere bryter — DL eskalerer til styreleder før neste planlagte møte.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="decision">
+    <b>Halvårlig — formell scenario-revurdering:</b>
+    <ul>
+      <li>Sammenlign faktisk YTD med valgt scenario-bane (synlig i oversikt.html marker-posisjon).</li>
+      <li>Hvis vi ligger &gt;10 % under valgt bane to halvår på rad: vurder å trekke seg tilbake (offensiv → base, eller bull → offensiv).</li>
+      <li>Hvis triggere for eskalering oppfylles: vurder å gå opp ett trinn (base → offensiv).</li>
+      <li>Ved hver halvårlig revurdering: lagre nytt scenario, ny merkelapp (f.eks. «H1 2027 — bekreftet offensiv»).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SERVICEALLIANSEN                                              -->
+<!-- ============================================================ -->
+<section class="role-section sa" id="sa">
+  <div class="head">
+    <h2>Slik bruker ServiceAlliansen-konsernet dashboardet</h2>
+    <span class="who">Konsernrapportering · SA-COO + SA-styret</span>
+  </div>
+  <div class="lead">
+    SA har to grensesnitt mot Byggmester Fritzøe: SA-COO som følger drift månedlig, og SA-styret som tar konsernbeslutninger kvartalsvis. Begge får all informasjon de trenger fra to dashboard-sider som er tilgjengelig direkte i nettleseren.
+  </div>
+
+  <div class="steps">
+    <h3>SA-COO — månedlig <span class="freq-badge monthly">Månedlig · 3. virkedag</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Mottar én-side oversikt fra DL via e-post</h4>
+        <p>DL genererer fra <a href="oversikt.html">oversikt.html</a> 3. virkedag etter månedslutt. Inneholder operativ status, økonomi, strategisk fremdrift og implementerings-progress.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Sammenlign mot SA-portefølje-snitt</h4>
+        <p>Åpne <a href="sa-rapport.html">sa-rapport.html</a> som har dedikert peer-comparison-tabell (avsnitt 3): Fritzøe+Areal vs SA-snitt vs SA-best på lønnsomhet, vekst, hit-rate, EK-andel, ROT-andel, ordrebok.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Identifisér grønne / gule / røde lamper</h4>
+        <p>SA-rapportens «eksekutiv ampel» (avsnitt 1) er bygget for dette: 6 dimensjoner med fargekoding. Røde lamper → ring DL samme dag. Gule → ta opp på månedlig portefølje-møte.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Allokér konsernressurser ved behov</h4>
+        <p>Hvis Fritzøe trenger UE-hjelp, vurder om SA-søsterselskap har ledig kapasitet. Hvis margin er presset på materialer, sjekk konsern-innkjøpsavtaler.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <h3>SA-styret — kvartalsvis <span class="freq-badge quarterly">Kvartalsvis · etter Q-rapport</span></h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Mottar to-siders SA-konsernrapport</h4>
+        <p><a href="sa-rapport.html">sa-rapport.html</a> — inneholder finansiell oversikt, operativ status, strategisk milepæler og kritisk: <i>Asks</i> (hva selskapet trenger fra SA-konsernet for å eksekvere strategien).</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Diskutér Asks-seksjonen (avsnitt 8)</h4>
+        <p>Beslutninger SA må ta: kapital-allokering for M&amp;A, Mercell Enterprise på konsernnivå, bekreftelse av strategi-bane, felles innkjøpsavtaler.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Vurder synergi-muligheter (avsnitt 7)</h4>
+        <p>Seks konkrete områder for porteføljesynergi. SA-styret avgjør prioritet og tildeler eierskap (typisk SA-COO eller dedikert konsernsjef).</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Bekreft eller juster strategisk bane</h4>
+        <p>Strategisk-seksjonen viser hvilket scenario styret har valgt + YTD-bane. SA kan be om revurdering hvis konsern-perspektivet tilsier annet enn lokalt-perspektivet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <h4>Hvorfor dette er forskjellig fra typisk konsernrapportering</h4>
+    <ul>
+      <li>Live data, ikke månedsgammel utskrift — alle tall kommer fra PowerOffice Go i sanntid.</li>
+      <li>Standardisert sammenligning med portefølje — peer-dot-visualisering gjør avvik tydelig på sekunder.</li>
+      <li>Kontant Asks-seksjon — fjerner usikkerhet om hva selskapet faktisk trenger fra konsernet.</li>
+      <li>Strategisk bane som <i>delt artefakt</i> — styret og SA-styret ser samme valgte scenario, ikke hver sin tolkning.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK REFERENCE                                               -->
+<!-- ============================================================ -->
+<section class="role-section" id="quickref">
+  <div class="head">
+    <h2>Quick reference — alle sider og hvem de er for</h2>
+    <span class="who">Oversikt</span>
+  </div>
+
+  <div class="quickref">
+    <table>
+      <thead>
+        <tr>
+          <th>Side</th>
+          <th>Primær bruker</th>
+          <th>Frekvens</th>
+          <th>Hva den brukes til</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="index.html">index.html</a></td><td>DL + Styret</td><td>Daglig / kvartalsvis</td><td>Hovedinngang. To-modus operativt eller strategisk.</td></tr>
+        <tr><td><a href="anbud.html">anbud.html</a></td><td>DL + tilbudsleder</td><td>Daglig (4× per dag)</td><td>Pipeline, anbud, drag-and-drop tilbudsforespørsler, speedometre, hit-rate.</td></tr>
+        <tr><td><a href="okonomi.html">okonomi.html</a></td><td>DL</td><td>Ukentlig</td><td>Live regnskap, prosjekt-margin, timeføring, lønn (PowerOffice Go).</td></tr>
+        <tr><td><a href="dashboard.html">dashboard.html</a></td><td>Styret + DL</td><td>Kvartalsvis</td><td>Konkurrentbilde i Bodø, M&amp;A-screening, soliditet av peers.</td></tr>
+        <tr><td><a href="implementering.html">implementering.html</a></td><td>DL + Styret + SA</td><td>Månedlig</td><td>14-uker Gantt, beta-spor, kostnader, beslutningspunkter.</td></tr>
+        <tr><td><a href="oversikt.html">oversikt.html</a></td><td>DL → SA-COO</td><td>Ukentlig (mandag)</td><td>Print-vennlig én-side med alle fire dimensjoner.</td></tr>
+        <tr><td><a href="sa-rapport.html">sa-rapport.html</a></td><td>Styret → SA-styret</td><td>Kvartalsvis</td><td>To-siders SA-konsernformat med peer-comparison og Asks.</td></tr>
+        <tr><td><a href="bruksanvisning.html">bruksanvisning.html</a></td><td>Alle nye brukere</td><td>Onboarding</td><td>Du leser den nå.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

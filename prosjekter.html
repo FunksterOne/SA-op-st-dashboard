@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Prosjekter — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<script src="prosjekter.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .page-header h1 { margin: 6px 0 0; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-sub { margin: 4px 0 0; font-size: 13px; color: var(--muted) }
+
+  .page-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap }
+  .toolbar-right { font-size: 11.5px; color: var(--muted) }
+  .filter-chips { display: inline-flex; gap: 4px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px }
+  .filter-chip {
+    padding: 5px 11px; background: transparent; border: 0; color: var(--muted);
+    font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 4px;
+  }
+  .filter-chip:hover { color: var(--text); background: var(--panel-3) }
+  .filter-chip.active { background: var(--panel-3); color: var(--accent-2); font-weight: 600 }
+
+  .container { padding: 22px 32px; max-width: 1400px }
+
+  .summary-row {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;
+  }
+  @media (max-width: 1100px) { .summary-row { grid-template-columns: repeat(2, 1fr) } }
+
+  .prj-table {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden;
+  }
+  .prj-table .prj-row {
+    display: grid; grid-template-columns: 32px 2.4fr 1.4fr 1fr 0.8fr 0.7fr 0.7fr 0.6fr;
+    gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--line);
+    align-items: center; font-size: 12.5px; cursor: pointer; transition: 0.12s;
+    text-decoration: none; color: var(--text);
+  }
+  .prj-table .prj-row:hover { background: var(--panel-2) }
+  .prj-table .prj-row:last-child { border-bottom: 0 }
+  .prj-table .prj-head {
+    background: var(--panel-2); cursor: default; font-size: 10.5px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700; padding: 10px 18px;
+  }
+  .prj-table .prj-head:hover { background: var(--panel-2) }
+  .prj-table .col-status {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex-shrink: 0;
+  }
+  .prj-row.flag-rod .col-status { background: var(--bad) }
+  .prj-row.flag-gul .col-status { background: var(--warn) }
+  .prj-row.flag-completed .col-status { background: var(--muted) }
+  .prj-table .col-name {
+    font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .prj-table .col-name .prj-id {
+    display: block; font-size: 10.5px; color: var(--muted); margin-top: 1px;
+    font-weight: 400; letter-spacing: 0.04em;
+  }
+  .prj-table .col-kunde { color: var(--muted); font-size: 12px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .prj-table .col-fase {
+    font-size: 10.5px; padding: 3px 8px; border-radius: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; display: inline-block;
+    background: var(--panel-3); color: var(--muted); white-space: nowrap;
+  }
+  .prj-table .col-fase.utforelse { background: var(--good-soft); color: var(--good) }
+  .prj-table .col-fase.planlegging { background: var(--hi-soft); color: var(--hi) }
+  .prj-table .col-fase.ferdigstillelse { background: var(--pending-soft); color: var(--pending) }
+  .prj-table .col-fase.garanti { background: var(--panel-3); color: var(--muted) }
+  .prj-table .col-num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500 }
+  .prj-table .col-pct { text-align: right; font-variant-numeric: tabular-nums }
+  .prj-table .col-pct.good { color: var(--good); font-weight: 600 }
+  .prj-table .col-pct.bad { color: var(--bad); font-weight: 600 }
+  .prj-table .col-pct.warn { color: var(--warn); font-weight: 600 }
+  .prj-table .col-fremdrift { display: flex; align-items: center; gap: 8px; font-size: 11px }
+  .prj-table .col-fremdrift .bar {
+    flex: 1; height: 4px; background: var(--panel-3); border-radius: 2px; overflow: hidden;
+    min-width: 30px;
+  }
+  .prj-table .col-fremdrift .bar-fill {
+    height: 100%; background: var(--accent-2); border-radius: 2px;
+  }
+  .prj-row.flag-rod .col-fremdrift .bar-fill { background: var(--bad) }
+  .prj-row.flag-gul .col-fremdrift .bar-fill { background: var(--warn) }
+
+  .prj-table .col-arrow { color: var(--muted); text-align: right; font-size: 14px }
+
+  .selskap-tag {
+    font-size: 9px; padding: 2px 5px; border-radius: 3px; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 700; background: var(--panel-3); color: var(--muted);
+    margin-left: 6px;
+  }
+
+  @media (max-width: 1100px) {
+    .prj-table .prj-row {
+      grid-template-columns: 24px 2fr 1fr 0.7fr 0.6fr;
+      gap: 8px; font-size: 12px;
+    }
+    .prj-table .col-kunde, .prj-table .col-fase, .prj-table .col-arrow { display: none }
+  }
+
+  .empty-state {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 36px; text-align: center; color: var(--muted); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="prosjekter"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div>
+      <div class="ph-crumb">
+        <span class="mode-pill" data-mode="daglig">Daglig</span>
+        <span>Hovedspor</span>
+        <span style="color:var(--muted);font-weight:400">›</span>
+        <span>Prosjekter</span>
+      </div>
+      <h1 id="ph-title">Prosjekter</h1>
+      <div class="ph-sub" id="ph-sub">Lifecycle, regnskap og ressurser per prosjekt. Drill ned for full detalj.</div>
+    </div>
+    <div class="ph-meta" id="ph-meta"></div>
+  </header>
+
+  <div class="page-toolbar">
+    <div class="toolbar-left">
+      <span style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Status</span>
+      <div class="filter-chips" id="status-chips">
+        <button class="filter-chip active" data-status="alle">Alle</button>
+        <button class="filter-chip" data-status="utforelse">Utførelse</button>
+        <button class="filter-chip" data-status="planlegging">Planlegging</button>
+        <button class="filter-chip" data-status="ferdigstillelse">Ferdigstillelse</button>
+        <button class="filter-chip" data-status="garanti">Garanti</button>
+      </div>
+      <div id="selskap-filter-wrap" style="display:none;align-items:center;gap:8px">
+        <span style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Selskap</span>
+        <div class="filter-chips" id="selskap-chips"></div>
+      </div>
+    </div>
+    <div class="toolbar-right" id="result-count"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- Sammendrag KPIs -->
+    <div class="summary-row" id="summary-row"></div>
+
+    <!-- Prosjekt-tabell -->
+    <div id="prj-list-wrap"></div>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+<script>
+let activeStatus = 'alle';
+let activeSelskapFilter = 'alle';
+
+function renderHeader() {
+  const scope = getActiveScope();
+  const lbl = getScopeLabel(scope);
+  document.getElementById('ph-title').textContent = `Prosjekter — ${lbl.label}`;
+  document.getElementById('ph-title').style.color = lbl.farge;
+
+  const all = getProsjekterInScope(scope);
+  const aktive = all.filter(p => ['utforelse', 'planlegging', 'ferdigstillelse'].includes(p.status));
+  const totVerdi = aktive.reduce((s, p) => s + (p.kontraktsverdi_kr || 0), 0);
+  const flaggRod = aktive.filter(p => p.flagg === 'rod').length;
+
+  document.getElementById('ph-sub').textContent =
+    `${aktive.length} aktive prosjekter · ${fmtKr(totVerdi)} samlet kontraktsverdi · ${flaggRod} prosjekt med rødt flagg`;
+
+  document.getElementById('ph-meta').innerHTML = `
+    <div style="font-size:11px;color:var(--muted)">Lifecycle · Regnskap · Ressurser</div>
+    <div style="font-size:10.5px;margin-top:2px">Klikk en rad for full detalj</div>
+  `;
+}
+
+function renderSelskapFilter() {
+  const scope = getActiveScope();
+  const wrap = document.getElementById('selskap-filter-wrap');
+  const chips = document.getElementById('selskap-chips');
+  // Vis selskap-filter kun ved by/konsern
+  if (scope.type === 'selskap') {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'inline-flex';
+  const selskaper = getSelskaperInScope(scope);
+  let html = `<button class="filter-chip ${activeSelskapFilter === 'alle' ? 'active' : ''}" data-selskap="alle">Alle</button>`;
+  selskaper.forEach(s => {
+    html += `<button class="filter-chip ${activeSelskapFilter === s.id ? 'active' : ''}" data-selskap="${s.id}" style="${activeSelskapFilter === s.id ? `color:${s.farge}` : ''}">${s.kortnavn}</button>`;
+  });
+  chips.innerHTML = html;
+  chips.querySelectorAll('[data-selskap]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeSelskapFilter = btn.dataset.selskap;
+      render();
+    });
+  });
+}
+
+function renderSummary(prosjekter) {
+  const aktive = prosjekter.filter(p => ['utforelse', 'planlegging', 'ferdigstillelse'].includes(p.status));
+  const totVerdi = aktive.reduce((s, p) => s + (p.kontraktsverdi_kr || 0), 0);
+  const totFakturert = prosjekter.reduce((s, p) => s + (p.faktisk_kr?.fakturert || 0), 0);
+  const totFaktisk = prosjekter.reduce((s, p) => {
+    const a = aggregateProsjekt(p);
+    return s + a.sumFaktisk;
+  }, 0);
+  const totBudsjett = prosjekter.reduce((s, p) => {
+    const a = aggregateProsjekt(p);
+    return s + a.sumBudsjett;
+  }, 0);
+  const margins = aktive.map(p => p.margin_faktisk_pct).filter(m => m != null);
+  const avgMargin = margins.length ? margins.reduce((s, x) => s + x, 0) / margins.length : null;
+  const flaggRod = aktive.filter(p => p.flagg === 'rod').length;
+
+  document.getElementById('summary-row').innerHTML = `
+    <div class="sa-kpi hi">
+      <div class="sa-kpi-label">Aktive prosjekter</div>
+      <div class="sa-kpi-value">${aktive.length}</div>
+      <div class="sa-kpi-detail">${prosjekter.length} totalt inkl. garanti</div>
+    </div>
+    <div class="sa-kpi">
+      <div class="sa-kpi-label">Kontraktsverdi aktive</div>
+      <div class="sa-kpi-value">${fmtKr(totVerdi)}</div>
+      <div class="sa-kpi-detail">Sum eksponert i drift</div>
+    </div>
+    <div class="sa-kpi good">
+      <div class="sa-kpi-label">Fakturert hittil</div>
+      <div class="sa-kpi-value">${fmtKr(totFakturert)}</div>
+      <div class="sa-kpi-detail">Inkl. avsluttede prosjekter</div>
+    </div>
+    <div class="sa-kpi ${avgMargin != null && avgMargin < 5 ? 'bad' : avgMargin != null && avgMargin < 7 ? 'warn' : 'good'}">
+      <div class="sa-kpi-label">Snitt-margin aktive</div>
+      <div class="sa-kpi-value">${fmtPct(avgMargin)}</div>
+      <div class="sa-kpi-detail">Faktisk per i dag · vektet</div>
+    </div>
+    <div class="sa-kpi ${flaggRod > 0 ? 'bad' : 'good'}">
+      <div class="sa-kpi-label">Røde flagg</div>
+      <div class="sa-kpi-value">${flaggRod}</div>
+      <div class="sa-kpi-detail">Krever umiddelbar inngripen</div>
+    </div>
+  `;
+}
+
+function renderTabell(prosjekter) {
+  const scope = getActiveScope();
+  const showSelskap = scope.type !== 'selskap';
+  const wrap = document.getElementById('prj-list-wrap');
+
+  if (prosjekter.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">Ingen prosjekter matcher filteret.</div>`;
+    return;
+  }
+
+  let html = `
+    <div class="prj-table">
+      <div class="prj-row prj-head">
+        <span></span>
+        <span>Prosjekt</span>
+        <span>Kunde</span>
+        <span>Fase</span>
+        <span class="col-num">Verdi</span>
+        <span class="col-num">Margin plan</span>
+        <span class="col-num">Margin faktisk</span>
+        <span>Fremdrift</span>
+      </div>
+  `;
+
+  prosjekter.forEach(p => {
+    const flagCls = p.flagg === 'rod' ? 'flag-rod'
+      : p.flagg === 'gul' ? 'flag-gul'
+      : (p.status === 'garanti' || p.status === 'arkivert') ? 'flag-completed' : '';
+    const selskap = SELSKAPER.find(s => s.id === p.selskap_id);
+    const tag = showSelskap && selskap ? `<span class="selskap-tag" style="color:${selskap.farge}">${selskap.kortnavn}</span>` : '';
+    const marginCls = p.margin_faktisk_pct == null ? ''
+      : p.margin_faktisk_pct < (p.margin_plan_pct - 2) ? 'bad'
+      : p.margin_faktisk_pct < p.margin_plan_pct ? 'warn'
+      : 'good';
+    html += `
+      <a class="prj-row ${flagCls}" href="prosjekt.html?id=${encodeURIComponent(p.id)}">
+        <span class="col-status"></span>
+        <span class="col-name">
+          ${p.navn}${tag}
+          <span class="prj-id">${p.id} · ${p.fag.join(', ')}</span>
+        </span>
+        <span class="col-kunde">${p.kunde}<br><span style="font-size:10.5px">${p.ramme || ''}</span></span>
+        <span><span class="col-fase ${p.status}">${PROSJEKT_STATUS_LABEL[p.status] || p.status}</span></span>
+        <span class="col-num">${fmtKr(p.kontraktsverdi_kr)}</span>
+        <span class="col-num">${fmtPct(p.margin_plan_pct)}</span>
+        <span class="col-pct ${marginCls}">${fmtPct(p.margin_faktisk_pct)}</span>
+        <span class="col-fremdrift">
+          <span class="bar"><span class="bar-fill" style="width:${p.fremdrift_pct}%"></span></span>
+          <span>${p.fremdrift_pct} %</span>
+        </span>
+      </a>
+    `;
+  });
+
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function render() {
+  const scope = getActiveScope();
+  let all = getProsjekterInScope(scope);
+  if (activeSelskapFilter !== 'alle') {
+    all = all.filter(p => p.selskap_id === activeSelskapFilter);
+  }
+  const filtered = activeStatus === 'alle' ? all : all.filter(p => p.status === activeStatus);
+
+  document.getElementById('result-count').textContent =
+    `${filtered.length} av ${all.length} prosjekter`;
+
+  renderSummary(filtered);
+  renderTabell(filtered);
+}
+
+function init() {
+  renderHeader();
+  renderSelskapFilter();
+  document.querySelectorAll('#status-chips [data-status]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#status-chips [data-status]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeStatus = btn.dataset.status;
+      render();
+    });
+  });
+  render();
+}
+
+init();
+window.addEventListener('scope-changed', () => { activeSelskapFilter = 'alle'; init(); });
+</script>
+</body>
+</html>

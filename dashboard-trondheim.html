@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Byggebransjen i Trondheim — 2024</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #d29922;
+    --accent-2: #e8b340;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --panel-3: #262d38;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #b87a17; --accent-2: #d29922;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35; --hi: #2a6dc7;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  .theme-toggle { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 15px; display: inline-flex; align-items: center; justify-content: center }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--header-grad);
+  }
+  header .crumb { font-size: 12px; color: var(--muted); margin-bottom: 6px }
+  header .crumb a { color: var(--accent); text-decoration: none }
+  header .crumb a:hover { text-decoration: underline }
+  header .city-tag {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
+    background: rgba(210,153,34,0.10); border: 1px solid var(--accent);
+    padding: 3px 10px; border-radius: 10px; margin-bottom: 8px;
+  }
+  header h1 { margin: 4px 0 6px; font-size: 24px; font-weight: 600; letter-spacing: -0.01em }
+  header .sub { color: var(--muted); font-size: 13px }
+  main { padding: 32px 40px 80px; max-width: 1280px; margin: 0 auto }
+  section { margin-bottom: 40px }
+  h2 {
+    font-size: 16px; font-weight: 600; margin: 0 0 14px;
+    color: var(--text);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    border-left: 3px solid var(--accent); padding-left: 10px;
+  }
+  h3 { font-size: 14px; font-weight: 600; margin: 18px 0 8px; color: var(--text) }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 14px 16px; border-radius: 6px;
+  }
+  .kpi .l { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em }
+  .kpi .v { font-size: 22px; font-weight: 600; margin-top: 4px }
+  .kpi .d { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .ssb {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 16px 20px; border-radius: 6px;
+  }
+  .ssb h3 { margin-top: 0; color: var(--accent) }
+  .ssb table { width: 100%; border-collapse: collapse; font-size: 13px }
+  .ssb td, .ssb th { padding: 4px 8px; text-align: right; border-bottom: 1px solid var(--line) }
+  .ssb td:first-child, .ssb th:first-child { text-align: left }
+  .ssb tbody tr:last-child td { border-bottom: 0 }
+  table.firms {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    overflow: hidden;
+  }
+  table.firms th {
+    text-align: left; padding: 10px 8px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); cursor: pointer; user-select: none;
+  }
+  table.firms th.num { text-align: right }
+  table.firms th:hover { color: var(--text) }
+  table.firms td { padding: 8px; border-bottom: 1px solid var(--line) }
+  table.firms td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.firms tbody tr:hover { background: rgba(210,153,34,0.04) }
+  table.firms tbody tr.target { background: rgba(210,153,34,0.10) }
+  table.firms tbody tr.target td:first-child::before {
+    content: "★"; color: var(--accent); margin-right: 6px;
+  }
+  table.firms tbody tr.outlier { background: rgba(88,166,255,0.04) }
+  .pos { color: var(--good) }
+  .neg { color: var(--bad) }
+  .neu { color: var(--muted) }
+  .pill {
+    display: inline-block; padding: 2px 7px; border-radius: 10px;
+    font-size: 11px; font-weight: 500; line-height: 1.4;
+  }
+  .pill.nace41 { background: rgba(88,166,255,0.15); color: var(--hi) }
+  .pill.nace43 { background: rgba(63,185,80,0.15); color: var(--good) }
+  .pill.outlier { background: rgba(88,166,255,0.18); color: var(--hi); border: 1px solid var(--hi) }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .card h3 { margin-top: 0 }
+  .card ul { margin: 8px 0; padding-left: 18px }
+  .card ul li { margin-bottom: 4px }
+  .card.hi { border-left: 3px solid var(--good) }
+  .card.lo { border-left: 3px solid var(--bad) }
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 24px; line-height: 1.6 }
+  .footnote a { color: var(--accent); text-decoration: none }
+  .braa-banner {
+    background: linear-gradient(90deg, rgba(210,153,34,0.20), rgba(210,153,34,0.05));
+    border: 1px solid var(--accent);
+    border-radius: 6px; padding: 14px 20px; margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .braa-banner b { color: var(--accent-2) }
+</style>
+</head>
+<body>
+<div data-sidebar data-active="bransjekart"></div>
+<header>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+    <div>
+      <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a> · <a href="dashboard.html">Bodø-bransjekart →</a></div>
+      <span class="city-tag">Trondheim · Trøndelag</span>
+      <h1>Byggebransjen i Trondheim — 2024</h1>
+      <div class="sub">Konkurrentbilde for de 35 største foretakene (≥5 ansatte i NACE 41 og 43, registrert i Trondheim kommune). Reelle data fra Brønnøysund Regnskapsregisteret + SSB. Generert 2026-04-30.</div>
+    </div>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+<main>
+
+<section>
+  <h2>Bransjekontekst — Trøndelag/Trondheim</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="l">Aktører i utvalg</div><div class="v">35</div><div class="d">≥5 ansatte, Trondheim kommune</div></div>
+    <div class="kpi"><div class="l">Samlet omsetning 2024</div><div class="v">13,1 mrd</div><div class="d">HENT alene 9,0 mrd (68 %)</div></div>
+    <div class="kpi"><div class="l">Median driftsmargin</div><div class="v">4,5 %</div><div class="d">spredning −104 % til +13 %</div></div>
+    <div class="kpi"><div class="l">Andel m/negativt resultat</div><div class="v">29 %</div><div class="d">10 av 35 selskaper</div></div>
+  </div>
+  <div class="ssb">
+    <div>
+      <h3>Sysselsatte i bygg/anlegg, Trøndelag</h3>
+      <table>
+        <thead><tr><th>År</th><th>NACE 41–43</th><th>NACE 41</th><th>NACE 42</th><th>NACE 43</th></tr></thead>
+        <tbody>
+          <tr><td>2021</td><td>21 860</td><td>6 954</td><td>1 895</td><td>13 011</td></tr>
+          <tr><td>2022</td><td>22 254</td><td>7 382</td><td>1 861</td><td>13 011</td></tr>
+          <tr><td>2023</td><td>22 229</td><td>7 245</td><td>1 951</td><td>13 033</td></tr>
+          <tr><td>2024</td><td>22 147</td><td>7 023</td><td>2 085</td><td>13 039</td></tr>
+          <tr><td>2025</td><td>21 595</td><td>6 895</td><td>2 012</td><td>12 688</td></tr>
+        </tbody>
+      </table>
+      <div class="footnote">Kilde: SSB tabell 09315. Trøndelag-bygg har holdt seg vesentlig mer stabilt enn Nordland — kun 3 % nedgang totalt siden 2022, vs 5 % i Nordland. NACE 43 (spesialisert) er praktisk talt flat.</div>
+    </div>
+    <div>
+      <h3>Igangsatte boliger, Trondheim kommune</h3>
+      <table>
+        <thead><tr><th>År</th><th>Igangsatte</th><th>Fullførte</th></tr></thead>
+        <tbody>
+          <tr><td>2020</td><td>1 802</td><td>—</td></tr>
+          <tr><td>2022</td><td>—</td><td>1 824</td></tr>
+          <tr><td>2024</td><td>1 392</td><td>1 759</td></tr>
+        </tbody>
+      </table>
+      <div class="footnote">Kilde: SSB tabell 05940. Trondheim har ~5,3× igangsettings-volumet i Bodø. Fall siden 2020 er 23 % — vesentlig mildere enn Bodøs 38 %. Reflekterer Trondheims større, mer diversifiserte boligmarked.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Aktørtabell — Trondheim 2024 (sortérbar)</h2>
+  <div class="braa-banner">
+    <b>Posisjonering:</b> Braa og Sørvåg Bygg AS (★) ligger på plass 27 etter omsetning blant de 35 største. 32 ansatte plasserer dem i øvre halvdel på bemanning. Hovedvirksomhet er snekker (NACE 43.320), som er et fragmentert segment med flere mellomstore aktører i Trondheim.
+  </div>
+  <table class="firms" id="firmTable">
+    <thead><tr>
+      <th data-key="navn">Selskap</th>
+      <th data-key="nace">NACE</th>
+      <th data-key="ansatte" class="num">Ansatte</th>
+      <th data-key="oms" class="num">Omsetning (MNOK)</th>
+      <th data-key="dm" class="num">Driftsmargin %</th>
+      <th data-key="ar" class="num">Årsresultat (MNOK)</th>
+      <th data-key="ek" class="num">EK-andel %</th>
+      <th data-key="score" class="num">Score</th>
+    </tr></thead>
+    <tbody>
+      <tr class="outlier" data-navn="HENT AS" data-nace="41.000" data-ansatte="1364" data-oms="9004.3" data-dm="5.7" data-ar="494.8" data-ek="23.3" data-score="70.7"><td>HENT AS <small class="neu">990749655</small> <span class="pill outlier">Outlier</span></td><td><span class="pill nace41">41.000</span></td><td class="num">1 364</td><td class="num">9 004,3</td><td class="num pos">5,7</td><td class="num pos">494,8</td><td class="num">23,3</td><td class="num">70,7</td></tr>
+      <tr data-navn="BETONMAST TRØNDELAG AS" data-nace="41.000" data-ansatte="76" data-oms="690.1" data-dm="-0.8" data-ar="0.6" data-ek="6.7" data-score="52.7"><td>BETONMAST TRØNDELAG AS <small class="neu">859739822</small></td><td><span class="pill nace41">41.000</span></td><td class="num">76</td><td class="num">690,1</td><td class="num neg">−0,8</td><td class="num pos">0,6</td><td class="num">6,7</td><td class="num">52,7</td></tr>
+      <tr data-navn="BN ENTREPRENØR AS" data-nace="43.120" data-ansatte="119" data-oms="353.8" data-dm="7.6" data-ar="23.5" data-ek="52.5" data-score="60.4"><td>BN ENTREPRENØR AS <small class="neu">985671230</small></td><td><span class="pill nace43">43.120</span></td><td class="num">119</td><td class="num">353,8</td><td class="num pos">7,6</td><td class="num pos">23,5</td><td class="num">52,5</td><td class="num">60,4</td></tr>
+      <tr data-navn="CONSTO ANLEGG MIDT AS" data-nace="43.120" data-ansatte="24" data-oms="304.8" data-dm="6.7" data-ar="16.8" data-ek="31.0" data-score="48.4"><td>CONSTO ANLEGG MIDT AS <small class="neu">922193770</small></td><td><span class="pill nace43">43.120</span></td><td class="num">24</td><td class="num">304,8</td><td class="num pos">6,7</td><td class="num pos">16,8</td><td class="num">31,0</td><td class="num">48,4</td></tr>
+      <tr data-navn="NÆRINGSBYGG AS" data-nace="41.000" data-ansatte="38" data-oms="270.5" data-dm="5.0" data-ar="11.3" data-ek="21.5" data-score="38.9"><td>NÆRINGSBYGG AS <small class="neu">920205968</small></td><td><span class="pill nace41">41.000</span></td><td class="num">38</td><td class="num">270,5</td><td class="num pos">5,0</td><td class="num pos">11,3</td><td class="num">21,5</td><td class="num">38,9</td></tr>
+      <tr data-navn="BACKE TRONDHEIM AS" data-nace="41.000" data-ansatte="93" data-oms="266.5" data-dm="-5.7" data-ar="-11.6" data-ek="24.1" data-score="28.7"><td>BACKE TRONDHEIM AS <small class="neu">952228609</small></td><td><span class="pill nace41">41.000</span></td><td class="num">93</td><td class="num">266,5</td><td class="num neg">−5,7</td><td class="num neg">−11,6</td><td class="num">24,1</td><td class="num">28,7</td></tr>
+      <tr data-navn="MESTERGRUPPEN ENTREPRENØR AS" data-nace="41.000" data-ansatte="59" data-oms="169.2" data-dm="-1.5" data-ar="-0.4" data-ek="33.0" data-score="25.3"><td>MESTERGRUPPEN ENTREPRENØR AS <small class="neu">987345632</small></td><td><span class="pill nace41">41.000</span></td><td class="num">59</td><td class="num">169,2</td><td class="num neg">−1,5</td><td class="num neg">−0,4</td><td class="num">33,0</td><td class="num">25,3</td></tr>
+      <tr data-navn="ANLEGG OG ENTREPRENØRSERVICE AOES AS" data-nace="43.120" data-ansatte="113" data-oms="161.2" data-dm="3.8" data-ar="3.1" data-ek="11.2" data-score="23.6"><td>ANLEGG OG ENTREPRENØRSERVICE AOES AS <small class="neu">920212220</small></td><td><span class="pill nace43">43.120</span></td><td class="num">113</td><td class="num">161,2</td><td class="num pos">3,8</td><td class="num pos">3,1</td><td class="num">11,2</td><td class="num">23,6</td></tr>
+      <tr data-navn="SOLBERG MASKIN AS" data-nace="43.120" data-ansatte="56" data-oms="153.7" data-dm="-4.2" data-ar="-5.8" data-ek="42.0" data-score="27.8"><td>SOLBERG MASKIN AS <small class="neu">999327869</small></td><td><span class="pill nace43">43.120</span></td><td class="num">56</td><td class="num">153,7</td><td class="num neg">−4,2</td><td class="num neg">−5,8</td><td class="num">42,0</td><td class="num">27,8</td></tr>
+      <tr data-navn="VARMBOBYGG AS" data-nace="41.000" data-ansatte="32" data-oms="146.3" data-dm="-0.2" data-ar="-2.2" data-ek="23.2" data-score="19.7"><td>VARMBOBYGG AS <small class="neu">964454302</small></td><td><span class="pill nace41">41.000</span></td><td class="num">32</td><td class="num">146,3</td><td class="num neg">−0,2</td><td class="num neg">−2,2</td><td class="num">23,2</td><td class="num">19,7</td></tr>
+      <tr data-navn="ETTO BYGG AS" data-nace="41.000" data-ansatte="44" data-oms="133.7" data-dm="6.8" data-ar="6.0" data-ek="51.4" data-score="44.0"><td>ETTO BYGG AS <small class="neu">964131198</small></td><td><span class="pill nace41">41.000</span></td><td class="num">44</td><td class="num">133,7</td><td class="num pos">6,8</td><td class="num pos">6,0</td><td class="num">51,4</td><td class="num">44,0</td></tr>
+      <tr data-navn="TØMRERMESTER ARNSTEIN SØRGÅRD AS" data-nace="41.000" data-ansatte="40" data-oms="125.7" data-dm="3.5" data-ar="4.0" data-ek="48.8" data-score="35.5"><td>TØMRERMESTER ARNSTEIN SØRGÅRD AS <small class="neu">984686773</small></td><td><span class="pill nace41">41.000</span></td><td class="num">40</td><td class="num">125,7</td><td class="num pos">3,5</td><td class="num pos">4,0</td><td class="num">48,8</td><td class="num">35,5</td></tr>
+      <tr data-navn="BP ENTREPRENØR AS" data-nace="43.120" data-ansatte="41" data-oms="122.3" data-dm="4.5" data-ar="3.8" data-ek="24.6" data-score="27.0"><td>BP ENTREPRENØR AS <small class="neu">912628752</small></td><td><span class="pill nace43">43.120</span></td><td class="num">41</td><td class="num">122,3</td><td class="num pos">4,5</td><td class="num pos">3,8</td><td class="num">24,6</td><td class="num">27,0</td></tr>
+      <tr data-navn="TIMBERBYGG AS" data-nace="41.000" data-ansatte="41" data-oms="96.8" data-dm="5.2" data-ar="4.2" data-ek="30.0" data-score="28.4"><td>TIMBERBYGG AS <small class="neu">922577021</small></td><td><span class="pill nace41">41.000</span></td><td class="num">41</td><td class="num">96,8</td><td class="num pos">5,2</td><td class="num pos">4,2</td><td class="num">30,0</td><td class="num">28,4</td></tr>
+      <tr data-navn="BYGGMESTER HOFSTAD AS" data-nace="41.000" data-ansatte="48" data-oms="92.3" data-dm="4.5" data-ar="3.3" data-ek="23.8" data-score="25.0"><td>BYGGMESTER HOFSTAD AS <small class="neu">993129755</small></td><td><span class="pill nace41">41.000</span></td><td class="num">48</td><td class="num">92,3</td><td class="num pos">4,5</td><td class="num pos">3,3</td><td class="num">23,8</td><td class="num">25,0</td></tr>
+      <tr data-navn="AS BYGGSERVICE" data-nace="41.000" data-ansatte="29" data-oms="90.3" data-dm="6.4" data-ar="4.9" data-ek="20.1" data-score="27.4"><td>AS BYGGSERVICE <small class="neu">885918042</small></td><td><span class="pill nace41">41.000</span></td><td class="num">29</td><td class="num">90,3</td><td class="num pos">6,4</td><td class="num pos">4,9</td><td class="num">20,1</td><td class="num">27,4</td></tr>
+      <tr data-navn="DOVRE ENTREPRENØR AS" data-nace="43.120" data-ansatte="26" data-oms="80.2" data-dm="5.5" data-ar="3.5" data-ek="43.0" data-score="33.7"><td>DOVRE ENTREPRENØR AS <small class="neu">943068593</small></td><td><span class="pill nace43">43.120</span></td><td class="num">26</td><td class="num">80,2</td><td class="num pos">5,5</td><td class="num pos">3,5</td><td class="num">43,0</td><td class="num">33,7</td></tr>
+      <tr data-navn="HAW ENTREPRENØR AS" data-nace="41.000" data-ansatte="31" data-oms="73.4" data-dm="3.0" data-ar="0.2" data-ek="6.8" data-score="14.0"><td>HAW ENTREPRENØR AS <small class="neu">879621992</small></td><td><span class="pill nace41">41.000</span></td><td class="num">31</td><td class="num">73,4</td><td class="num pos">3,0</td><td class="num pos">0,2</td><td class="num">6,8</td><td class="num">14,0</td></tr>
+      <tr data-navn="KM BYGG ENTREPRENØR AS" data-nace="41.000" data-ansatte="32" data-oms="70.2" data-dm="12.0" data-ar="6.9" data-ek="32.6" data-score="42.0"><td>KM BYGG ENTREPRENØR AS <small class="neu">912026353</small></td><td><span class="pill nace41">41.000</span></td><td class="num">32</td><td class="num">70,2</td><td class="num pos">12,0</td><td class="num pos">6,9</td><td class="num">32,6</td><td class="num">42,0</td></tr>
+      <tr data-navn="MODULVEGGER TRONDHEIM AS" data-nace="43.320" data-ansatte="42" data-oms="64.3" data-dm="-5.5" data-ar="-2.7" data-ek="-1.0" data-score="4.6"><td>MODULVEGGER TRONDHEIM AS <small class="neu">881533022</small></td><td><span class="pill nace43">43.320</span></td><td class="num">42</td><td class="num">64,3</td><td class="num neg">−5,5</td><td class="num neg">−2,7</td><td class="num neg">−1,0</td><td class="num">4,6</td></tr>
+      <tr data-navn="BYGGMESTER GEIR O FURUNES AS" data-nace="41.000" data-ansatte="29" data-oms="63.3" data-dm="9.6" data-ar="5.4" data-ek="50.9" data-score="44.0"><td>BYGGMESTER GEIR O FURUNES AS <small class="neu">962369537</small></td><td><span class="pill nace41">41.000</span></td><td class="num">29</td><td class="num">63,3</td><td class="num pos">9,6</td><td class="num pos">5,4</td><td class="num">50,9</td><td class="num">44,0</td></tr>
+      <tr data-navn="BYÅSEN TREVARE AS" data-nace="41.000" data-ansatte="26" data-oms="63.0" data-dm="9.7" data-ar="5.4" data-ek="54.9" data-score="44.5"><td>BYÅSEN TREVARE AS <small class="neu">961393183</small></td><td><span class="pill nace41">41.000</span></td><td class="num">26</td><td class="num">63,0</td><td class="num pos">9,7</td><td class="num pos">5,4</td><td class="num">54,9</td><td class="num">44,5</td></tr>
+      <tr data-navn="BN BYGG AS" data-nace="41.000" data-ansatte="35" data-oms="62.5" data-dm="13.2" data-ar="6.8" data-ek="62.2" data-score="50.9"><td>BN BYGG AS <small class="neu">999610137</small></td><td><span class="pill nace41">41.000</span></td><td class="num">35</td><td class="num">62,5</td><td class="num pos">13,2</td><td class="num pos">6,8</td><td class="num">62,2</td><td class="num">50,9</td></tr>
+      <tr data-navn="OTTAR AUGDAL AS" data-nace="43.120" data-ansatte="25" data-oms="61.5" data-dm="5.4" data-ar="3.3" data-ek="64.0" data-score="35.3"><td>OTTAR AUGDAL AS <small class="neu">938524831</small></td><td><span class="pill nace43">43.120</span></td><td class="num">25</td><td class="num">61,5</td><td class="num pos">5,4</td><td class="num pos">3,3</td><td class="num">64,0</td><td class="num">35,3</td></tr>
+      <tr data-navn="FREDHEIM &amp; PAULSBY BYGG AS" data-nace="41.000" data-ansatte="24" data-oms="61.4" data-dm="1.1" data-ar="0.7" data-ek="24.6" data-score="16.4"><td>FREDHEIM &amp; PAULSBY BYGG AS <small class="neu">977323622</small></td><td><span class="pill nace41">41.000</span></td><td class="num">24</td><td class="num">61,4</td><td class="num pos">1,1</td><td class="num pos">0,7</td><td class="num">24,6</td><td class="num">16,4</td></tr>
+      <tr data-navn="VALTEC AS" data-nace="41.000" data-ansatte="25" data-oms="61.0" data-dm="7.6" data-ar="3.8" data-ek="42.7" data-score="36.4"><td>VALTEC AS <small class="neu">916022794</small></td><td><span class="pill nace41">41.000</span></td><td class="num">25</td><td class="num">61,0</td><td class="num pos">7,6</td><td class="num pos">3,8</td><td class="num">42,7</td><td class="num">36,4</td></tr>
+      <tr class="target" data-navn="BRAA OG SØRVÅG BYGG AS" data-nace="43.320" data-ansatte="32" data-oms="57.7" data-dm="0.6" data-ar="0.3" data-ek="58.5" data-score="25.3"><td>BRAA OG SØRVÅG BYGG AS <small class="neu">962246931</small></td><td><span class="pill nace43">43.320</span></td><td class="num">32</td><td class="num">57,7</td><td class="num pos">0,6</td><td class="num pos">0,3</td><td class="num">58,5</td><td class="num">25,3</td></tr>
+      <tr data-navn="BYGGMESTER KNUDSEN AS" data-nace="43.320" data-ansatte="30" data-oms="57.0" data-dm="3.6" data-ar="1.6" data-ek="40.6" data-score="27.0"><td>BYGGMESTER KNUDSEN AS <small class="neu">980568806</small></td><td><span class="pill nace43">43.320</span></td><td class="num">30</td><td class="num">57,0</td><td class="num pos">3,6</td><td class="num pos">1,6</td><td class="num">40,6</td><td class="num">27,0</td></tr>
+      <tr data-navn="JOHANNESSEN AS" data-nace="43.120" data-ansatte="34" data-oms="52.4" data-dm="9.8" data-ar="3.9" data-ek="23.8" data-score="33.0"><td>JOHANNESSEN AS <small class="neu">922636761</small></td><td><span class="pill nace43">43.120</span></td><td class="num">34</td><td class="num">52,4</td><td class="num pos">9,8</td><td class="num pos">3,9</td><td class="num">23,8</td><td class="num">33,0</td></tr>
+      <tr data-navn="TOTAL TEKNISK AS" data-nace="43.120" data-ansatte="24" data-oms="48.8" data-dm="7.6" data-ar="3.0" data-ek="-102.3" data-score="18.7"><td>TOTAL TEKNISK AS <small class="neu">998477190</small></td><td><span class="pill nace43">43.120</span></td><td class="num">24</td><td class="num">48,8</td><td class="num pos">7,6</td><td class="num pos">3,0</td><td class="num neg">−102,3</td><td class="num">18,7</td></tr>
+      <tr data-navn="MURMESTER IVAR S. MOE A/S" data-nace="43.910" data-ansatte="28" data-oms="35.6" data-dm="2.8" data-ar="1.0" data-ek="31.8" data-score="20.8"><td>MURMESTER IVAR S. MOE A/S <small class="neu">946642517</small></td><td><span class="pill nace43">43.910</span></td><td class="num">28</td><td class="num">35,6</td><td class="num pos">2,8</td><td class="num pos">1,0</td><td class="num">31,8</td><td class="num">20,8</td></tr>
+      <tr data-navn="AS SANERING" data-nace="43.110" data-ansatte="39" data-oms="28.5" data-dm="-1.9" data-ar="-0.6" data-ek="8.0" data-score="5.2"><td>AS SANERING <small class="neu">926008420</small></td><td><span class="pill nace43">43.110</span></td><td class="num">39</td><td class="num">28,5</td><td class="num neg">−1,9</td><td class="num neg">−0,6</td><td class="num">8,0</td><td class="num">5,2</td></tr>
+      <tr data-navn="TORVEN ENTREPRENØR AS" data-nace="43.120" data-ansatte="25" data-oms="14.0" data-dm="-0.8" data-ar="-0.2" data-ek="35.8" data-score="15.3"><td>TORVEN ENTREPRENØR AS <small class="neu">999118305</small></td><td><span class="pill nace43">43.120</span></td><td class="num">25</td><td class="num">14,0</td><td class="num neg">−0,8</td><td class="num neg">−0,2</td><td class="num">35,8</td><td class="num">15,3</td></tr>
+      <tr data-navn="MT FLIS AS" data-nace="43.910" data-ansatte="25" data-oms="9.8" data-dm="-1.0" data-ar="-0.2" data-ek="3.3" data-score="2.0"><td>MT FLIS AS <small class="neu">928911993</small></td><td><span class="pill nace43">43.910</span></td><td class="num">25</td><td class="num">9,8</td><td class="num neg">−1,0</td><td class="num neg">−0,2</td><td class="num">3,3</td><td class="num">2,0</td></tr>
+      <tr data-navn="AGENDI AS" data-nace="41.000" data-ansatte="25" data-oms="2.1" data-dm="-104.4" data-ar="-1.8" data-ek="52.7" data-score="20.2"><td>AGENDI AS <small class="neu">922698805</small></td><td><span class="pill nace41">41.000</span></td><td class="num">25</td><td class="num">2,1</td><td class="num neg">−104,4</td><td class="num neg">−1,8</td><td class="num">52,7</td><td class="num">20,2</td></tr>
+    </tbody>
+  </table>
+  <div class="footnote">★ markerer Braa og Sørvåg Bygg AS. Score er sammensatt indikator (skala 0–100) basert på skala (omsetning capped ved 700 MNOK, vekt 50), lønnsomhet (driftsmargin, vekt 30) og soliditet (EK-andel, vekt 20). HENT er flagget som outlier — 9 mrd omsetning gjør dem ikke direkte sammenlignbar med øvrige aktører.</div>
+</section>
+
+<section>
+  <h2>Posisjonering for Braa og Sørvåg</h2>
+  <div class="grid2">
+    <div class="card hi">
+      <h3>Lokal kontekst — snekker-segmentet (NACE 43.320)</h3>
+      <p style="color:var(--muted);font-size:12px;margin:0 0 8px">Direkte konkurrenter til Braa og Sørvåg i Trondheim på snekker-NACE.</p>
+      <ul>
+        <li><b>Modulvegger Trondheim AS</b> (42 ansatte, 64M, −5,5 % margin). Større enn oss på folk, men sliter med drift.</li>
+        <li><b>Byggmester Knudsen AS</b> (30 ansatte, 57M, 3,6 % margin). Tilsvarende skala, marginalt bedre drift.</li>
+        <li><b>Braa og Sørvåg Bygg ★</b> (32 ansatte, 57,7M, 0,6 % margin). På linje med Knudsen i størrelse, marginsvak.</li>
+        <li><b>Implikasjon:</b> Snekker-segmentet i Trondheim er fragmentert med 3–4 mellomstore aktører. Marginutfordringen vi har 2024 er ikke unik — Modulvegger har samme problem på dobbel skala.</li>
+      </ul>
+    </div>
+    <div class="card hi">
+      <h3>Marked-ledere (referanse, ikke direkte konkurrenter)</h3>
+      <p style="color:var(--muted);font-size:12px;margin:0 0 8px">Dominerende aktører i Trondheim-bygg, primært nybygg/total­entreprise.</p>
+      <ul>
+        <li><b>HENT AS</b> — 9 mrd omsetning, 1364 ansatte. Norges største private entreprenør. Konkurrer ikke direkte med Braa.</li>
+        <li><b>Betonmast Trøndelag</b> — 690M, 76 ansatte, men −0,8 % margin.</li>
+        <li><b>BN Entreprenør</b> — 354M, 119 ansatte, 7,6 % margin, EK 52,5 %. Høyt presterende.</li>
+        <li><b>Backe Trondheim</b> — 267M, 93 ansatte, men −5,7 % margin (taper også).</li>
+        <li><b>Konklusjon:</b> Også de store sliter med margin i Trondheim 2024 — sektoren har bredt marginpress, ikke kun Braa-spesifikt.</li>
+      </ul>
+    </div>
+    <div class="card lo">
+      <h3>Aktører med driftsproblemer — potensielle M&A-mål</h3>
+      <p style="color:var(--muted);font-size:12px;margin:0 0 8px">Kandidater som kan være kjøpsklare hvis 2025 ikke snur.</p>
+      <ul>
+        <li><b>AGENDI AS</b> — 25 ansatte, 2,1M omsetning, −104 % margin. Tilnærmet ute av drift.</li>
+        <li><b>Modulvegger Trondheim AS</b> — 42 ansatte, 64M, −5,5 % margin og negativ EK. Strategisk attraktiv hvis snekker-konsolidering er målet.</li>
+        <li><b>Total Teknisk AS</b> — 24 ansatte, 49M, men EK −102 %. Driftsmessig OK (7,6 %), men balanse-utfordret.</li>
+        <li><b>Solberg Maskin AS</b> — 56 ansatte, 154M, −4,2 % margin. Større oppkjøp, krever konsernkapital.</li>
+      </ul>
+    </div>
+    <div class="card hi">
+      <h3>Topppresterte småaktører — læring</h3>
+      <p style="color:var(--muted);font-size:12px;margin:0 0 8px">Mindre selskap med sterk margin og soliditet.</p>
+      <ul>
+        <li><b>BN Bygg AS</b> — 13,2 % margin, 62,2 % EK. Beste kombinasjon i hele utvalget.</li>
+        <li><b>KM Bygg Entreprenør</b> — 12,0 % margin, 32,6 % EK.</li>
+        <li><b>Byåsen Trevare</b> — 9,7 % margin, 54,9 % EK.</li>
+        <li><b>Byggmester Geir O Furunes</b> — 9,6 % margin, 50,9 % EK.</li>
+        <li><b>Implikasjon:</b> Det er fullt mulig å levere 9–13 % margin i Trondheim. Marginløfts-strategien for Braa er ikke urealistisk — det krever bare disiplin og prising.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Strategiske observasjoner for SA-konsernet</h2>
+  <div class="card">
+    <h3>Tre oppsummerende funn</h3>
+    <ul style="font-size:13px;line-height:1.65">
+      <li><b>Trondheim-markedet har bredt marginpress 2024.</b> 10 av 35 aktører hadde negativt driftsresultat. Det forklarer Braa og Sørvågs 0,6 % margin som <i>en del av sektorbildet</i>, ikke en isolert utfordring. Det styrker argumentet for at SA-konsolidering med disiplinerte prosesser kan løfte margin uavhengig av makro-bildet.</li>
+      <li><b>Det er ekte rom for vekst i NACE 43.320 snekker.</b> Av de 35 aktørene er bare tre (Modulvegger, Knudsen, Braa) ren snekker. To av dem sliter med drift. Konsolideringsmuligheten i Trondheim-snekker er reell — særlig gitt SA-konsernets evne til å bære integrasjonskost.</li>
+      <li><b>De store i Trondheim er ikke direkte konkurrenter.</b> HENT, Betonmast, Backe, Mestergruppen — disse er nybygg-totalentreprenører. Brå's offentlige rehab-marked (Trondheim k., Trøndelag fylke, Helse Midt, Trondheim Eiendom) er separat. Det betyr at konkurransen i ROT-segmentet er mot de mellomstore aktørene som ETTO, BP Entreprenør, Tømrermester Sørgård — selskaper på vår skala.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="footnote">
+  <b>Kildedata:</b> Brønnøysund Enhetsregisteret + Regnskapsregisteret (orgnr-oppslag), SSB tabellene 09315 (sysselsetting Trøndelag) og 05940 (igangsatte boliger Trondheim). Utvalg: 35 største aktive AS med ≥5 ansatte i NACE 41/43, registrert i Trondheim kommune (5001).
+  <br><b>Forbehold:</b> Score er sammensatt indikator — bruk som grov posisjonering, ikke fasit. Balansestørrelser tolkes ikke direkte som soliditetsstyrke (preges av leasing og konsernbidrag i denne typen driftsselskap).
+  <br><b>Tilkoblede dashboards:</b>
+  <a href="dashboard.html">Bodø-bransjekart</a> ·
+  <a href="okonomi-trondheim.html">Trondheim økonomi</a> ·
+  <a href="anbud-trondheim.html">Trondheim anbud</a> ·
+  <a href="oversikt-trondheim.html">Trondheim én-side</a> ·
+  <a href="trondheim_byggebransje_2024.csv" download>Råtall · CSV</a>
+</div>
+
+</main>
+<script>
+(() => {
+  const tbl = document.getElementById('firmTable');
+  if (!tbl) return;
+  const tbody = tbl.querySelector('tbody');
+  let lastKey = 'score', asc = false;
+  tbl.querySelectorAll('th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      asc = (lastKey === key) ? !asc : false;
+      lastKey = key;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        const av = a.dataset[key], bv = b.dataset[key];
+        const an = parseFloat(av), bn = parseFloat(bv);
+        if (!isNaN(an) && !isNaN(bn)) return asc ? an - bn : bn - an;
+        return asc ? String(av).localeCompare(bv) : String(bv).localeCompare(av);
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  });
+})();
+</script>
+<script src="sidebar.js"></script>
+</body>
+</html>

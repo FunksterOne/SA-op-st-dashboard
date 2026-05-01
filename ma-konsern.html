@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>M&amp;A-vurdering — ServiceAlliansen-konsernet</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  /* HTML-stil — bruker felles theme fra style.css */
+  body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .page { padding: 22px 32px; max-width: 1280px; margin: 0 auto }
+
+  section { margin-bottom: 18px }
+  h2.sec {
+    font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 10px;
+    padding-left: 10px; border-left: 3px solid var(--accent);
+  }
+  .lead { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin-bottom: 12px }
+  .lead b { color: var(--text) }
+
+  /* Bg/accent-aliaser så eksisterende klasser fungerer */
+  .bodo, .city-card.bodo, .row-bodo td:first-child { --bodo: var(--accent-2); --bodo-bg: var(--accent-soft) }
+  .tron, .city-card.tron, .row-tron td:first-child { --tron: var(--warn); --tron-bg: var(--warn-soft) }
+
+  .tldr {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: 14px 18px; margin-bottom: 18px; border-radius: 0 6px 6px 0;
+  }
+  .tldr h3 {
+    margin: 0 0 6px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--accent-2); font-weight: 700;
+  }
+  .tldr p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--text) }
+  .tldr b { color: var(--accent-2) }
+
+  /* KPI-rad */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px }
+  @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(2, 1fr) } }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; border-top: 3px solid var(--accent);
+  }
+  .kpi.bodo { border-top-color: var(--accent-2) }
+  .kpi.tron { border-top-color: var(--warn) }
+  .kpi.acc  { border-top-color: var(--accent) }
+  .kpi.warn { border-top-color: var(--warn) }
+  .kpi .l {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); font-weight: 700;
+  }
+  .kpi .v {
+    font-size: 22px; font-weight: 700; margin-top: 4px;
+    font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .kpi .v small { font-size: 13px; font-weight: 500; color: var(--muted) }
+  .kpi .d { font-size: 11px; margin-top: 4px; color: var(--text) }
+
+  /* Tabell */
+  table.std {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  table.std th {
+    background: var(--panel-2); padding: 10px 12px; text-align: left;
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700;
+  }
+  table.std th.num { text-align: right }
+  table.std td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.std td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.std tbody tr:last-child td { border-bottom: 0 }
+  table.std tr.row-tron td:first-child { border-left: 3px solid var(--warn) }
+  table.std tr.row-bodo td:first-child { border-left: 3px solid var(--accent-2) }
+
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 11px;
+    font-size: 10px; font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .pill.green { background: var(--good-soft); color: var(--good) }
+  .pill.warn  { background: var(--warn-soft); color: var(--warn) }
+  .pill.bad   { background: var(--bad-soft); color: var(--bad) }
+  .pill.hi    { background: var(--hi-soft); color: var(--hi) }
+  .pill.bodo  { background: var(--accent-soft); color: var(--accent-2) }
+  .pill.tron  { background: var(--warn-soft); color: var(--warn) }
+
+  /* Per-by quick view */
+  .city-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+  @media (max-width: 900px) { .city-grid { grid-template-columns: 1fr } }
+  .city-card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 16px 18px; border-top: 3px solid var(--accent);
+  }
+  .city-card.bodo { border-top-color: var(--accent-2) }
+  .city-card.tron { border-top-color: var(--warn) }
+  .city-card h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600 }
+  .city-card .who { color: var(--muted); font-size: 11.5px; margin-bottom: 10px }
+  .city-card ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6 }
+
+  /* Sequencing timeline */
+  .seq-timeline {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 16px 20px;
+  }
+  .seq-timeline h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600 }
+  .seq-grid { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: stretch }
+  .seq-row { display: contents }
+  .seq-period {
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 11px;
+    text-align: center; padding: 9px; border-radius: 4px;
+  }
+  .seq-period.q3-26 { background: var(--good) }
+  .seq-period.q1-27 { background: var(--accent) }
+  .seq-period.q3-27 { background: var(--warn) }
+  .seq-period.q1-28 { background: var(--warn) }
+  .seq-period.opt   { background: var(--muted) }
+  .seq-content {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 4px; padding: 10px 14px; font-size: 12.5px;
+  }
+  .seq-content b { color: var(--text) }
+  .seq-content .city-tag {
+    display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 9px;
+    margin-right: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .seq-content .city-tag.bodo { background: var(--accent-soft); color: var(--accent-2) }
+  .seq-content .city-tag.tron { background: var(--warn-soft); color: var(--warn) }
+  .seq-content .cap { color: var(--muted); font-size: 11.5px; margin-top: 4px }
+
+  .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px }
+  @media (max-width: 800px) { .risk-grid { grid-template-columns: 1fr } }
+  .risk-card {
+    border: 1px solid var(--line); border-left: 4px solid var(--warn);
+    border-radius: 6px; padding: 12px 16px; background: var(--panel);
+  }
+  .risk-card.high { border-left-color: var(--bad) }
+  .risk-card.low  { border-left-color: var(--good) }
+  .risk-card h4 { margin: 0 0 4px; font-size: 13px; font-weight: 600 }
+  .risk-card p  { margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted) }
+  .risk-card .level {
+    display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-right: 5px;
+    background: var(--warn-soft); color: var(--warn);
+  }
+  .risk-card.high .level { background: var(--bad-soft); color: var(--bad) }
+  .risk-card.low  .level { background: var(--good-soft); color: var(--good) }
+
+  .rec {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: 14px 18px; margin-top: 14px; border-radius: 0 6px 6px 0;
+  }
+  .rec h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--accent-2) }
+  .rec p { margin: 0 0 6px; font-size: 12.5px; line-height: 1.6 }
+  .rec ol { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; line-height: 1.7 }
+
+  .foot {
+    margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; font-size: 11px; color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="ma-konsern"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+      <span>M&amp;A konsern</span>
+    </div>
+    <h1>Konsolidert oppkjøpsplan — Bodø + Trondheim</h1>
+    <div class="ph-meta-row">
+      <span>Periode: <b>Q1 2026</b></span>
+      <span>Versjon: <b>v1.0</b> · 30. april 2026</span>
+      <span>Klassifisering: <b>Konfidensiell</b></span>
+      <span>Til: <b>SA-styret</b></span>
+    </div>
+  </header>
+
+<div class="page">
+
+  <div class="tldr">
+    <h3>Hovedanbefaling til SA-styret</h3>
+    <p><b>Snekker-konsolidering på tvers av begge byer er den klareste M&amp;A-muligheten i porteføljen.</b> Bodø har én distressed kandidat (Snekkern, NACE 43.320), Trondheim har én distressed (Modulvegger) og én vennlig (Byggmester Knudsen). Total kapital for sekvensiell gjennomføring 2026–2028: <b>17–47 MNOK</b>. ROI-potensial målt mot konsolidert markedsandel og forsvarsverdi mot lokale konkurrenter.</p>
+  </div>
+
+  <h2 class="sec">1. Eksekutiv kapital- og verdipotensial</h2>
+  <div class="kpi-row">
+    <div class="kpi bodo">
+      <div class="l">Bodø — 5 kandidater</div>
+      <div class="v">7–31 <small>MNOK</small></div>
+      <div class="d">Kapitalbehov fase 1–3</div>
+    </div>
+    <div class="kpi tron">
+      <div class="l">Trondheim — 5 kandidater</div>
+      <div class="v">17–85 <small>MNOK</small></div>
+      <div class="d">Kapitalbehov fase 1–3</div>
+    </div>
+    <div class="kpi acc">
+      <div class="l">Anbefalt sekvens (fase 1–2)</div>
+      <div class="v">~ 24–47 <small>MNOK</small></div>
+      <div class="d">Bodø + Trondheim 2026–2028</div>
+    </div>
+    <div class="kpi warn">
+      <div class="l">Bull-spor opportunistisk</div>
+      <div class="v">+ 38–65 <small>MNOK</small></div>
+      <div class="d">Kun ved klare distress-signaler 2025–26</div>
+    </div>
+  </div>
+
+  <h2 class="sec">2. Konsolidert kandidat-rangering</h2>
+  <table class="std">
+    <thead>
+      <tr>
+        <th>Kandidat</th>
+        <th>By</th>
+        <th>NACE</th>
+        <th class="num">Ansatte</th>
+        <th class="num">Oms 2024</th>
+        <th class="num">Margin</th>
+        <th class="num">Kjøpspris</th>
+        <th class="num">Score</th>
+        <th>Anbefaling</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="row-bodo"><td><b>Snekkern AS</b></td><td><span class="pill bodo">Bodø</span></td><td>43.320</td><td class="num">14</td><td class="num">16,5</td><td class="num">−16,1 %</td><td class="num">Sym + 1–3</td><td class="num"><span class="pill green">18/20</span></td><td><span class="pill green">Fase 1</span></td></tr>
+      <tr class="row-bodo"><td><b>NBT Bygg AS</b></td><td><span class="pill bodo">Bodø</span></td><td>41.000</td><td class="num">7</td><td class="num">3,8</td><td class="num">+6,8 %</td><td class="num">Sym + 0,5–1</td><td class="num"><span class="pill green">17/20</span></td><td><span class="pill green">Fase 1</span></td></tr>
+      <tr class="row-tron"><td><b>Modulvegger Trondheim</b></td><td><span class="pill tron">Trondheim</span></td><td>43.320</td><td class="num">42</td><td class="num">64,3</td><td class="num">−5,5 %</td><td class="num">Sym + 5–10</td><td class="num"><span class="pill green">16/20</span></td><td><span class="pill warn">Fase 2</span></td></tr>
+      <tr class="row-tron"><td><b>Byggmester Knudsen</b></td><td><span class="pill tron">Trondheim</span></td><td>43.320</td><td class="num">30</td><td class="num">57,0</td><td class="num">+3,6 %</td><td class="num">12–25</td><td class="num"><span class="pill green">16/20</span></td><td><span class="pill warn">Fase 3</span></td></tr>
+      <tr class="row-bodo"><td><b>Byggm. Erling Skipnes</b></td><td><span class="pill bodo">Bodø</span></td><td>41.000</td><td class="num">21</td><td class="num">49,0</td><td class="num">−3,4 %</td><td class="num">5–12</td><td class="num"><span class="pill warn">15/20</span></td><td><span class="pill warn">Fase 2</span></td></tr>
+      <tr class="row-bodo"><td><b>Byggproffen Bodø</b></td><td><span class="pill bodo">Bodø</span></td><td>41.000</td><td class="num">26</td><td class="num">47,8</td><td class="num">+2,3 %</td><td class="num">8–15</td><td class="num"><span class="pill hi">14/20*</span></td><td><span class="pill hi">Opportunistisk</span></td></tr>
+      <tr class="row-tron"><td><b>Total Teknisk</b></td><td><span class="pill tron">Trondheim</span></td><td>43.120</td><td class="num">24</td><td class="num">48,8</td><td class="num">+7,6 %</td><td class="num">Sym + restrukt.</td><td class="num"><span class="pill warn">13/20</span></td><td><span class="pill hi">Opportunistisk</span></td></tr>
+      <tr class="row-bodo"><td><b>Grunn og Betong Bodø</b></td><td><span class="pill bodo">Bodø</span></td><td>43.120</td><td class="num">8</td><td class="num">10,7</td><td class="num">−8,2 %</td><td class="num">Sym + 0,5–1</td><td class="num"><span class="pill bad">11/20</span></td><td><span class="pill bad">Lav prioritet</span></td></tr>
+      <tr class="row-tron"><td><b>Solberg Maskin</b></td><td><span class="pill tron">Trondheim</span></td><td>43.120</td><td class="num">56</td><td class="num">153,7</td><td class="num">−4,2 %</td><td class="num">30–50</td><td class="num"><span class="pill hi">11/20*</span></td><td><span class="pill hi">Bull only</span></td></tr>
+      <tr class="row-tron"><td><b>AGENDI AS</b></td><td><span class="pill tron">Trondheim</span></td><td>41.000</td><td class="num">25</td><td class="num">2,1</td><td class="num">−104,4 %</td><td class="num">Minimalt</td><td class="num"><span class="pill bad">10/20</span></td><td><span class="pill bad">Wind-down</span></td></tr>
+    </tbody>
+  </table>
+  <div class="lead" style="margin-top:6px"><b>* Stjerne-score</b> betyr at vurderingen forutsetter at kandidaten blir mer distressed i 2025–2026. I dagens tilstand er pris-attraktiviteten begrenset.</div>
+
+  <h2 class="sec">3. Per-by fokus og oppdrag</h2>
+  <div class="city-grid">
+    <div class="city-card bodo">
+      <h3>Byggmester Fritzøe (Bodø)</h3>
+      <div class="who">DL Brynjar Storvik · 5 kandidater · 7–31 MNOK kapital</div>
+      <ul>
+        <li><b>Hovedmål Q3 2026:</b> Snekker-konsolidering i Bodø. Snekkern + NBT Bygg gir grunnlag.</li>
+        <li><b>Strategisk hovedoppkjøp Q1 2027:</b> Byggmester Erling Skipnes — vennlig, krever 5–12 MNOK.</li>
+        <li><b>Opportunistisk:</b> Byggproffen Bodø hvis 2025/2026 svekker dem ytterligere.</li>
+        <li><b>Total fase 1–2:</b> 7–16 MNOK. Holder seg innenfor SA-rammen.</li>
+      </ul>
+    </div>
+    <div class="city-card tron">
+      <h3>Braa og Sørvåg (Trondheim)</h3>
+      <div class="who">DL Øyvind Berggren · 5 kandidater · 17–85 MNOK kapital</div>
+      <ul>
+        <li><b>2026:</b> Margin-løft, ingen M&amp;A. Forutsetter stabil 5 %+ EBIT før kapital allokeres.</li>
+        <li><b>Hovedmål Q3 2027:</b> Modulvegger Trondheim — snekker-konsolidering. 5–10 MNOK.</li>
+        <li><b>Vennlig konsolidering Q1 2028:</b> Byggmester Knudsen hvis generasjonsskifte. 12–25 MNOK.</li>
+        <li><b>Total fase 1–2:</b> 17–35 MNOK. Større per-target enn Bodø pga. større skala.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div>SA Konsern M&amp;A-vurdering · Konfidensiell · Q1 2026</div>
+    <div>Konsolidert oversikt — del 1 av 2</div>
+  </div>
+
+  <h2 class="sec" style="margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-size:16px;border-left:0;padding-left:0;color:var(--accent)">Del 2 — Sekvensering, risiko og anbefaling</h2>
+  <p class="lead">Tidslinje, kapitalallokering, og hvilke beslutninger SA-styret må ta de neste 18 månedene.</p>
+
+  <h2 class="sec">4. Anbefalt sekvensering — 2026 til 2029</h2>
+  <div class="seq-timeline">
+    <h3>Maks ett pågående større oppkjøp om gangen — på tvers av begge byer</h3>
+    <div class="lead" style="margin-bottom:8px">
+      Sekvensering valgt slik at SA-konsernets integrasjons-kapasitet ikke overstrekkes. Aldri to større oppkjøp i samme by samtidig, og maks to større parallelt på konsernnivå.
+    </div>
+    <div class="seq-grid">
+      <div class="seq-period q3-26">Q3 2026</div>
+      <div class="seq-content">
+        <span class="city-tag bodo">Bodø</span> <b>NBT Bygg + Snekkern AS</b> — quick wins, lav risiko
+        <div class="cap">Kapital ~ 2–4 MNOK + earnouts · Integrasjonstid 6 mnd · Begge fra Bodø samtidig akseptabelt grunnet liten skala</div>
+      </div>
+
+      <div class="seq-period q1-27">Q1–Q2 2027</div>
+      <div class="seq-content">
+        <span class="city-tag bodo">Bodø</span> <b>Byggmester Erling Skipnes</b> — strategisk hovedoppkjøp
+        <div class="cap">Kapital 5–12 MNOK · Integrasjonstid 12–18 mnd · Forutsetter vennlig samtale med eier</div>
+      </div>
+
+      <div class="seq-period q3-27">Q3 2027</div>
+      <div class="seq-content">
+        <span class="city-tag tron">Trondheim</span> <b>Modulvegger Trondheim</b> — snekker-konsolidering
+        <div class="cap">Kapital 5–10 MNOK + earnout · Forutsetter Braa-margin stabilt &gt;5 % i 2026 · Integrasjonstid 12–18 mnd</div>
+      </div>
+
+      <div class="seq-period q1-28">Q1 2028</div>
+      <div class="seq-content">
+        <span class="city-tag tron">Trondheim</span> <b>Byggmester Knudsen</b> — vennlig konsolidering
+        <div class="cap">Kapital 12–25 MNOK · Forutsetter generasjonsskifte-mulighet · Med Modulvegger gir 100+ ansatte i NACE 43.320 i Trondheim</div>
+      </div>
+
+      <div class="seq-period opt">2028+</div>
+      <div class="seq-content">
+        <b>Opportunistisk</b> — kun hvis utløst av distress-signaler
+        <div class="cap"><span class="city-tag bodo">Bodø</span>Byggproffen (8–15 MNOK) · <span class="city-tag tron">Trondheim</span>Total Teknisk (sym+restrukt.) · <span class="city-tag tron">Trondheim</span>Solberg Maskin (30–50 MNOK · bull-spor)</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">5. Risiko ved parallelle integrasjoner</h2>
+  <div class="risk-grid">
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>To samtidige integrasjoner krever dedikert konsernkapasitet</h4>
+      <p>SA-konsernet har én HR-rekrutterer og én integrasjons-prosjektleder. Q3 2027 ser to samtidige oppkjøp (Skipnes-integrasjon avsluttes mens Modulvegger starter). Krever dedikert ekstern integrasjonsressurs eller utsettelse.</p>
+    </div>
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>Kulturkollisjon ved snekker-konsolidering</h4>
+      <p>Modulvegger og Byggmester Knudsen er begge etablerte selskaper med 24+ års drift. Crew-overgang og merkevare-håndtering kan skape friksjon. Mitigering: behold lokal merkevare i 24 mnd post-oppkjøp, gradvis sammenslåing.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Marginpress fra distressed-oppkjøp</h4>
+      <p>Snekkern, Modulvegger, NBT er distressed — overtagelsen inkluderer overtagelse av tap. Kan slå ut i 6–12 mnd integrasjonsperiode med marginpress på samlet konsernselskap.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Eier-vilje på vennlige kjøp er ikke gitt</h4>
+      <p>Skipnes (Bodø) og Knudsen (Trondheim) er IKKE distressed. Eier kan velge ikke å selge. Tidsplan avhenger av åpning. Mitigering: vennlig samtale tidlig, men ingen avhengighet av at det skjer.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>SA-konsernets kapital-ramme</h4>
+      <p>Total fase 1–2 (24–47 MNOK) er innenfor konsernrammene. Men hvis bull-spor utløses (Solberg Maskin 30–50 MNOK), kan total kapitalallokering nå 80+ MNOK. Krever eksplisitt SA-styrebeslutning.</p>
+    </div>
+    <div class="risk-card low">
+      <h4><span class="level">Lav</span>Legal og regulatorisk risiko</h4>
+      <p>Alle kandidater er aktive AS i etablerte NACE-koder. Ingen kjent reguleringsbarriere. Konkurransetilsyn-risiko er minimal — bygg er fragmentert nok til at konsolidering på 2–3 selskap ikke utløser markedsdominans-vurdering.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">6. Konsernets strategiske valg</h2>
+  <div class="rec">
+    <h3>Anbefaling — start fase 1 nå, kommit til fase 2</h3>
+    <p><b>SA-styret bes ta to samtidige beslutninger denne våren:</b></p>
+    <ol>
+      <li><b>Godkjenn fase 1 (~2–4 MNOK Bodø)</b> for igangsettelse Q3 2026. Lav risiko, lav kapital, høy strategisk verdi i snekker-konsolidering.</li>
+      <li><b>Kommitter prinsipielt til fase 2</b> (~5–35 MNOK over 12 mnd) som strategisk retning. Endelig kapital-allokering ved halvårlig revurdering når 2026 H1-resultater er kjent.</li>
+    </ol>
+    <p style="margin-top:8px"><b>Hvorfor begge nå:</b> Snekker-konsolidering på tvers av Bodø og Trondheim er hovedstrategien. Hvis vi venter med fase 1 til fase 2 er bekreftet, mister vi tidsvinduet i Bodø (Snekkern kan finne annen kjøper eller gå konkurs uten orden).</p>
+    <p style="margin-top:8px"><b>Det viktigste argumentet:</b> Konsolidering nå i et fragmentert NACE 43.320-segment posisjonerer SA-konsernet som dominerende snekker-aktør i to av Norges mellomstore byer. Det er forsvarsverdi mot fremtidig konkurranse, ikke bare offensiv vekst.</p>
+  </div>
+
+  <div class="foot">
+    <div>SA Konsern M&amp;A-vurdering · Konfidensiell · Q1 2026</div>
+    <div>Underlag for kapitalallokering 2026–2029</div>
+  </div>
+</div>
+
+</main>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

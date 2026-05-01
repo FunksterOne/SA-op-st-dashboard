@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>M&amp;A-screening — Trondheim</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+  header { padding: 22px 32px 18px; background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%); border-bottom: 1px solid var(--line) }
+  header .crumb { font-size: 12px; color: var(--muted); margin-bottom: 6px }
+  header .crumb a { color: var(--accent); text-decoration: none }
+  header .city-tag { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); background: rgba(210,153,34,0.10); border: 1px solid var(--accent); padding: 3px 10px; border-radius: 10px; margin-bottom: 6px }
+  header h1 { margin: 4px 0 6px; font-size: 22px; font-weight: 600; letter-spacing: -0.015em }
+  header .sub { color: var(--muted); font-size: 13px; max-width: 920px }
+  main { padding: 28px 36px 80px; max-width: 1400px; margin: 0 auto }
+  h2.sec { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin: 28px 0 12px; padding-left: 10px; border-left: 3px solid var(--accent) }
+  .lead { color: var(--muted); font-size: 13px; max-width: 920px; line-height: 1.7; margin-bottom: 14px }
+  .lead b { color: var(--text) }
+
+  .candidates { display: grid; grid-template-columns: 1fr; gap: 14px }
+  .cand { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px 26px; border-left: 4px solid var(--accent) }
+  .cand.high { border-left-color: var(--good) }
+  .cand.med { border-left-color: var(--warn) }
+  .cand.low { border-left-color: var(--bad) }
+  .cand.opp { border-left-color: var(--hi) }
+  .cand .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 10px; flex-wrap: wrap }
+  .cand .head .left h3 { margin: 0; font-size: 16px; font-weight: 600 }
+  .cand .head .left .meta { color: var(--muted); font-size: 11px; margin-top: 2px; font-variant-numeric: tabular-nums }
+  .cand .priority { background: var(--panel-2); border: 1px solid var(--line); padding: 4px 12px; border-radius: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600 }
+  .cand.high .priority { background: rgba(63,185,80,0.18); color: var(--good); border-color: var(--good) }
+  .cand.med .priority { background: rgba(210,153,34,0.18); color: var(--warn); border-color: var(--warn) }
+  .cand.low .priority { background: rgba(248,81,73,0.18); color: var(--bad); border-color: var(--bad) }
+  .cand.opp .priority { background: rgba(88,166,255,0.18); color: var(--hi); border-color: var(--hi) }
+  .cand .strap { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; font-style: italic }
+  .cand-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px }
+  .cand-section h4 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600 }
+  .cand-section ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6 }
+  .cand-section ul li { margin-bottom: 3px }
+  .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px }
+  .metric { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px }
+  .metric .l { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em }
+  .metric .v { font-size: 14px; font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums }
+  .metric .v.pos { color: var(--good) }
+  .metric .v.neg { color: var(--bad) }
+
+  table.score { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+  table.score th { background: var(--panel-2); padding: 9px 12px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600 }
+  table.score th.num, table.score td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.score td { padding: 8px 12px; border-bottom: 1px solid var(--line) }
+  table.score tbody tr:last-child td { border-bottom: 0 }
+  table.score .pill { display: inline-block; padding: 2px 8px; border-radius: 9px; font-size: 11px; font-weight: 600 }
+  table.score .pill.h { background: rgba(63,185,80,0.18); color: var(--good) }
+  table.score .pill.m { background: rgba(210,153,34,0.18); color: var(--warn) }
+  table.score .pill.l { background: rgba(248,81,73,0.18); color: var(--bad) }
+  table.score .pill.o { background: rgba(88,166,255,0.18); color: var(--hi) }
+
+  .seq-card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px; margin-top: 8px }
+  .seq-card h3 { margin: 0 0 8px; font-size: 14px }
+  .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px }
+  .phase { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; border-top: 3px solid var(--accent) }
+  .phase.p1 { border-top-color: var(--good) }
+  .phase.p2 { border-top-color: var(--warn) }
+  .phase.p3 { border-top-color: var(--bad) }
+  .phase h4 { margin: 0 0 4px; font-size: 12px }
+  .phase .when { font-size: 10px; color: var(--muted); margin-bottom: 8px }
+  .phase ul { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6 }
+  .phase .total { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 11px; color: var(--accent-2); font-weight: 600 }
+
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 24px; line-height: 1.6 }
+  .footnote a { color: var(--accent); text-decoration: none }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="ma-screening"></div>
+
+<header>
+  <div class="crumb" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;text-transform:uppercase;letter-spacing:0.12em;font-weight:600">
+    <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+    <span>M&amp;A-screening — Trondheim</span>
+  </div>
+  <h1>M&amp;A-screening — kandidater for Braa og Sørvåg</h1>
+  <div class="sub">
+    Strukturert vurdering av oppkjøpsmål i Trondheim-bygg basert på 2024-regnskap fra Brreg. Fem kandidater rangert etter strategisk verdi for Trondheim-enheten. Trondheim-strategien er primært marginløft i 2026 — M&amp;A er aktuelt fra Q3 2027 og fremover, etter at egne marginer er stabilisert.
+  </div>
+</header>
+
+<main>
+
+<h2 class="sec">Metodologi</h2>
+<div class="lead">
+  Samme vurderingsdimensjoner som Bodø-screeningen: strategisk fit, kjøpspris-attraktivitet, integrasjonskompleksitet, synergi-potensial.
+  <br><br>
+  Trondheim-spesifikk kontekst: NACE 43.320 snekker er det fragmenterte segmentet hvor Braa har sin kjerne, og hvor strukturell konsolidering har størst strategisk verdi. NACE 41 oppføring er allerede dominert av store totalentreprenører (HENT, Betonmast, Backe) som ikke er M&amp;A-kandidater.
+  <br><br>
+  Vi viser ikke detaljerte balansetall — kjøpspris-vurdering må gjøres i due diligence, ikke fra Brreg-tall alene (leasing/konsernbidrag-effekter).
+</div>
+
+<h2 class="sec">Top kandidater — Trondheim</h2>
+<div class="candidates">
+
+  <!-- 1. Modulvegger Trondheim -->
+  <div class="cand high" onclick="location.href='ma-kandidat.html?id=modulvegger'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>1 · Modulvegger Trondheim AS</h3>
+        <div class="meta">Orgnr 881533022 · NACE 43.320 Snekkerarbeid · 42 ansatte · stiftet 2000</div>
+      </div>
+      <span class="priority">Høy prioritet · Drill →</span>
+    </div>
+    <div class="strap">Direkte konkurrent i NACE 43.320 — den eneste større aktøren i samme nisje som Braa. 42 ansatte er 30 % flere enn Braa, og driftssituasjonen tilsier at konsolidering er mulig.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">64,3 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−5,5 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−3,5 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Distressed</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Symbolsk + 5–10M earnout</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Eneste større snekker-konkurrent i Trondheim — konsolidering gir Braa dominerende posisjon i NACE 43.320</li>
+          <li>42 ansatte — fordobler Braa-bemanningen til ~74 stk</li>
+          <li>Modulvegg-spesialisering åpner for prefab-segment som Braa ikke har</li>
+          <li>Kombinert vil ha skala til å konkurrere på større offentlige rammeavtaler</li>
+          <li>Tar en sliter ut av markedet — eliminerer prispresset på snekker-anbud</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Negativ EK krever balanseringsjobb — kjøpspris reflekterer dette</li>
+          <li>Marginproblem 2024 må forstås — er det struktur eller forbigående?</li>
+          <li>Modulvegg-spesialiseringen kan kreve egen forretningsenhet</li>
+          <li>Crew-overgang av 42 ansatte er stor integrasjonsoppgave (12–18 mnd)</li>
+          <li>Mads Jespersen har konsernrolle — må sikre at SA-styret er aligned før samtale</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Total Teknisk -->
+  <div class="cand opp" onclick="location.href='ma-kandidat.html?id=total-teknisk'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>2 · Total Teknisk AS</h3>
+        <div class="meta">Orgnr 998477190 · NACE 43.120 Grunnarbeid · 24 ansatte · stiftet 2012</div>
+      </div>
+      <span class="priority">Opportunistisk · Drill →</span>
+    </div>
+    <div class="strap">Driftsmessig sunn (7,6 % margin) men sterkt balanse-utfordret. Klassisk «good business, bad balance sheet»-mulighet — krever finansiell restrukturering, ikke driftsendring.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">48,8 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v pos">7,6 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v pos">3,7 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Balanse-stresset</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Symbolsk + restrukturering</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Sunn drift — skal ikke snus, bare avlastes finansielt</li>
+          <li>Grunnarbeid (NACE 43.120) gir Braa total-rehab-kapasitet</li>
+          <li>SA-konsernet kan bære gjeldsovertagelse — billig vei til ny NACE-kapasitet</li>
+          <li>24 ansatte med spesialkompetanse — vanskelig å bygge organisk</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Grunnarbeid er utenfor Braas NACE-kjerne — krever egen ledelseslinje</li>
+          <li>Balanse-restrukturering krever DD og kreditor-forhandlinger</li>
+          <li>Eierne kan ha bundet selskap til andre forpliktelser vi ikke kjenner</li>
+          <li>Bedre å vente til 2027 når margin-løftet i Braa er stabilisert før vi tar på oss balansejobb</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Byggmester Knudsen -->
+  <div class="cand med" onclick="location.href='ma-kandidat.html?id=knudsen'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>3 · Byggmester Knudsen AS</h3>
+        <div class="meta">Orgnr 980568806 · NACE 43.320 Snekkerarbeid · 30 ansatte · stiftet 1999</div>
+      </div>
+      <span class="priority">Middels · vennlig · Drill →</span>
+    </div>
+    <div class="strap">Sunn aktør i samme NACE som Braa, omtrent samme størrelse. Ikke distressed — kandidat for vennlig konsolidering hvis eier nærmer seg generasjonsskifte. Gir 60+ ansatte i kombinert snekker-virksomhet.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">57,0 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v pos">3,6 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v pos">2,1 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Sunn, normal</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">12–25 MNOK</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Direkte NACE 43.320-konsolidering — fordobler Braa til ~62 ansatte</li>
+          <li>26 år i Trondheim-marked → etablerte rammeavtaler og kunderelasjoner</li>
+          <li>Sunn balanse — ingen restruktureringsrisiko</li>
+          <li>Sammen med Braa: dominerende snekker-aktør i Trondheim</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Eier må være villig — krever vennlig henvendelse, ikke distressed-kjøp</li>
+          <li>Pris reflekterer multipler (4–6× EBIT) — konsernkapital påkrevd</li>
+          <li>Knudsen-merkevaren kan kreve å beholdes som datterenhet</li>
+          <li>Generasjonsskifte-vinduet er begrenset — typisk 1–3 års forhandling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. AGENDI AS -->
+  <div class="cand low" onclick="location.href='ma-kandidat.html?id=agendi'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>4 · AGENDI AS</h3>
+        <div class="meta">Orgnr 922698805 · NACE 41.000 Oppføring · 25 ansatte · stiftet 2019</div>
+      </div>
+      <span class="priority">Lav · wind-down · Drill →</span>
+    </div>
+    <div class="strap">Praktisk talt ute av drift (2,1 MNOK omsetning, −104 % margin). Kun interessant for å plukke opp fagansatte hvis de er villige. Ikke et selskapskjøp i tradisjonell forstand.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">2,1 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−104 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−2,2 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Wind-down</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Minimalt eller 0</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Mulighet for å rekruttere fagansatte direkte hvis selskapet legger ned</li>
+          <li>Eventuell rammeavtale-overtakelse hvis de har slike</li>
+          <li>Omtrent gratis — ingen reell selskapsverdi</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Ikke et selskapskjøp — bare individuell rekruttering</li>
+          <li>Hvorfor er marginen så katastrofal? Kanskje skjulte forpliktelser eller vanskelige prosjekter</li>
+          <li>Bedre å la dem dø av seg selv og rekruttere lønnsomt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Solberg Maskin -->
+  <div class="cand opp" onclick="location.href='ma-kandidat.html?id=solberg'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>5 · Solberg Maskin AS</h3>
+        <div class="meta">Orgnr 999327869 · NACE 43.120 Grunnarbeid · 56 ansatte · stiftet 2012</div>
+      </div>
+      <span class="priority">Opportunistisk · stor · Drill →</span>
+    </div>
+    <div class="strap">Stort selskap (154M oms, 56 ansatte) med tap 2024. Hvis 2025/2026 svekker dem, blir dette en transformativ men stor mulighet — krever bull-case kapital fra SA.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">153,7 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−4,2 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−6,5 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Stresset, ikke kritisk</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">30–50 MNOK</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Transformativ skala — fordobler Braa-virksomheten</li>
+          <li>NACE 43.120 grunnarbeid utvider segmentet vesentlig</li>
+          <li>56 ansatte med maskin- og grunnkompetanse</li>
+          <li>Hvis kjøpt billig (post-distress), kan dette være «kjøpet av tiåret» for Trondheim-enheten</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>For tidlig — 2024-tap alene er ikke nok til å presse ned pris</li>
+          <li>NACE 43.120 grunn er utenfor Braas kjerne — krever egen ledelse</li>
+          <li>Kapitalbehov 30–50 MNOK overgår SA-konsernets dagens ramme for Trondheim</li>
+          <li>Større integrasjon = 18–24 mnd distraksjon fra kjernevirksomhet</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2 class="sec">Scoring-matrise</h2>
+<table class="score">
+  <thead>
+    <tr>
+      <th>Kandidat</th>
+      <th>Strategisk fit</th>
+      <th>Pris-attraktivitet</th>
+      <th>Integrasjonsletthet</th>
+      <th>Synergi-potensial</th>
+      <th>Samlet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>Modulvegger Trondheim</b></td><td><span class="pill h">5/5</span></td><td><span class="pill h">4/5</span></td><td><span class="pill l">2/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill h">16/20</span></td></tr>
+    <tr><td><b>Total Teknisk</b></td><td><span class="pill m">3/5</span></td><td><span class="pill h">4/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill m">13/20</span></td></tr>
+    <tr><td><b>Byggmester Knudsen</b></td><td><span class="pill h">5/5</span></td><td><span class="pill m">2/5</span></td><td><span class="pill h">4/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill h">16/20</span></td></tr>
+    <tr><td><b>AGENDI AS</b></td><td><span class="pill l">2/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill l">2/5</span></td><td><span class="pill l">1/5</span></td><td><span class="pill l">10/20</span></td></tr>
+    <tr><td><b>Solberg Maskin</b></td><td><span class="pill m">3/5</span></td><td><span class="pill o">2/5*</span></td><td><span class="pill l">1/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill o">11/20*</span></td></tr>
+  </tbody>
+</table>
+<div class="footnote" style="margin-top:8px">* Solberg-scoren forutsetter at de blir mer distressed i 2025–2026. I dagens tilstand er pris-attraktiviteten begrenset.</div>
+
+<h2 class="sec">Anbefalt sekvensering</h2>
+<div class="seq-card">
+  <h3>Tre-fase plan over 24 måneder — utsatt til Q3 2027</h3>
+  <div class="lead" style="margin-bottom:0">
+    Trondheim-strategien forutsetter <b>marginstabilisering først</b> (2026), deretter M&amp;A. Sekvensering for å unngå kritisk integrasjonsbelastning samtidig med margin-konsolidering.
+  </div>
+  <div class="phase-grid">
+    <div class="phase p1">
+      <h4>Fase 1 · Q3 2027</h4>
+      <div class="when">Snekker-konsolidering, høy strategisk verdi</div>
+      <ul>
+        <li><b>Modulvegger Trondheim</b> (symbolsk + 5–10M earnout)</li>
+        <li>Forutsetter at Braa har stabil margin &gt;5 % gjennom 2026</li>
+      </ul>
+      <div class="total">Kapital: 5–10 MNOK</div>
+    </div>
+    <div class="phase p2">
+      <h4>Fase 2 · Q1 2028</h4>
+      <div class="when">Vennlig konsolidering hvis åpning</div>
+      <ul>
+        <li><b>Byggmester Knudsen</b> (12–25 MNOK)</li>
+        <li>Krever vennlig henvendelse — generasjonsskifte-mulighet</li>
+      </ul>
+      <div class="total">Kapital: 12–25 MNOK</div>
+    </div>
+    <div class="phase p3">
+      <h4>Fase 3 · 2029+</h4>
+      <div class="when">Bull-case opportunistisk</div>
+      <ul>
+        <li><b>Total Teknisk</b> (symbolsk + restrukturering)</li>
+        <li><b>Solberg Maskin</b> (kun hvis betydelig distressed)</li>
+      </ul>
+      <div class="total">Kapital: 0–50 MNOK · betinget</div>
+    </div>
+  </div>
+</div>
+
+<div class="footnote">
+  <b>Total kapital fase 1–2:</b> 17–35 MNOK. Innenfor Trondheim-enhetens kapitalramme på 20–35 MNOK i offensiv-banen.
+  <br><b>Strategisk merknad:</b> Modulvegger og Byggmester Knudsen sammen ville gi Braa-konsernet ~104 ansatte i NACE 43.320 — dominerende snekker-aktør i Trondheim. Det er den klareste konsolideringsmuligheten i hele SA-porteføljen.
+  <br><b>Tilkoblede sider:</b>
+  <a href="ma-screening-bodo.html">M&amp;A-screening Bodø</a> ·
+  <a href="ma-konsern.html">M&amp;A-vurdering for SA-styret</a> ·
+  <a href="dashboard-trondheim.html">Bransjekart Trondheim</a>
+</div>
+
+</main>
+<script src="sidebar.js"></script>
+</body>
+</html>

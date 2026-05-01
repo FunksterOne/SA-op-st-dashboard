@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Anbudsportal — Byggmester Fritzøe</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1f2630;
+    --line: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b95a3;
+    --accent: #4f9da6;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --hi: #58a6ff;
+    --pending: #a371f7;
+    --panel-3: #262d38;
+    --header-grad: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff;
+    --panel: #f5f7fa;
+    --panel-2: #eaeef3;
+    --panel-3: #dde3ec;
+    --line: #d8dde5;
+    --text: #1a1f29;
+    --muted: #6b7380;
+    --accent: #2d6e76;
+    --good: #2e8a3a;
+    --warn: #b87a17;
+    --bad: #c63a35;
+    --hi: #2a6dc7;
+    --pending: #7c5fce;
+    --header-grad: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  }
+  /* Theme toggle */
+  .theme-toggle {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+    width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font: inherit;
+    font-size: 15px; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent) }
+  .theme-toggle .t-icon-light { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-dark { display: none }
+  :root[data-theme="light"] .theme-toggle .t-icon-light { display: inline }
+  * { box-sizing: border-box }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14.5px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header {
+    padding: 20px 32px; border-bottom: 1px solid var(--line);
+    background: var(--header-grad);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em }
+  header .brand { color: var(--accent); font-weight: 500 }
+  header .period { color: var(--muted); font-size: 12px }
+  .toolbar {
+    padding: 14px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .toolbar select, .toolbar input, .toolbar button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 6px 10px; border-radius: 4px; font-size: 13px; font-family: inherit;
+  }
+  .toolbar button { cursor: pointer; transition: 0.1s }
+  .toolbar button:hover { background: var(--accent); border-color: var(--accent); color: #fff }
+  .toolbar .spacer { flex: 1 }
+  .toolbar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px }
+  main { padding: 24px 32px 60px; max-width: 1280px; margin: 0 auto }
+  .kpis {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 12px 14px; border-radius: 6px;
+  }
+  .kpi .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em }
+  .kpi .v { font-size: 18px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums }
+  .kpi .d { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .grid-bottom {
+    display: grid; grid-template-columns: 1fr 320px; gap: 16px;
+  }
+  .table-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    overflow: hidden;
+  }
+  .table-card .head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .table-card .head h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted) }
+  .table-card .head .count { color: var(--text); font-weight: 600 }
+  table.anbud {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  table.anbud th {
+    text-align: left; padding: 10px 12px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  table.anbud th.num { text-align: right }
+  table.anbud th:hover { color: var(--text) }
+  table.anbud td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.anbud td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.anbud tbody tr:hover { background: rgba(88,166,255,0.04) }
+  table.anbud .id { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums }
+  table.anbud .tit { font-weight: 500 }
+  .badge {
+    display: inline-block; padding: 2px 7px; border-radius: 10px;
+    font-size: 11px; font-weight: 500; line-height: 1.4;
+  }
+  .badge.s-vunnet { background: rgba(63,185,80,0.18); color: var(--good) }
+  .badge.s-tapt { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .badge.s-pending { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .badge.s-utkast { background: rgba(139,149,163,0.18); color: var(--muted) }
+  .badge.fritzoe { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .badge.areal { background: rgba(63,185,80,0.18); color: var(--good) }
+  .badge.kombinert { background: rgba(79,157,166,0.18); color: var(--accent) }
+  .badge.mini { background: rgba(210,153,34,0.15); color: var(--warn); border: 1px solid rgba(210,153,34,0.3) }
+  .badge.hoved { background: rgba(248,81,73,0.10); color: #ff9a93; border: 1px solid rgba(248,81,73,0.3) }
+  .badge.fag {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+    margin-right: 2px;
+  }
+  .side {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .side .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .side .card h3 {
+    margin: 0 0 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  }
+  .bar-row {
+    display: grid; grid-template-columns: 90px 1fr 50px; align-items: center; gap: 8px;
+    margin-bottom: 6px; font-size: 12px;
+  }
+  .bar-row .label { color: var(--text) }
+  .bar-row .bar { background: var(--panel-2); border-radius: 3px; height: 18px; position: relative; overflow: hidden }
+  .bar-row .bar .fill { background: var(--accent); height: 100%; border-radius: 3px; transition: width 0.3s }
+  .bar-row .bar .fill.won { background: var(--good) }
+  .bar-row .bar .fill.lost { background: var(--bad) }
+  .bar-row .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted) }
+  .quarter-chart {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; align-items: end;
+    height: 120px; margin-top: 12px;
+  }
+  .qbar {
+    position: relative; display: flex; flex-direction: column; align-items: center;
+  }
+  .qbar .stack {
+    width: 100%; display: flex; flex-direction: column-reverse;
+    border-radius: 3px; overflow: hidden;
+  }
+  .qbar .seg.won { background: var(--good) }
+  .qbar .seg.lost { background: var(--bad) }
+  .qbar .seg.pending { background: var(--pending) }
+  .qbar .lbl { font-size: 10px; color: var(--muted); margin-top: 4px }
+  .qbar .total { font-size: 10px; color: var(--text); position: absolute; top: -14px; font-variant-numeric: tabular-nums }
+  /* modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none;
+    align-items: center; justify-content: center; z-index: 50;
+  }
+  .modal-bg.open { display: flex }
+  .modal {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 24px 28px; width: 540px; max-width: 90vw;
+  }
+  .modal h3 { margin: 0 0 16px; font-size: 16px }
+  .modal .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px }
+  .modal label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 3px }
+  .modal input, .modal select, .modal textarea {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 7px 10px; border-radius: 4px; font: inherit; font-size: 13px;
+  }
+  .modal .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px }
+  .modal button { background: var(--panel-2); border: 1px solid var(--line); color: var(--text); padding: 8px 16px; border-radius: 4px; cursor: pointer; font: inherit; font-size: 13px }
+  .modal button.primary { background: var(--accent); border-color: var(--accent); color: #fff }
+  .modal button.primary:hover { background: #5fb1bb }
+  .add-btn {
+    background: var(--accent); border: 1px solid var(--accent); color: #fff;
+    padding: 6px 14px; border-radius: 4px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 500;
+  }
+  .add-btn:hover { background: #5fb1bb }
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 24px; line-height: 1.6 }
+  /* tabs */
+  .tabs {
+    display: flex; gap: 4px; padding: 0 32px; background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .tabs .tab {
+    padding: 10px 18px; cursor: pointer; font-size: 13px; color: var(--muted);
+    border-bottom: 2px solid transparent; user-select: none;
+  }
+  .tabs .tab:hover { color: var(--text) }
+  .tabs .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500 }
+  .tabs .tab .badge-count {
+    display: inline-block; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; margin-left: 4px;
+  }
+  .tab-content { display: none }
+  .tab-content.active { display: block }
+  /* pipeline */
+  .pipeline-head {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 16px;
+    display: flex; gap: 16px; align-items: center;
+  }
+  .pipeline-head .src {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px;
+    padding: 8px 12px; font-size: 12px;
+  }
+  .pipeline-head .src .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .pipeline-head .src .v { font-size: 16px; font-weight: 600; margin-top: 2px }
+  .pipeline-head .src.doffin { border-left: 3px solid #58a6ff }
+  .pipeline-head .src.mercell { border-left: 3px solid #d29922 }
+  .pipeline-head .src.tendsign { border-left: 3px solid #a371f7 }
+  .pipeline-head .src.cobrief { border-left: 3px solid #4f9da6 }
+  .pipeline-head .src.email { border-left: 3px solid var(--muted) }
+  .pipeline-list {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .pipe-item {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 14px 18px;
+    display: grid; grid-template-columns: 90px 1fr 100px 120px 200px;
+    gap: 14px; align-items: center;
+  }
+  .pipe-item.doffin { border-left: 3px solid #58a6ff }
+  .pipe-item.mercell { border-left: 3px solid #d29922 }
+  .pipe-item.tendsign { border-left: 3px solid #a371f7 }
+  .pipe-item.cobrief { border-left: 3px solid #4f9da6 }
+  .pipe-item.email { border-left: 3px solid var(--muted) }
+  .pipe-item.forsikring { border-left: 3px solid #e85d75 }
+  .pipeline-head .src.forsikring { border-left: 3px solid #e85d75 }
+  .pipe-item.forsikring .src-tag { color: #e85d75 }
+  .badge.s-forsikringsoppdrag { background: rgba(232,93,117,0.18); color: #e85d75 }
+  .badge.tilbud.forsikring { background: rgba(232,93,117,0.18); color: #e85d75 }
+  .pipe-item .src-tag {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+  }
+  .pipe-item.doffin .src-tag { color: #58a6ff }
+  .pipe-item.mercell .src-tag { color: #d29922 }
+  .pipe-item.tendsign .src-tag { color: #a371f7 }
+  .pipe-item.cobrief .src-tag { color: #4f9da6 }
+  .pipe-item.email .src-tag { color: var(--muted) }
+  .pipe-item .ref { font-size: 10px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums }
+  .pipe-item .titl { font-weight: 500; font-size: 13px }
+  .pipe-item .kunde { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .pipe-item .frist .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .pipe-item .frist .v { font-size: 13px; font-weight: 500; margin-top: 2px; font-variant-numeric: tabular-nums }
+  .pipe-item .frist.urgent .v { color: var(--bad) }
+  .pipe-item .frist.soon .v { color: var(--warn) }
+  .pipe-item .match {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px;
+    padding: 6px 10px; text-align: center;
+  }
+  .pipe-item .match .l { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em }
+  .pipe-item .match .v { font-size: 16px; font-weight: 600; margin-top: 1px }
+  .pipe-item .match.high .v { color: var(--good) }
+  .pipe-item .match.med .v { color: var(--warn) }
+  .pipe-item .match.low .v { color: var(--bad) }
+  .pipe-item .match.na .v { color: var(--muted) }
+  .pipe-item .acts { display: flex; gap: 6px; justify-content: flex-end }
+  .pipe-item .acts button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 5px 10px; border-radius: 4px; font: inherit; font-size: 11px; cursor: pointer;
+  }
+  .pipe-item .acts button.primary { background: var(--accent); border-color: var(--accent); color: #fff }
+  .pipe-item .acts button:hover { filter: brightness(1.15) }
+  .pipe-item .ai-tip {
+    grid-column: 2 / 5; font-size: 11px; color: var(--muted); margin-top: 4px;
+    background: rgba(79,157,166,0.08); border-left: 2px solid var(--accent);
+    padding: 6px 10px; border-radius: 0 4px 4px 0;
+  }
+  .pipe-item .ai-tip b { color: var(--accent) }
+  /* fade-out on import/ignore */
+  .pipe-item.removing { transition: 0.35s; opacity: 0; transform: translateX(20px); pointer-events: none }
+  /* flash new row in anbud-table */
+  @keyframes flashNew {
+    0%   { background: rgba(63,185,80,0.35); box-shadow: inset 3px 0 0 var(--good) }
+    100% { background: transparent; box-shadow: inset 3px 0 0 transparent }
+  }
+  table.anbud tbody tr.new-row td { animation: flashNew 2.8s ease-out }
+  /* toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel); border: 1px solid var(--good); border-left: 3px solid var(--good);
+    color: var(--text); padding: 10px 16px; border-radius: 6px; font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4); z-index: 100;
+    opacity: 0; transform: translateY(10px); transition: 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0) }
+  .toast .id { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums }
+  /* reset-knapp */
+  .header-right { display: flex; gap: 14px; align-items: center }
+  .reset-btn {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+    padding: 5px 12px; border-radius: 4px; font: inherit; font-size: 12px; cursor: pointer;
+    transition: 0.15s;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--accent) }
+  .save-pulse {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--good); opacity: 0;
+    transition: 0.3s;
+  }
+  .save-pulse.on { opacity: 1; box-shadow: 0 0 8px var(--good) }
+  /* Drop-zone for tilbudsforespørsler */
+  .inbox-drop { margin-bottom: 18px }
+  .dropzone {
+    background: var(--panel); border: 2px dashed var(--line); border-radius: 10px;
+    padding: 24px 28px; text-align: center; transition: 0.2s;
+    cursor: pointer;
+  }
+  .dropzone.drag-over {
+    border-color: var(--accent); background: rgba(79,157,166,0.08);
+    transform: scale(1.005);
+  }
+  .dropzone .dz-icon { font-size: 32px; margin-bottom: 6px }
+  .dropzone .dz-title { font-size: 15px; font-weight: 600; margin-bottom: 4px }
+  .dropzone .dz-sub { color: var(--muted); font-size: 12px; margin-bottom: 10px }
+  .dropzone .dz-demos { font-size: 11px; color: var(--muted) }
+  .dropzone .dz-demos button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 5px 10px; margin: 4px 3px 0; border-radius: 4px;
+    cursor: pointer; font: inherit; font-size: 11px; transition: 0.15s;
+  }
+  .dropzone .dz-demos button:hover { border-color: var(--accent); color: var(--accent-2) }
+  .eval-result {
+    background: var(--panel); border: 1px solid var(--accent); border-radius: 10px;
+    padding: 18px 22px; margin-top: 14px;
+    border-left: 4px solid var(--accent);
+    animation: fadeInUp 0.3s ease-out;
+  }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+  .eval-loading {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 22px; text-align: center; margin-top: 14px;
+    color: var(--muted); font-size: 13px;
+  }
+  .eval-loading .spinner {
+    display: inline-block; width: 20px; height: 20px; border: 3px solid var(--line);
+    border-top-color: var(--accent); border-radius: 50%; vertical-align: middle;
+    margin-right: 10px; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .eval-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px }
+  .eval-head h4 { margin: 0; font-size: 14px; font-weight: 600 }
+  .eval-meta { color: var(--muted); font-size: 11px; margin-top: 2px }
+  .eval-score {
+    font-size: 24px; font-weight: 700; padding: 8px 16px; border-radius: 8px;
+    background: var(--panel-2); border: 2px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .eval-score.high { color: var(--good); border-color: var(--good); background: rgba(63,185,80,0.10) }
+  .eval-score.med { color: var(--warn); border-color: var(--warn); background: rgba(210,153,34,0.10) }
+  .eval-score.low { color: var(--bad); border-color: var(--bad); background: rgba(248,81,73,0.10) }
+  .eval-body { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px; margin-bottom: 12px; font-size: 12.5px }
+  .eval-row { display: grid; grid-template-columns: 130px 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--line) }
+  .eval-row .lbl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em }
+  .eval-row .val { color: var(--text); font-weight: 500 }
+  .eval-notes {
+    background: rgba(79,157,166,0.08); border-left: 3px solid var(--accent);
+    padding: 10px 14px; margin: 8px 0 14px; border-radius: 0 4px 4px 0;
+    font-size: 12px; line-height: 1.5;
+  }
+  .eval-notes b { color: var(--accent-2) }
+  .eval-actions { display: flex; gap: 8px }
+  .eval-actions button {
+    padding: 8px 16px; border-radius: 4px; cursor: pointer; font: inherit; font-size: 12px;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+  }
+  .eval-actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500 }
+  .eval-actions button.primary:hover { background: #5fb1bb }
+  .badge.s-tilbudsforespørsel { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .badge.tilbud { background: rgba(255,107,53,0.15); color: #ff8856 }
+  .badge.kat-borettslag { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .badge.kat-privat { background: rgba(255,107,53,0.15); color: #ff8856 }
+  .badge.kat-sameie { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .badge.kat-bedrift { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .badge.kat-offentlig { background: rgba(63,185,80,0.18); color: var(--good) }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="anbud"></div>
+
+<header>
+  <div>
+    <div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;font-weight:600;display:flex;align-items:center;gap:10px">
+      <span class="mode-pill" data-mode="daglig">Daglig</span>
+      <span>Hovedspor</span>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <span>Anbudspipeline</span>
+    </div>
+    <h1 style="margin:6px 0 0">Anbudspipeline — Byggmester Fritzøe</h1>
+    <div class="period" id="periodLabel" style="margin-top:4px">Periode: alle</div>
+  </div>
+  <div class="header-right">
+    <a href="overlevering.html" style="font-size:12px;color:var(--accent-2);text-decoration:none;padding:7px 13px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2)">Vunnet → Overlevering →</a>
+    <span class="period"><span class="save-pulse" id="savePulse" title="Lagret"></span> &nbsp;Sist lagret lokalt</span>
+    <button class="reset-btn" onclick="resetState()">Tilbakestill demo</button>
+    <div data-theme-toggle-slot></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="anbud">Anbudsregister</div>
+  <div class="tab" data-tab="pipeline">Pipeline / Innkommende <span class="badge-count" id="pipeCount">0</span></div>
+</div>
+
+<div class="tab-content active" id="tab-anbud">
+<div class="toolbar">
+  <label>Selskap</label>
+  <select id="filterCompany">
+    <option value="all">Alle</option>
+    <option value="Fritzøe">Kun Fritzøe</option>
+    <option value="Areal">Kun Areal</option>
+    <option value="Kombinert">Kun kombinert</option>
+  </select>
+  <label>Status</label>
+  <select id="filterStatus">
+    <option value="all">Alle</option>
+    <option value="Vunnet">Vunnet</option>
+    <option value="Tapt">Tapt</option>
+    <option value="Pending">Avventer svar</option>
+    <option value="Utkast">Utkast</option>
+  </select>
+  <label>Type</label>
+  <select id="filterType">
+    <option value="all">Alle</option>
+    <option value="Mini-konkurranse">Mini-konkurranse</option>
+    <option value="Hovedanbud">Hovedanbud</option>
+    <option value="Tilbudsforespørsel">Tilbudsforespørsel</option>
+    <option value="Forsikringsoppdrag">Forsikringsoppdrag</option>
+  </select>
+  <label>Fag</label>
+  <select id="filterFag">
+    <option value="all">Alle</option>
+    <option value="Snekker">Snekker</option>
+    <option value="Maler">Maler</option>
+    <option value="Bygg-rehab">Bygg-rehab</option>
+    <option value="Fasade">Fasade</option>
+    <option value="Tak">Tak</option>
+    <option value="Vinduer">Vinduer</option>
+    <option value="Total-rehab">Total-rehab</option>
+  </select>
+  <label>Kunde</label>
+  <select id="filterKunde">
+    <option value="all">Alle</option>
+  </select>
+  <label>Periode</label>
+  <select id="filterPeriode">
+    <option value="all">Alle</option>
+    <option value="2026">2026</option>
+    <option value="2025">2025</option>
+    <option value="2026-Q2">2026-Q2</option>
+    <option value="2026-Q1">2026-Q1</option>
+    <option value="2025-Q4">2025-Q4</option>
+    <option value="2025-Q3">2025-Q3</option>
+  </select>
+  <div class="spacer"></div>
+  <button class="add-btn" id="openAdd">+ Nytt anbud</button>
+</div>
+
+<main>
+
+<section class="kpis">
+  <div class="kpi"><div class="l">Verdi vunnet</div><div class="v" id="kpiVunnetVerdi">–</div><div class="d">av aktive tilbud</div></div>
+  <div class="kpi"><div class="l">Verdi tapt</div><div class="v" id="kpiTaptVerdi">–</div><div class="d">tapte konkurranser</div></div>
+  <div class="kpi"><div class="l">Verdi i pipeline</div><div class="v" id="kpiPendingVerdi">–</div><div class="d">avventer svar</div></div>
+  <div class="kpi"><div class="l">Snitt anbudsverdi</div><div class="v" id="kpiSnittVerdi">–</div><div class="d">levert</div></div>
+  <div class="kpi"><div class="l">Hit-rate verdi</div><div class="v" id="kpiHitRateVerdi">–</div><div class="d">vunnet kr / total kr levert</div></div>
+</section>
+
+<div class="grid-bottom">
+  <div class="table-card">
+    <div class="head">
+      <h3>Anbudsregister — <span class="count" id="rowCount">0</span> oppføringer</h3>
+      <div style="color:var(--muted);font-size:11px">Klikk kolonne for sortering</div>
+    </div>
+    <table class="anbud" id="anbudTable">
+      <thead><tr>
+        <th data-key="id">ID</th>
+        <th data-key="tittel">Tittel</th>
+        <th data-key="kunde">Kunde</th>
+        <th data-key="type">Type</th>
+        <th data-key="selskap">Selskap</th>
+        <th data-key="fag">Fag</th>
+        <th data-key="verdi" class="num">Verdi (NOK)</th>
+        <th data-key="frist" class="num">Frist</th>
+        <th data-key="resultat">Status</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <aside class="side">
+    <div class="card">
+      <h3>Suksessrate per kunde</h3>
+      <div id="kundeChart"></div>
+    </div>
+    <div class="card">
+      <h3>Suksessrate per fag</h3>
+      <div id="fagChart"></div>
+    </div>
+    <div class="card">
+      <h3>Anbud per kvartal</h3>
+      <div class="quarter-chart" id="quarterChart"></div>
+      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--muted)">
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--good);border-radius:2px"></span> Vunnet</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--bad);border-radius:2px"></span> Tapt</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--pending);border-radius:2px"></span> Pending</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="footnote">
+  <b>Datamodell:</b> Hvert anbud knyttes til selskap (Fritzøe / Areal / Kombinert), type (Mini-konkurranse under rammeavtale / Hovedanbud), fagområde (snekker, maler, bygg-rehab, fasade, tak, vinduer, total-rehab) og kunde. Kombinerte anbud telles én gang i samlet, men er synlige i begge selskaps speedometer fordi begge selskaper er ressursbelastet.
+  <br><b>Hit-rate:</b> Vunnet / (Vunnet + Tapt). Pending teller ikke i nevneren før det er avgjort. Eksempel-data nedenfor er reelle navn på Bodø-objekter, men anbudsutfall er fiktive.
+</div>
+
+</div><!-- /tab-anbud -->
+
+<div class="tab-content" id="tab-pipeline">
+
+  <div class="inbox-drop">
+    <div class="dropzone" id="emailDrop">
+      <div class="dz-icon">📥</div>
+      <div class="dz-title">Tilbudsforespørsler fra borettslag og private</div>
+      <div class="dz-sub">Dra og slipp e-post (.eml), PDF, tegninger eller bilder her — AI evaluerer relevans, kategoriserer og foreslår selskap.</div>
+      <div class="dz-demos">
+        Test med eksempler:
+        <button data-demo="vega">📄 Vega borettslag — fasaderehab</button>
+        <button data-demo="villa">📄 Villa Bodøsjøen — totalrehab</button>
+        <button data-demo="sameie">📄 Mørkved sameie — vinduer</button>
+        <button data-demo="bedrift">📄 Brønnøysund næringsbygg</button>
+      </div>
+    </div>
+    <div id="evalArea"></div>
+  </div>
+
+  <div class="pipeline-head">
+    <div style="flex:0 0 auto">
+      <h2 style="margin:0;font-size:14px">Innkommende fra integrasjoner</h2>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">Auto-importert siste 7 dager — krever bekreftelse før det legges i registeret</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto">
+      <div class="src doffin"><div class="l">Doffin</div><div class="v">3</div></div>
+      <div class="src mercell"><div class="l">Mercell</div><div class="v">5</div></div>
+      <div class="src tendsign"><div class="l">TendSign</div><div class="v">2</div></div>
+      <div class="src cobrief"><div class="l">CoBrief</div><div class="v">4</div></div>
+      <div class="src forsikring" style="background:rgba(232,93,117,0.10)"><div class="l">SA Forsikring</div><div class="v">3</div></div>
+      <div class="src email"><div class="l">E-post</div><div class="v">1</div></div>
+    </div>
+  </div>
+
+  <div class="pipeline-list">
+
+    <!-- SA Forsikring — Vannskade, akutt -->
+    <div class="pipe-item forsikring">
+      <div>
+        <div class="src-tag">SA Forsikring</div>
+        <div class="ref">2026-04-30 07:18<br>Gjensidige · 2026-V14823</div>
+      </div>
+      <div>
+        <div class="titl">Vannskade — leilighet Mørkved Allé 8B, 4. etg</div>
+        <div class="kunde">Gjensidige Forsikring · via SA distribusjon · Vannskade kjøkken/bad · Akutt-flagg</div>
+      </div>
+      <div class="frist urgent">
+        <div class="l">Befaring</div><div class="v">02.05.26</div>
+      </div>
+      <div class="match high"><div class="l">SA-match</div><div class="v">94 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som forsikringsoppdrag</button>
+        <button>Avslå</button>
+      </div>
+      <div class="ai-tip">
+        <b>SA Distribusjon:</b> Geografisk match — 4 km fra Påls vei. Skade-omfang ~320 kNOK ifølge takst (Crawford). Anbefalt: <b>Kombinert</b> (snekker + maling, fuktprotokoll). <b>Akutt-flagg</b> krever befaring innen 72 t. Standard SA-margin 6–8 %, fast pris fra forsikringsselskap.
+      </div>
+    </div>
+
+    <!-- SA Forsikring — Brannskade, større oppdrag -->
+    <div class="pipe-item forsikring">
+      <div>
+        <div class="src-tag">SA Forsikring</div>
+        <div class="ref">2026-04-29 14:52<br>Tryg · T-26-001109</div>
+      </div>
+      <div>
+        <div class="titl">Brannskade — rekkehus Bodøsjøen, omfattende røyk- og varmeskade</div>
+        <div class="kunde">Tryg Forsikring · via SA distribusjon · Brann (komfyrbrann) · 2 av 3 etg</div>
+      </div>
+      <div class="frist">
+        <div class="l">Oppstart</div><div class="v">12.05.26</div>
+      </div>
+      <div class="match high"><div class="l">SA-match</div><div class="v">88 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som forsikringsoppdrag</button>
+        <button>Avslå</button>
+      </div>
+      <div class="ai-tip">
+        <b>SA Distribusjon:</b> Estimert verdi 1,2 MNOK (takstmann Polygon). Krever rivearbeid + total-rehab kjøkken/bad/stue. <b>Anbefalt: Fritzøe lead</b>, Areal som UE for snekker/maling. Tre måneders gjennomføring. Inntak gir referanse for fremtidige skadeoppdrag i Bodøsjøen-området.
+      </div>
+    </div>
+
+    <!-- SA Forsikring — Stormskade -->
+    <div class="pipe-item forsikring">
+      <div>
+        <div class="src-tag">SA Forsikring</div>
+        <div class="ref">2026-04-28 09:30<br>If · IF-2026-22411</div>
+      </div>
+      <div>
+        <div class="titl">Stormskade — fasade og takplater Aspmyra borettslag</div>
+        <div class="kunde">If Skadeforsikring · via SA distribusjon · Vinterstorm jan 2026 · 6 leiligheter berørt</div>
+      </div>
+      <div class="frist">
+        <div class="l">Oppstart</div><div class="v">19.05.26</div>
+      </div>
+      <div class="match high"><div class="l">SA-match</div><div class="v">81 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som forsikringsoppdrag</button>
+        <button>Avslå</button>
+      </div>
+      <div class="ai-tip">
+        <b>SA Distribusjon:</b> Takplate-festepunkter og deler av fasade. Estimert 480 kNOK. <b>Anbefalt: Fritzøe</b> (tak-arbeid). Borettslag som har kontakt med Fritzøe fra tidligere — relasjonsverdi i tillegg til oppdraget. Standard 6 ukers gjennomføring.
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse, høy match -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-29 08:14<br>MC-2026-04129</div>
+      </div>
+      <div>
+        <div class="titl">Bodø rådhus — kontorrehab 4. etg, fløy øst</div>
+        <div class="kunde">Bodø kommune · Rammeavtale Bygg-vedlikehold 2024–27 · Mini-konkurranse</div>
+      </div>
+      <div class="frist urgent">
+        <div class="l">Frist</div><div class="v">07.05.26</div>
+      </div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">92 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Sterk match. Total-rehab kontor 320 m², estimert verdi 4,5–6 MNOK. Krever HMS-kort, klimaregnskap, FDV-leveranse. Anbefalt selskap: <b>Kombinert</b> (Fritzøe lead + Areal snekker/maler). Tre referanseprosjekter på CV Partner identifisert.
+      </div>
+    </div>
+
+    <!-- Doffin rammeavtale-utlysning, strategisk -->
+    <div class="pipe-item doffin">
+      <div>
+        <div class="src-tag">Doffin</div>
+        <div class="ref">2026-04-28 06:00<br>2026-091422</div>
+      </div>
+      <div>
+        <div class="titl">Rammeavtale bygg- og vedlikeholdstjenester 2027–2030</div>
+        <div class="kunde">Helse Nord RHF · Hovedanbud · CPV 45000000, 45400000</div>
+      </div>
+      <div class="frist soon">
+        <div class="l">Frist</div><div class="v">12.06.26</div>
+      </div>
+      <div class="match high"><div class="v">★★★</div><div class="l">Strategisk</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>Strategisk varsel:</b> Helse Nord lyser ut ny 4-års rammeavtale. Dagens rammeavtale (Bygg-rehab Helse Nord 2025–29) løper til 2029, men dette kan være tidlig oppstart eller utvidet portefølje. <b>Krever ledelsesvurdering før tilbudsarbeid.</b>
+      </div>
+    </div>
+
+    <!-- TendSign mini-konkurranse, fylke -->
+    <div class="pipe-item tendsign">
+      <div>
+        <div class="src-tag">TendSign</div>
+        <div class="ref">2026-04-27 14:30<br>TS-1142933</div>
+      </div>
+      <div>
+        <div class="titl">Bodin vgs — gulvrehab gymsal og garderobe</div>
+        <div class="kunde">Nordland fylkeskommune · Rammeavtale Bygg-rehab fylke 2025–28 · Mini-konkurranse</div>
+      </div>
+      <div class="frist soon">
+        <div class="l">Frist</div><div class="v">15.05.26</div>
+      </div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">87 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Anbefalt selskap: <b>Areal</b> (snekker + parkettlegging). Estimert 1,2–1,8 MNOK. Lignende prosjekt vunnet 2026-01 (Bankgata skole) — bruk samme tilbudsmal.
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse, Forsvarsbygg -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-26 11:48<br>MC-2026-04081</div>
+      </div>
+      <div>
+        <div class="titl">Forsvarsbygg Bodøsjøen — bolig 27, total-rehab</div>
+        <div class="kunde">Forsvarsbygg · Rammeavtale Salten 2024–28 · Mini-konkurranse</div>
+      </div>
+      <div class="frist soon">
+        <div class="l">Frist</div><div class="v">22.05.26</div>
+      </div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">94 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Direkte oppfølger til AN-2026-009 (boligrehab fase 1, pending). Samme krav-spek-mal. <b>Anbefalt: Kombinert</b>. Estimat 3,5–4,5 MNOK.
+      </div>
+    </div>
+
+    <!-- CoBrief AI-aggregert, lav match -->
+    <div class="pipe-item cobrief">
+      <div>
+        <div class="src-tag">CoBrief AI</div>
+        <div class="ref">2026-04-26 09:02<br>CB-NB-9134</div>
+      </div>
+      <div>
+        <div class="titl">Sjøgata kulturbygg — fasaderehab og vinduer</div>
+        <div class="kunde">Bodø Eiendomsselskap · Hovedanbud · CPV 45261000, 45421000</div>
+      </div>
+      <div class="frist">
+        <div class="l">Frist</div><div class="v">04.06.26</div>
+      </div>
+      <div class="match med"><div class="l">AI-match</div><div class="v">63 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Verneklasse 2 — krever antikvarisk kompetanse. Sterke konkurrenter: Fasaderenovering AS, Byggalf AS. Estimat 9–12 MNOK. Vurder bud, men marginsjekk anbefales — historisk taper Fritzøe mot Fasaderenovering på rene fasadejobber.
+      </div>
+    </div>
+
+    <!-- Doffin rammeavtale, geografisk utenfor kjerne -->
+    <div class="pipe-item doffin">
+      <div>
+        <div class="src-tag">Doffin</div>
+        <div class="ref">2026-04-25 06:00<br>2026-091211</div>
+      </div>
+      <div>
+        <div class="titl">Rammeavtale håndverkstjenester Fauske kommune 2026–2030</div>
+        <div class="kunde">Fauske kommune · Hovedanbud · CPV 45000000</div>
+      </div>
+      <div class="frist">
+        <div class="l">Frist</div><div class="v">28.06.26</div>
+      </div>
+      <div class="match med"><div class="v">★★</div><div class="l">Strategisk</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>Strategisk varsel:</b> Geografisk utvidelse til Salten (jf. strategiplan Q2 2027). Vurder å posisjonere allerede nå — vunnet rammeavtale gir mini-konkurranseflyt 2027–2030.
+      </div>
+    </div>
+
+    <!-- Mercell mini-konkurranse, kun Areal -->
+    <div class="pipe-item mercell">
+      <div>
+        <div class="src-tag">Mercell</div>
+        <div class="ref">2026-04-25 13:21<br>MC-2026-04055</div>
+      </div>
+      <div>
+        <div class="titl">Hunstad ungdomsskole — innvendig maling, fløy A og B</div>
+        <div class="kunde">Bodø kommune · Rammeavtale Bygg-vedlikehold 2024–27 · Mini-konkurranse</div>
+      </div>
+      <div class="frist">
+        <div class="l">Frist</div><div class="v">08.05.26</div>
+      </div>
+      <div class="match high"><div class="l">AI-match</div><div class="v">89 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Rent malerarbeid, ~480 m² + himling. Anbefalt: <b>Areal</b> alene. Estimert 0,9–1,2 MNOK. Hunstad-prosjektet 2025-Q3 (AN-2025-017) gir referanse og kjent bygg.
+      </div>
+    </div>
+
+    <!-- E-post-parsed, ufullstendig -->
+    <div class="pipe-item email">
+      <div>
+        <div class="src-tag">E-post</div>
+        <div class="ref">2026-04-24 16:55<br>(Graph parse)</div>
+      </div>
+      <div>
+        <div class="titl">[Mercell] Avrop på rammeavtale — detaljer i portalen</div>
+        <div class="kunde">Bodø kommune · Mini-konkurranse · ⚠ Manuell sjekk i portal</div>
+      </div>
+      <div class="frist">
+        <div class="l">Frist</div><div class="v">~ukjent</div>
+      </div>
+      <div class="match na"><div class="l">AI-match</div><div class="v">–</div></div>
+      <div class="acts">
+        <button>Åpne i Mercell</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>E-post-parser:</b> Ufullstendig metadata. Generic notification — krever manuell pålogging. Vurder Mercell Supplier API for full automatisering når volum &gt; 50 anbud/år.
+      </div>
+    </div>
+
+    <!-- TendSign mini-konkurranse, lav match -->
+    <div class="pipe-item tendsign">
+      <div>
+        <div class="src-tag">TendSign</div>
+        <div class="ref">2026-04-24 09:12<br>TS-1142711</div>
+      </div>
+      <div>
+        <div class="titl">Polarsirkelen vgs — VVS-rehab tekniske rom</div>
+        <div class="kunde">Nordland fylkeskommune · Rammeavtale tekniske fag 2024–27 · Mini-konkurranse</div>
+      </div>
+      <div class="frist">
+        <div class="l">Frist</div><div class="v">19.05.26</div>
+      </div>
+      <div class="match low"><div class="l">AI-match</div><div class="v">22 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Utenfor kjernekompetanse (VVS er ikke et registrert fag). Trolig feil rammeavtale-utløsning. Anbefales <b>ignorert</b> med mindre dere skal byde sammen med ServiceAlliansen-søsterselskap.
+      </div>
+    </div>
+
+    <!-- CoBrief gruppert: ServiceAlliansen-søsterselskap-mulighet -->
+    <div class="pipe-item cobrief">
+      <div>
+        <div class="src-tag">CoBrief AI</div>
+        <div class="ref">2026-04-23 08:00<br>CB-NB-9087</div>
+      </div>
+      <div>
+        <div class="titl">Saltdal sykehjem — total-rehab fløy nord</div>
+        <div class="kunde">Saltdal kommune · Hovedanbud · Estimert 18–24 MNOK</div>
+      </div>
+      <div class="frist">
+        <div class="l">Frist</div><div class="v">02.07.26</div>
+      </div>
+      <div class="match med"><div class="l">AI-match</div><div class="v">71 %</div></div>
+      <div class="acts">
+        <button class="primary">Importer som anbud</button>
+        <button>Ignorer</button>
+      </div>
+      <div class="ai-tip">
+        <b>CoBrief AI:</b> Geografisk Salten — passer strategi 2027 H1. Krever VVS- og elektro-UE; vurder ServiceAlliansen-søsterselskap (kontakt konsernkjøper). <b>Estimert vinnersannsynlighet stiger til 84 %</b> ved konsolidert konsern-tilbud.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    <b>Pipeline-kilder:</b>
+    <span style="color:#58a6ff">Doffin</span> (data.norge.no daglig dump, eForms-parser) ·
+    <span style="color:#d29922">Mercell</span> (Supplier API + e-post-fallback) ·
+    <span style="color:#a371f7">TendSign</span> (samme Mercell-konsern) ·
+    <span style="color:#4f9da6">CoBrief</span> (AI-evaluering + nordisk aggregering) ·
+    <span style="color:var(--muted)">E-post</span> (Microsoft Graph-parse for kilder uten API).
+    <br>AI-match er CoBriefs scoring (0–100) som vekter selskapsprofil, fag-match, geografi, historiske vinn-/tap-mønstre. Strategiske varsler (★) er rammeavtale-utlysninger flagget av Doffin-monitor.
+  </div>
+
+</div><!-- /tab-pipeline -->
+
+</main>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>Nytt anbud</h3>
+    <div class="row">
+      <div><label>Tittel</label><input id="m-tittel" placeholder="F.eks. Aspåsen skole - tak og taksrenner"></div>
+      <div><label>Kunde</label><input id="m-kunde" placeholder="Bodø kommune"></div>
+    </div>
+    <div class="row">
+      <div><label>Selskap</label>
+        <select id="m-selskap">
+          <option>Fritzøe</option><option>Areal</option><option>Kombinert</option>
+        </select>
+      </div>
+      <div><label>Type</label>
+        <select id="m-type"><option>Mini-konkurranse</option><option>Hovedanbud</option></select>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>Fag (komma-separert)</label><input id="m-fag" placeholder="Bygg-rehab, Snekker"></div>
+      <div><label>Rammeavtale</label><input id="m-ramme" placeholder="Bygg-vedlikehold 2024-27"></div>
+    </div>
+    <div class="row">
+      <div><label>Estimert verdi (NOK)</label><input id="m-verdi" type="number" placeholder="3500000"></div>
+      <div><label>Tilbudsfrist</label><input id="m-frist" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>Status</label>
+        <select id="m-resultat">
+          <option>Utkast</option><option>Pending</option><option>Vunnet</option><option>Tapt</option>
+        </select>
+      </div>
+      <div><label>Vinner (hvis tapt)</label><input id="m-vinner" placeholder="Konkurrerende firma"></div>
+    </div>
+    <div class="actions">
+      <button id="cancelAdd">Avbryt</button>
+      <button class="primary" id="saveAdd">Lagre anbud</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// SAMPLE DATA — 25 anbud over 9 mnd, reelle Bodø-objekter, fiktive utfall
+// ================================================================
+const seed = [
+  { id: "AN-2025-014", tittel: "Saltstraumen skole — dør- og vindusutskifting", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Kombinert", fag: ["Vinduer","Snekker"], verdi: 6800000, frist: "2025-08-04", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-015", tittel: "Bodø sentralfengsel — cellerehab fløy A", kunde: "Statsbygg", ramme: "—", type: "Hovedanbud", selskap: "Fritzøe", fag: ["Bygg-rehab","Total-rehab"], verdi: 12500000, frist: "2025-08-15", resultat: "Tapt", vinner: "Backe Nord" },
+  { id: "AN-2025-016", tittel: "Stordalshallen — innvendig maling", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler"], verdi: 1200000, frist: "2025-08-22", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-017", tittel: "Hunstad ungdomsskole — garderoberehab", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Kombinert", fag: ["Bygg-rehab","Snekker","Maler"], verdi: 3800000, frist: "2025-09-05", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-018", tittel: "Aspåsen skole — tak og taksrenner", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Fritzøe", fag: ["Tak"], verdi: 4200000, frist: "2025-09-12", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-019", tittel: "Bodø rådhus — innvendig maling 3. etg", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler"], verdi: 850000, frist: "2025-09-24", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-020", tittel: "Nordlandssykehuset — dagkirurgisk rehab", kunde: "Helse Nord", ramme: "Bygg-rehab Helse Nord 2025-29", type: "Hovedanbud", selskap: "Kombinert", fag: ["Total-rehab","Bygg-rehab","Maler"], verdi: 18500000, frist: "2025-10-08", resultat: "Tapt", vinner: "Veidekke Bygg Nord" },
+  { id: "AN-2025-021", tittel: "Bodø lufthavn — terminalrehab fase 2", kunde: "Avinor", ramme: "—", type: "Hovedanbud", selskap: "Fritzøe", fag: ["Bygg-rehab"], verdi: 22000000, frist: "2025-10-15", resultat: "Tapt", vinner: "Consto Anlegg Nord" },
+  { id: "AN-2025-022", tittel: "Mørkved barnehage — vindusutskifting", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Kombinert", fag: ["Vinduer","Snekker"], verdi: 1900000, frist: "2025-10-28", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-023", tittel: "Forsvarsbygg Bodøsjøen — kontorrehab", kunde: "Forsvarsbygg", ramme: "Salten rammeavtale 2024-28", type: "Mini-konkurranse", selskap: "Kombinert", fag: ["Bygg-rehab","Snekker","Maler"], verdi: 5400000, frist: "2025-11-05", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-024", tittel: "Tverlandet skole — parkettlegging", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Snekker"], verdi: 650000, frist: "2025-11-15", resultat: "Tapt", vinner: "Snekker'n AS" },
+  { id: "AN-2025-025", tittel: "Heggmoen skytebane — klubbhus", kunde: "Forsvarsbygg", ramme: "Salten rammeavtale 2024-28", type: "Mini-konkurranse", selskap: "Fritzøe", fag: ["Bygg-rehab"], verdi: 2200000, frist: "2025-11-22", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-026", tittel: "Mørkvedhallen — innvendig oppussing", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler","Snekker"], verdi: 1400000, frist: "2025-12-04", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2025-027", tittel: "Bodø havn — fasaderehab adminbygg", kunde: "Bodø Havn KF", ramme: "—", type: "Hovedanbud", selskap: "Fritzøe", fag: ["Fasade"], verdi: 8900000, frist: "2025-12-12", resultat: "Tapt", vinner: "Fasaderenovering AS" },
+  { id: "AN-2025-028", tittel: "Saltstraumen brygge — kafé-rehab", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Kombinert", fag: ["Total-rehab","Snekker","Maler"], verdi: 2800000, frist: "2025-12-20", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-001", tittel: "Nordlandssykehuset — personalkantine", kunde: "Helse Nord", ramme: "Bygg-rehab Helse Nord 2025-29", type: "Mini-konkurranse", selskap: "Kombinert", fag: ["Bygg-rehab","Snekker"], verdi: 3200000, frist: "2026-01-15", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-002", tittel: "Bankgata skole — maling fløy A", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler"], verdi: 950000, frist: "2026-01-28", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-003", tittel: "Politihuset Bodø — vinduer 1.-3. etg", kunde: "Statsbygg", ramme: "—", type: "Hovedanbud", selskap: "Fritzøe", fag: ["Vinduer"], verdi: 6500000, frist: "2026-02-08", resultat: "Tapt", vinner: "NCC Building" },
+  { id: "AN-2026-004", tittel: "Hunstad bibliotek — innvendig oppussing", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler","Snekker"], verdi: 1100000, frist: "2026-02-19", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-005", tittel: "Skarmoen barnehage — byggeteknisk rehab", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Fritzøe", fag: ["Bygg-rehab"], verdi: 4800000, frist: "2026-03-05", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-006", tittel: "Bodø vgs — garderobeanlegg ombygging", kunde: "Nordland fylkeskommune", ramme: "Bygg-rehab fylke 2025-28", type: "Hovedanbud", selskap: "Kombinert", fag: ["Total-rehab","Bygg-rehab","Snekker","Maler"], verdi: 14200000, frist: "2026-03-18", resultat: "Pending", vinner: "" },
+  { id: "AN-2026-007", tittel: "Sølvsuper helsesenter — tak og takvinduer", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Fritzøe", fag: ["Tak","Vinduer"], verdi: 2600000, frist: "2026-04-02", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-008", tittel: "Bodø sykehjem — korridormaling", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler"], verdi: 700000, frist: "2026-04-15", resultat: "Vunnet", vinner: "" },
+  { id: "AN-2026-009", tittel: "Forsvarsbygg Bodøsjøen — boligrehab fase 1", kunde: "Forsvarsbygg", ramme: "Salten rammeavtale 2024-28", type: "Hovedanbud", selskap: "Kombinert", fag: ["Total-rehab","Bygg-rehab","Maler","Snekker"], verdi: 28000000, frist: "2026-04-23", resultat: "Pending", vinner: "" },
+  { id: "AN-2026-010", tittel: "Mørkved senior — utvendig maling", kunde: "Bodø kommune", ramme: "Bygg-vedlikehold 2024-27", type: "Mini-konkurranse", selskap: "Areal", fag: ["Maler"], verdi: 1600000, frist: "2026-04-30", resultat: "Pending", vinner: "" },
+];
+
+let anbud = [...seed];
+let sortKey = 'frist', sortAsc = false;
+const consumedPipeIds = new Set();
+const STORAGE_KEY = 'fritzoe-anbud-state-v1';
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      anbud,
+      consumedPipeIds: [...consumedPipeIds],
+      ts: Date.now(),
+    }));
+    const p = document.getElementById('savePulse');
+    if (p) {
+      p.classList.add('on');
+      setTimeout(() => p.classList.remove('on'), 700);
+    }
+  } catch (e) { console.warn('saveState failed', e); }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (Array.isArray(s.anbud)) anbud = s.anbud;
+    if (Array.isArray(s.consumedPipeIds)) s.consumedPipeIds.forEach(id => consumedPipeIds.add(id));
+  } catch (e) { console.warn('loadState failed', e); }
+}
+
+function assignPipeIds() {
+  document.querySelectorAll('.pipe-item').forEach((el, idx) => {
+    const refHtml = el.querySelector('.ref')?.innerHTML || '';
+    const lines = refHtml.split(/<br\s*\/?>/i)
+      .map(s => s.replace(/<[^>]+>/g, '').trim())
+      .filter(Boolean);
+    el.dataset.pipeId = lines[lines.length - 1] || `PIPE-${idx}`;
+  });
+}
+
+function applyConsumedToDom() {
+  document.querySelectorAll('.pipe-item').forEach(el => {
+    if (consumedPipeIds.has(el.dataset.pipeId)) el.remove();
+  });
+}
+
+function resetState() {
+  if (!confirm('Tilbakestill demo? Alle importerte og ignorerte pipeline-elementer gjenopprettes, og anbudsregisteret går tilbake til standardinnholdet.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ================================================================
+// SVG Speedometer
+// ================================================================
+// renderGauge fjernet sammen med gauge-kortene — hit-rate vises på dashboard.
+
+// ================================================================
+// Filter logic
+// ================================================================
+function getFiltered() {
+  const fc = document.getElementById('filterCompany').value;
+  const fs = document.getElementById('filterStatus').value;
+  const ft = document.getElementById('filterType').value;
+  const ff = document.getElementById('filterFag').value;
+  const fk = document.getElementById('filterKunde').value;
+  const fp = document.getElementById('filterPeriode').value;
+  return anbud.filter(a => {
+    if (fc !== 'all' && a.selskap !== fc) return false;
+    if (fs !== 'all' && a.resultat !== fs) return false;
+    if (ft !== 'all' && a.type !== ft) return false;
+    if (ff !== 'all' && !a.fag.includes(ff)) return false;
+    if (fk !== 'all' && a.kunde !== fk) return false;
+    if (fp !== 'all') {
+      const d = a.frist;
+      if (fp === '2026' && !d.startsWith('2026')) return false;
+      if (fp === '2025' && !d.startsWith('2025')) return false;
+      if (fp.includes('Q')) {
+        const [yr, q] = fp.split('-');
+        const m = parseInt(d.slice(5,7));
+        const qmap = { Q1:[1,3], Q2:[4,6], Q3:[7,9], Q4:[10,12] }[q];
+        if (!d.startsWith(yr) || m < qmap[0] || m > qmap[1]) return false;
+      }
+    }
+    return true;
+  });
+}
+
+// Stats helpers — computes within ALL anbud (ignores filter Company so each gauge shows its own scope)
+function statsForCompany(scope, filterByOther) {
+  // scope: "Fritzøe" / "Areal" / "Samlet"
+  // filterByOther: filter list (excluding company filter)
+  let list = filterByOther;
+  if (scope === 'Fritzøe') list = list.filter(a => a.selskap === 'Fritzøe' || a.selskap === 'Kombinert');
+  else if (scope === 'Areal') list = list.filter(a => a.selskap === 'Areal' || a.selskap === 'Kombinert');
+  // 'Samlet' = alle (telles én gang)
+  const v = list.filter(a => a.resultat === 'Vunnet').length;
+  const t = list.filter(a => a.resultat === 'Tapt').length;
+  const p = list.filter(a => a.resultat === 'Pending').length;
+  const u = list.filter(a => a.resultat === 'Utkast').length;
+  const decided = v + t;
+  const rate = decided ? (v / decided * 100) : null;
+  return { levert: v + t + p, vunnet: v, tapt: t, pending: p, utkast: u, rate };
+}
+
+function getFilteredExceptCompany() {
+  // same as getFiltered but ignoring company filter (so each gauge shows its own slice)
+  const fs = document.getElementById('filterStatus').value;
+  const ft = document.getElementById('filterType').value;
+  const ff = document.getElementById('filterFag').value;
+  const fk = document.getElementById('filterKunde').value;
+  const fp = document.getElementById('filterPeriode').value;
+  return anbud.filter(a => {
+    if (fs !== 'all' && a.resultat !== fs) return false;
+    if (ft !== 'all' && a.type !== ft) return false;
+    if (ff !== 'all' && !a.fag.includes(ff)) return false;
+    if (fk !== 'all' && a.kunde !== fk) return false;
+    if (fp !== 'all') {
+      const d = a.frist;
+      if (fp === '2026' && !d.startsWith('2026')) return false;
+      if (fp === '2025' && !d.startsWith('2025')) return false;
+      if (fp.includes('Q')) {
+        const [yr, q] = fp.split('-');
+        const m = parseInt(d.slice(5,7));
+        const qmap = { Q1:[1,3], Q2:[4,6], Q3:[7,9], Q4:[10,12] }[q];
+        if (!d.startsWith(yr) || m < qmap[0] || m > qmap[1]) return false;
+      }
+    }
+    return true;
+  });
+}
+
+// ================================================================
+// Render
+// ================================================================
+function fmtNOK(n) {
+  if (n === 0) return '0';
+  if (n >= 1e6) return (n/1e6).toFixed(1).replace('.', ',') + ' MNOK';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + ' kNOK';
+  return n.toString();
+}
+
+function renderGauges() { /* fjernet — gauge-kort er flyttet til dashboard */ }
+
+function renderKpis() {
+  const list = getFiltered();
+  const won = list.filter(a => a.resultat === 'Vunnet');
+  const lost = list.filter(a => a.resultat === 'Tapt');
+  const pending = list.filter(a => a.resultat === 'Pending');
+  const decided = [...won, ...lost];
+  const sum = arr => arr.reduce((s, a) => s + a.verdi, 0);
+  const wonSum = sum(won), lostSum = sum(lost), pendSum = sum(pending), decSum = sum(decided);
+  document.getElementById('kpiVunnetVerdi').textContent = fmtNOK(wonSum);
+  document.getElementById('kpiTaptVerdi').textContent = fmtNOK(lostSum);
+  document.getElementById('kpiPendingVerdi').textContent = fmtNOK(pendSum);
+  document.getElementById('kpiSnittVerdi').textContent = decided.length ? fmtNOK(decSum / decided.length) : '–';
+  document.getElementById('kpiHitRateVerdi').textContent = decSum ? Math.round(wonSum / decSum * 100) + ' %' : '–';
+}
+
+function renderTable() {
+  const list = getFiltered();
+  // sort
+  list.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === 'fag') { av = a.fag.join(', '); bv = b.fag.join(', '); }
+    if (sortKey === 'verdi') return sortAsc ? av - bv : bv - av;
+    if (typeof av === 'string') return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortAsc ? av - bv : bv - av;
+  });
+  const tbody = document.querySelector('#anbudTable tbody');
+  tbody.innerHTML = list.map(a => {
+    const status = `<span class="badge s-${a.resultat.toLowerCase()}">${a.resultat}${a.vinner ? ' → '+a.vinner : ''}</span>`;
+    const selskap = `<span class="badge ${a.selskap.toLowerCase()}">${a.selskap}</span>`;
+    const type = `<span class="badge ${a.type === 'Mini-konkurranse' ? 'mini' : 'hoved'}">${a.type === 'Mini-konkurranse' ? 'Mini' : 'Hoved'}</span>`;
+    const fag = a.fag.map(f => `<span class="badge fag">${f}</span>`).join('');
+    return `<tr style="cursor:pointer" onclick="location.href='anbud-detalj.html?id=${encodeURIComponent(a.id)}'" title="Åpne anbud-detalj">
+      <td><span class="id">${a.id}</span></td>
+      <td><div class="tit">${a.tittel}</div><div class="id">${a.ramme}</div></td>
+      <td>${a.kunde}</td>
+      <td>${type}</td>
+      <td>${selskap}</td>
+      <td>${fag}</td>
+      <td class="num">${a.verdi.toLocaleString('no-NO')}</td>
+      <td class="num">${a.frist}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rowCount').textContent = list.length;
+}
+
+function renderKundeChart() {
+  const list = getFiltered();
+  const m = {};
+  list.forEach(a => {
+    if (a.resultat === 'Pending' || a.resultat === 'Utkast') return;
+    if (!m[a.kunde]) m[a.kunde] = { v: 0, t: 0 };
+    if (a.resultat === 'Vunnet') m[a.kunde].v++; else m[a.kunde].t++;
+  });
+  const rows = Object.entries(m).map(([k, s]) => ({ k, ...s, total: s.v + s.t, rate: s.v / (s.v + s.t) * 100 }));
+  rows.sort((a, b) => b.total - a.total);
+  document.getElementById('kundeChart').innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <div class="label">${r.k.length > 13 ? r.k.slice(0,12)+'…' : r.k}</div>
+      <div class="bar"><div class="fill won" style="width:${r.rate}%"></div></div>
+      <div class="v">${Math.round(r.rate)}% (${r.total})</div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:12px">Ingen avgjorte anbud i utvalg</div>';
+}
+
+function renderFagChart() {
+  const list = getFiltered();
+  const m = {};
+  list.forEach(a => {
+    if (a.resultat === 'Pending' || a.resultat === 'Utkast') return;
+    a.fag.forEach(f => {
+      if (!m[f]) m[f] = { v: 0, t: 0 };
+      if (a.resultat === 'Vunnet') m[f].v++; else m[f].t++;
+    });
+  });
+  const rows = Object.entries(m).map(([k, s]) => ({ k, ...s, total: s.v + s.t, rate: s.v / (s.v + s.t) * 100 }));
+  rows.sort((a, b) => b.total - a.total);
+  document.getElementById('fagChart').innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <div class="label">${r.k}</div>
+      <div class="bar"><div class="fill won" style="width:${r.rate}%"></div></div>
+      <div class="v">${Math.round(r.rate)}% (${r.total})</div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:12px">Ingen avgjorte anbud</div>';
+}
+
+function renderQuarterChart() {
+  const list = getFiltered();
+  const quarters = ['2025-Q3','2025-Q4','2026-Q1','2026-Q2','2026-Q3','2026-Q4'];
+  const m = Object.fromEntries(quarters.map(q => [q, { v:0, t:0, p:0 }]));
+  list.forEach(a => {
+    const yr = a.frist.slice(0,4);
+    const mn = parseInt(a.frist.slice(5,7));
+    const q = yr + '-Q' + Math.ceil(mn/3);
+    if (!m[q]) return;
+    if (a.resultat === 'Vunnet') m[q].v++;
+    else if (a.resultat === 'Tapt') m[q].t++;
+    else if (a.resultat === 'Pending') m[q].p++;
+  });
+  const max = Math.max(1, ...quarters.map(q => m[q].v + m[q].t + m[q].p));
+  document.getElementById('quarterChart').innerHTML = quarters.map(q => {
+    const s = m[q];
+    const total = s.v + s.t + s.p;
+    const h = (n) => Math.round(n / max * 100) + '%';
+    return `<div class="qbar">
+      <div class="total">${total || ''}</div>
+      <div class="stack" style="height:${total/max*100}%">
+        ${s.p ? `<div class="seg pending" style="height:${(s.p/(total||1))*100}%"></div>` : ''}
+        ${s.t ? `<div class="seg lost" style="height:${(s.t/(total||1))*100}%"></div>` : ''}
+        ${s.v ? `<div class="seg won" style="height:${(s.v/(total||1))*100}%"></div>` : ''}
+      </div>
+      <div class="lbl">${q.replace('20','')}</div>
+    </div>`;
+  }).join('');
+}
+
+function refreshAll() {
+  renderGauges();
+  renderKpis();
+  renderTable();
+  renderKundeChart();
+  renderFagChart();
+  renderQuarterChart();
+  // update period label
+  const fp = document.getElementById('filterPeriode').value;
+  document.getElementById('periodLabel').textContent = 'Periode: ' + (fp === 'all' ? 'alle' : fp);
+}
+
+// populate kunde-filter
+function populateKunder() {
+  const sel = document.getElementById('filterKunde');
+  const set = [...new Set(anbud.map(a => a.kunde))].sort();
+  sel.innerHTML = '<option value="all">Alle</option>' + set.map(k => `<option>${k}</option>`).join('');
+}
+
+// ================================================================
+// Wiring
+// ================================================================
+['filterCompany','filterStatus','filterType','filterFag','filterKunde','filterPeriode']
+  .forEach(id => document.getElementById(id).addEventListener('change', refreshAll));
+
+document.querySelectorAll('#anbudTable thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.key;
+    sortAsc = (sortKey === k) ? !sortAsc : true;
+    sortKey = k;
+    renderTable();
+  });
+});
+
+// modal
+const modalBg = document.getElementById('modalBg');
+document.getElementById('openAdd').onclick = () => modalBg.classList.add('open');
+document.getElementById('cancelAdd').onclick = () => modalBg.classList.remove('open');
+modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.classList.remove('open') };
+document.getElementById('saveAdd').onclick = () => {
+  const tittel = document.getElementById('m-tittel').value.trim();
+  if (!tittel) { alert('Tittel mangler'); return; }
+  const id = 'AN-' + new Date().getFullYear() + '-' + String(anbud.length + 1).padStart(3, '0');
+  const nytt = {
+    id,
+    tittel,
+    kunde: document.getElementById('m-kunde').value.trim() || 'Ukjent',
+    ramme: document.getElementById('m-ramme').value.trim() || '—',
+    type: document.getElementById('m-type').value,
+    selskap: document.getElementById('m-selskap').value,
+    fag: document.getElementById('m-fag').value.split(',').map(s => s.trim()).filter(Boolean),
+    verdi: parseInt(document.getElementById('m-verdi').value) || 0,
+    frist: document.getElementById('m-frist').value || '2026-12-31',
+    resultat: document.getElementById('m-resultat').value,
+    vinner: document.getElementById('m-vinner').value.trim() || '',
+  };
+  anbud.unshift(nytt);
+  ['m-tittel','m-kunde','m-ramme','m-fag','m-verdi','m-frist','m-vinner'].forEach(id => document.getElementById(id).value = '');
+  populateKunder();
+  modalBg.classList.remove('open');
+  refreshAll();
+  saveState();
+};
+
+// init — assign pipe-IDs, restore from localStorage, deretter render
+assignPipeIds();
+loadState();
+applyConsumedToDom();
+populateKunder();
+refreshAll();
+
+// tab switching
+document.querySelectorAll('.tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// set pipeline count badge
+function updatePipeCount() {
+  const n = document.querySelectorAll('.pipe-item:not(.removing)').length;
+  document.getElementById('pipeCount').textContent = n;
+}
+updatePipeCount();
+
+// extract structured anbud-data from a pipe-item DOM element
+function extractPipeData(el) {
+  const tittel = el.querySelector('.titl').textContent.trim();
+  const kundeText = el.querySelector('.kunde').textContent.trim();
+  const fristText = el.querySelector('.frist .v').textContent.trim();
+  const aiTipNode = el.querySelector('.ai-tip');
+  const aiTipText = aiTipNode ? aiTipNode.textContent : '';
+  const aiTipHtml = aiTipNode ? aiTipNode.innerHTML : '';
+
+  // Parse kunde-linjen: "Bodø kommune · Rammeavtale Bygg-vedlikehold 2024–27 · Mini-konkurranse"
+  const parts = kundeText.split('·').map(s => s.trim());
+  const kunde = parts[0];
+  let ramme = '—', type = 'Mini-konkurranse';
+  parts.forEach(p => {
+    if (p.startsWith('Rammeavtale ')) ramme = p.replace('Rammeavtale ', '').trim();
+    if (/Hovedanbud/i.test(p)) type = 'Hovedanbud';
+    else if (/Mini-konkurranse/i.test(p)) type = 'Mini-konkurranse';
+  });
+
+  // Parse frist: "07.05.26" → "2026-05-07". "~ukjent" → tom
+  let frist = '';
+  const fm = fristText.match(/(\d{2})\.(\d{2})\.(\d{2})/);
+  if (fm) frist = `20${fm[3]}-${fm[2]}-${fm[1]}`;
+
+  // Selskap fra AI-tipset, leter etter <b>Selskap</b> i HTML for å unngå falske matcher i fritekst
+  let selskap = 'Kombinert';
+  const selM = aiTipHtml.match(/Anbefalt[^<]*<b>(Fritzøe|Areal|Kombinert)<\/b>/i);
+  if (selM) selskap = selM[1];
+
+  // Verdi fra "Estimert X–Y MNOK" (median) eller "Estimert X MNOK"
+  let verdi = 0;
+  const vRange = aiTipText.match(/[Ee]stimer[a-zæøå]*\s+(?:verdi\s+)?([\d,]+)\s*[–-]\s*([\d,]+)\s*MNOK/);
+  if (vRange) {
+    const lo = parseFloat(vRange[1].replace(',', '.'));
+    const hi = parseFloat(vRange[2].replace(',', '.'));
+    verdi = Math.round((lo + hi) / 2 * 1_000_000);
+  } else {
+    const vSingle = aiTipText.match(/[Ee]stimer[a-zæøå]*\s+(?:verdi\s+)?([\d,]+)\s*MNOK/);
+    if (vSingle) verdi = Math.round(parseFloat(vSingle[1].replace(',', '.')) * 1_000_000);
+  }
+
+  // Fag — heuristisk fra tittel
+  const t = tittel.toLowerCase();
+  const fag = [];
+  if (/maling/.test(t)) fag.push('Maler');
+  if (/snekker|parkett|gulvrehab|gulvleg/.test(t)) fag.push('Snekker');
+  if (/\btak\b|takvinduer|taksrenner/.test(t)) fag.push('Tak');
+  if (/vindu/.test(t)) fag.push('Vinduer');
+  if (/fasade/.test(t)) fag.push('Fasade');
+  if (/total[- ]?rehab/.test(t)) fag.push('Total-rehab');
+  if (/(rehab|ombygging|kontor|byggeteknisk|renovering)/.test(t) && !fag.includes('Total-rehab')) fag.push('Bygg-rehab');
+  if (fag.length === 0) fag.push('Bygg-rehab');
+
+  return { tittel, kunde, ramme, type, selskap, fag, verdi, frist };
+}
+
+// toast-melding
+function toast(msg, idText) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = msg + (idText ? `<br><span class="id">${idText}</span>` : '');
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, 3200);
+}
+
+// fjern pipe-item med fade og persistér til localStorage
+function removePipeItem(el) {
+  if (el.dataset.pipeId) consumedPipeIds.add(el.dataset.pipeId);
+  el.classList.add('removing');
+  saveState();
+  setTimeout(() => { el.remove(); updatePipeCount(); }, 350);
+}
+
+// fremhev importert rad i anbudstabellen
+function highlightNewRow(id) {
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#anbudTable tbody tr');
+    for (const row of rows) {
+      const idCell = row.querySelector('.id');
+      if (idCell && idCell.textContent.trim() === id) {
+        row.classList.add('new-row');
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => row.classList.remove('new-row'), 2800);
+        break;
+      }
+    }
+  }, 120);
+}
+
+// ============================================================
+// DRAG-AND-DROP TILBUDSFORESPØRSLER (privat / borettslag / sameie / bedrift)
+// ============================================================
+const demoDb = {
+  vega: {
+    filename: "Henvendelse_Vega_borettslag.pdf",
+    kategori: "Borettslag",
+    kunde: "Vega Borettslag",
+    tittel: "Fasaderehab og maling — alle 4 blokker",
+    fag: ["Fasade", "Maler"],
+    verdi: 4500000,
+    selskap: "Kombinert",
+    score: 87,
+    frist: "2026-06-15",
+    notes: "Borettslag med 48 leiligheter over 4 blokker. Behov for puss og maling utvendig. <b>Sterk match</b> mot kjernekompetanse — Areal kan håndtere malerarbeidet alene eller Kombinert er optimalt for fasade+maler. Verdi 4–5 MNOK gir typisk margin 8–10 %. Anbefales å byde."
+  },
+  villa: {
+    filename: "Tegninger_Villa_Bodosjoen.pdf",
+    kategori: "Privat",
+    kunde: "Privatperson · Bodøsjøen",
+    tittel: "Totalrehab villa fra 1973",
+    fag: ["Bygg-rehab", "Total-rehab", "Snekker"],
+    verdi: 2800000,
+    selskap: "Fritzøe",
+    score: 62,
+    frist: "2026-09-30",
+    notes: "Privat oppdrag, <b>moderat strategisk match</b> (vi prioriterer offentlig ROT). 2,8 MNOK er over vår private-terskel på 2 MNOK. Beslutningskriterium: Har vi kapasitet i denne kvartalet? Hvis ja — byd, marg ~10 %. Hvis pipeline er full — avvis høflig."
+  },
+  sameie: {
+    filename: "Befaring_Morkved_sameie.eml",
+    kategori: "Sameie",
+    kunde: "Mørkved Sameie",
+    tittel: "Vindusutskifting alle 24 leiligheter",
+    fag: ["Vinduer", "Snekker"],
+    verdi: 1900000,
+    selskap: "Areal",
+    score: 79,
+    frist: "2026-08-01",
+    notes: "Sameie med 24 enheter, vinduer og innvendig listverk. <b>Areal-jobb</b>. Vi har gjort lignende på Hunstad bibliotek (vunnet 2026-02) — referanseprosjekt finnes i CV Partner. Estimat 1,7–2,1 MNOK. Anbefales."
+  },
+  bedrift: {
+    filename: "Tilbudsforesp_Bronnoysund_Naring.pdf",
+    kategori: "Bedrift",
+    kunde: "Bedriftskunde · Brønnøysund",
+    tittel: "Kontorombygging næringsbygg",
+    fag: ["Bygg-rehab", "Snekker", "Maler"],
+    verdi: 1200000,
+    selskap: "Kombinert",
+    score: 38,
+    frist: "2026-07-15",
+    notes: "Geografisk <b>utenfor kjerneområde</b> — Brønnøysund er i Helgeland. Vi har ingen lokal tilstedeværelse pr 2026 (planlagt 2028). Reisetid 5+ timer fra Bodø gjør prosjektet ulønnsomt med mindre vi har crew på Helgeland. <b>Anbefal å avvise</b>, eller henvis til SA-søsterselskap i området."
+  },
+};
+
+(function setupDropzone() {
+  const dz = document.getElementById('emailDrop');
+  const area = document.getElementById('evalArea');
+  if (!dz || !area) return;
+
+  function guessFromFilename(name) {
+    const n = name.toLowerCase();
+    if (n.includes('borettslag') || n.includes('vega')) return demoDb.vega;
+    if (n.includes('villa') || n.includes('privat')) return demoDb.villa;
+    if (n.includes('sameie')) return demoDb.sameie;
+    if (n.includes('bedrift') || n.includes('næring') || n.includes('naring') || n.includes('kontor')) return demoDb.bedrift;
+    // Generisk fallback
+    return {
+      filename: name,
+      kategori: "Ukjent",
+      kunde: "Ukjent (parsing fra fil)",
+      tittel: name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' '),
+      fag: ["Bygg-rehab"],
+      verdi: 1000000,
+      selskap: "Fritzøe",
+      score: 50,
+      frist: "2026-08-01",
+      notes: "Fil dratt inn — automatisk analyse begrenset uten å lese innhold. Manuell sjekk anbefalt. I produksjonsversjon vil AI lese PDF/e-post-innhold direkte."
+    };
+  }
+
+  function showLoading() {
+    area.innerHTML = `<div class="eval-loading"><span class="spinner"></span>Analyserer dokument og evaluerer mot selskapsprofil...</div>`;
+  }
+
+  function showResult(d) {
+    const scoreClass = d.score >= 70 ? 'high' : d.score >= 50 ? 'med' : 'low';
+    const fagBadges = d.fag.map(f => `<span class="badge fag">${f}</span>`).join(' ');
+    area.innerHTML = `
+      <div class="eval-result">
+        <div class="eval-head">
+          <div>
+            <h4>📄 ${d.filename}</h4>
+            <div class="eval-meta">${d.kunde} · <span class="badge kat-${d.kategori.toLowerCase()}">${d.kategori}</span></div>
+          </div>
+          <div class="eval-score ${scoreClass}">${d.score}%</div>
+        </div>
+        <div class="eval-body">
+          <div class="eval-row"><div class="lbl">Tittel</div><div class="val">${d.tittel}</div></div>
+          <div class="eval-row"><div class="lbl">Fag</div><div class="val">${fagBadges}</div></div>
+          <div class="eval-row"><div class="lbl">Estimert verdi</div><div class="val">${d.verdi.toLocaleString('no-NO')} kr</div></div>
+          <div class="eval-row"><div class="lbl">Anbefalt selskap</div><div class="val"><span class="badge ${d.selskap.toLowerCase()}">${d.selskap}</span></div></div>
+          <div class="eval-row"><div class="lbl">Foreslått frist</div><div class="val">${d.frist}</div></div>
+          <div class="eval-row"><div class="lbl">Type</div><div class="val"><span class="badge tilbud">Tilbudsforespørsel</span></div></div>
+        </div>
+        <div class="eval-notes"><b>AI-vurdering:</b> ${d.notes}</div>
+        <div class="eval-actions">
+          <button class="primary" id="evalImport">✓ Importer som tilbudsforespørsel</button>
+          <button id="evalReject">Avvis</button>
+        </div>
+      </div>`;
+
+    document.getElementById('evalImport').onclick = () => {
+      const yr = d.frist.slice(0, 4);
+      const id = `TF-${yr}-${String(anbud.length + 1).padStart(3, '0')}`;
+      const ny = {
+        id,
+        tittel: d.tittel,
+        kunde: d.kunde,
+        ramme: d.kategori,
+        type: "Tilbudsforespørsel",
+        selskap: d.selskap,
+        fag: d.fag,
+        verdi: d.verdi,
+        frist: d.frist,
+        resultat: "Pending",
+        vinner: "",
+      };
+      anbud.unshift(ny);
+      populateKunder();
+      refreshAll();
+      saveState();
+      area.innerHTML = '';
+      document.querySelector('.tabs .tab[data-tab="anbud"]').click();
+      highlightNewRow(id);
+      toast(`Tilbudsforespørsel importert: <b>${d.tittel}</b>`, id);
+    };
+
+    document.getElementById('evalReject').onclick = () => {
+      area.innerHTML = '';
+      toast('Tilbudsforespørsel avvist');
+    };
+  }
+
+  // Drag-and-drop handlers
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation();
+    dz.classList.add('drag-over');
+  }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation();
+    dz.classList.remove('drag-over');
+  }));
+  dz.addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const d = guessFromFilename(files[0].name);
+      showLoading();
+      setTimeout(() => showResult(d), 1400);
+    }
+  });
+
+  // Demo buttons
+  dz.querySelectorAll('button[data-demo]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const d = demoDb[btn.dataset.demo];
+      showLoading();
+      setTimeout(() => showResult(d), 1200);
+    });
+  });
+})();
+
+// wire up alle pipeline-knapper (event delegation tåler dynamiske items)
+document.querySelector('.pipeline-list').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button');
+  if (!btn) return;
+  const item = btn.closest('.pipe-item');
+  if (!item) return;
+  const txt = btn.textContent.trim();
+
+  if (txt === 'Importer som anbud' || txt === 'Importer som forsikringsoppdrag') {
+    const isForsikring = item.classList.contains('forsikring');
+    const data = extractPipeData(item);
+    if (isForsikring) {
+      data.type = 'Forsikringsoppdrag';
+      // Forsikringsoppdrag har fast pris fra selskapet — ofte tildelt direkte
+      // sett resultat = Vunnet om SA-match er høy (>80%); ellers Pending
+    }
+    const yr = data.frist ? data.frist.slice(0, 4) : new Date().getFullYear();
+    const idPrefix = isForsikring ? 'FO' : 'AN';
+    const id = `${idPrefix}-${yr}-${String(anbud.length + 1).padStart(3, '0')}`;
+    const ny = { id, ...data, resultat: 'Pending', vinner: '' };
+    anbud.unshift(ny);
+    populateKunder();
+    refreshAll();
+    removePipeItem(item);
+    document.querySelector('.tabs .tab[data-tab="anbud"]').click();
+    highlightNewRow(id);
+    toast(`${isForsikring ? 'Forsikringsoppdrag' : 'Anbud'} importert: <b>${data.tittel}</b>`, id);
+  } else if (txt === 'Ignorer' || txt === 'Avslå') {
+    removePipeItem(item);
+    toast('Ignorert — fjernet fra pipeline');
+  } else if (txt.startsWith('Åpne')) {
+    toast('I produksjon: åpner Mercell-portalen i ny fane.');
+  }
+});
+</script>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

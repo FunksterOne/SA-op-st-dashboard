@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Prosjekt — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<script src="prosjekter.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header .ph-crumb a { color: var(--muted); text-decoration: none }
+  .page-header .ph-crumb a:hover { color: var(--accent-2) }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .ph-flag {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+    background: var(--bad-soft); border: 1px solid var(--bad); color: var(--bad);
+    border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 12px;
+  }
+  .ph-flag.gul { background: var(--warn-soft); border-color: var(--warn); color: var(--warn) }
+
+  .page-tabs-wrap {
+    padding: 12px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .page-tabs {
+    display: inline-flex; gap: 2px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px;
+  }
+  .page-tabs .tab {
+    padding: 7px 16px; background: transparent; border: 0; color: var(--muted);
+    font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; border-radius: 4px;
+    transition: 0.12s; text-decoration: none;
+  }
+  .page-tabs .tab:hover { color: var(--text); background: var(--panel-3); text-decoration: none }
+  .page-tabs .tab.active { background: var(--panel-3); color: var(--accent-2); font-weight: 600 }
+
+  .container { padding: 22px 32px; max-width: 1280px }
+
+  .summary-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .summary-row { grid-template-columns: repeat(2, 1fr) } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 12px; margin: 0 0 14px }
+
+  /* Lifecycle */
+  .lifecycle {
+    display: grid; gap: 10px;
+  }
+  .lc-fase {
+    display: grid; grid-template-columns: 30px 1.6fr 1fr 1fr 1.2fr;
+    gap: 14px; padding: 11px 12px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; align-items: center; font-size: 12.5px;
+    border-left: 3px solid var(--muted);
+  }
+  .lc-fase.completed { border-left-color: var(--good); opacity: 0.85 }
+  .lc-fase.in_progress { border-left-color: var(--accent-2); background: var(--accent-soft) }
+  .lc-fase.planned { border-left-color: var(--muted); opacity: 0.6 }
+  .lc-fase .lc-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--panel-3); color: var(--muted);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .lc-fase.completed .lc-num { background: var(--good-soft); color: var(--good) }
+  .lc-fase.in_progress .lc-num { background: var(--accent-soft); color: var(--accent-2) }
+  .lc-fase .lc-name { font-weight: 600 }
+  .lc-fase .lc-status-badge {
+    display: inline-block; font-size: 9.5px; padding: 2px 6px; border-radius: 3px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .lc-fase.completed .lc-status-badge { background: var(--good-soft); color: var(--good) }
+  .lc-fase.in_progress .lc-status-badge { background: var(--accent-soft); color: var(--accent-2) }
+  .lc-fase.planned .lc-status-badge { background: var(--panel-3); color: var(--muted) }
+  .lc-fase .lc-meta { font-size: 11.5px; color: var(--muted) }
+  .lc-fase .lc-meta b { color: var(--text); font-weight: 500 }
+
+  .lc-fremdrift-bar {
+    margin-top: 4px; height: 4px; background: var(--panel-3); border-radius: 2px; overflow: hidden;
+  }
+  .lc-fremdrift-bar .fill { height: 100%; background: var(--accent-2); border-radius: 2px }
+
+  /* Regnskap-tabell */
+  .regnskap-tabell {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+  }
+  .regnskap-tabell th {
+    text-align: left; padding: 10px 12px; background: var(--panel-2); border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .regnskap-tabell th.num, .regnskap-tabell td.num {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .regnskap-tabell td {
+    padding: 10px 12px; border-bottom: 1px solid var(--line);
+  }
+  .regnskap-tabell tr:last-child td { border-bottom: 0 }
+  .regnskap-tabell tr.total { font-weight: 600; background: var(--panel-2) }
+  .regnskap-tabell tr.total td { border-top: 2px solid var(--line); border-bottom: 0 }
+  .regnskap-tabell .avvik-pos { color: var(--good) }
+  .regnskap-tabell .avvik-neg { color: var(--bad) }
+
+  /* Margin-bar */
+  .margin-bar {
+    display: flex; align-items: center; gap: 10px; padding: 14px;
+    background: var(--panel-2); border-radius: 6px; margin-bottom: 14px;
+  }
+  .margin-bar .mb-lbl { font-size: 11px; color: var(--muted); flex-shrink: 0; min-width: 110px }
+  .margin-bar .mb-bar {
+    flex: 1; height: 18px; background: var(--panel-3); border-radius: 4px; position: relative;
+    overflow: hidden;
+  }
+  .margin-bar .mb-fill {
+    position: absolute; top: 0; bottom: 0; left: 0; background: var(--accent-2); border-radius: 4px;
+  }
+  .margin-bar .mb-target {
+    position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--text);
+  }
+  .margin-bar .mb-vals {
+    flex-shrink: 0; font-size: 12.5px; min-width: 140px; text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .margin-bar .mb-vals b { color: var(--text) }
+  .margin-bar .mb-vals .neg { color: var(--bad) }
+  .margin-bar .mb-vals .pos { color: var(--good) }
+
+  /* Ressurs-tabell */
+  .ressurs-tabell {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+  }
+  .ressurs-tabell th {
+    text-align: left; padding: 10px 12px; background: var(--panel-2); border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .ressurs-tabell th.num, .ressurs-tabell td.num {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .ressurs-tabell td {
+    padding: 10px 12px; border-bottom: 1px solid var(--line);
+  }
+  .ressurs-tabell tr:last-child td { border-bottom: 0 }
+  .ressurs-tabell .timer-bar {
+    display: inline-block; width: 60px; height: 4px; background: var(--panel-3); border-radius: 2px;
+    overflow: hidden; margin-left: 6px; vertical-align: middle;
+  }
+  .ressurs-tabell .timer-bar .fill {
+    height: 100%; background: var(--accent-2); border-radius: 2px;
+  }
+  .ressurs-tabell .timer-bar.over .fill { background: var(--bad) }
+  .ressurs-tabell .ressurs-rolle { font-size: 10.5px; color: var(--muted); margin-top: 2px }
+
+  .doc-list {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  }
+  @media (max-width: 800px) { .doc-list { grid-template-columns: 1fr } }
+  .doc-item {
+    padding: 12px 14px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; font-size: 12.5px;
+  }
+  .doc-item .dl { font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.08em; font-weight: 700 }
+  .doc-item b { display: block; margin-top: 3px; font-weight: 500 }
+  .doc-item .dlink { color: var(--accent-2); font-size: 11px; margin-top: 6px; display: inline-block }
+
+  .empty-state {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 36px; text-align: center; color: var(--muted); font-size: 13px;
+  }
+
+  .tab-content { display: none }
+  .tab-content.active { display: block }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="prosjekt"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="daglig">Daglig</span>
+      <a href="index.html">Dashboard</a>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <a href="prosjekter.html">Prosjekter</a>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <span id="cr-id">PRJ-…</span>
+    </div>
+    <h1 id="ph-title">Prosjekt</h1>
+    <div class="ph-meta-row" id="ph-meta-row"></div>
+    <div id="ph-flag-wrap"></div>
+  </header>
+
+  <div class="page-tabs-wrap">
+    <div class="page-tabs">
+      <a class="tab active" data-tab="lifecycle" href="#lifecycle">Lifecycle</a>
+      <a class="tab" data-tab="regnskap" href="#regnskap">Prosjektregnskap</a>
+      <a class="tab" data-tab="ressurser" href="#ressurser">Ressurser</a>
+      <a class="tab" data-tab="dokumenter" href="#dokumenter">Dokumenter</a>
+    </div>
+    <div style="font-size:11px;color:var(--muted)" id="tab-meta"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- Sammendrag KPIs (synlig på alle tabs) -->
+    <div class="summary-row" id="summary-row"></div>
+
+    <!-- Lifecycle -->
+    <section class="tab-content active" id="tab-lifecycle">
+      <div class="panel">
+        <h2>Lifecycle</h2>
+        <p class="lead">Hver fase fra anbud til garanti — dato, status og ansvarlig. Klikk en fase for full detalj (kommer).</p>
+        <div class="lifecycle" id="lifecycle-list"></div>
+      </div>
+    </section>
+
+    <!-- Prosjektregnskap -->
+    <section class="tab-content" id="tab-regnskap">
+      <div class="panel">
+        <h2>Prosjektregnskap</h2>
+        <p class="lead">Budsjett vs faktisk per kostnadsgruppe. Projisert sluttverdi basert på fremdrift.</p>
+        <div id="margin-bar-wrap"></div>
+        <table class="regnskap-tabell" id="regnskap-tabell"></table>
+      </div>
+      <div class="panel">
+        <h2>Fakturering</h2>
+        <p class="lead">Fakturert mot kontraktsverdi og fremdrift.</p>
+        <div id="fakt-bar-wrap"></div>
+      </div>
+    </section>
+
+    <!-- Ressurser -->
+    <section class="tab-content" id="tab-ressurser">
+      <div class="panel">
+        <h2>Ressurser på prosjektet</h2>
+        <p class="lead">Bemanning med planlagte vs. faktiske timer. Underentreprenører som UE-pakker.</p>
+        <table class="ressurs-tabell" id="ressurs-tabell"></table>
+      </div>
+    </section>
+
+    <!-- Dokumenter -->
+    <section class="tab-content" id="tab-dokumenter">
+      <div class="panel">
+        <h2>Dokumenter og knytninger</h2>
+        <p class="lead">Anbudsdokumenter, kontrakt, FDV, bilder og PowerOffice Go-tilkobling.</p>
+        <div class="doc-list" id="doc-list"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+<script>
+function getQueryParam(name) {
+  return new URLSearchParams(location.search).get(name);
+}
+
+let prosjekt = null;
+let agg = null;
+
+function fmtT(timer) {
+  if (timer == null) return '—';
+  return timer.toLocaleString('no-NO') + ' t';
+}
+function fmtKrShort(v) {
+  if (v == null || v === 0) return '0';
+  if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(2).replace('.', ',') + ' M';
+  if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + ' k';
+  return v.toLocaleString('no-NO');
+}
+
+function renderHeader() {
+  document.getElementById('cr-id').textContent = prosjekt.id;
+  document.getElementById('ph-title').textContent = prosjekt.navn;
+
+  const selskap = SELSKAPER.find(s => s.id === prosjekt.selskap_id);
+  const aktivFase = aktivProsjektFase(prosjekt);
+  document.getElementById('ph-meta-row').innerHTML = `
+    <span><b>${selskap?.label || ''}</b> · ${selskap?.lokasjon.by || ''}</span>
+    <span>Kunde: <b>${prosjekt.kunde}</b></span>
+    <span>Kontrakt: <b>${fmtKr(prosjekt.kontraktsverdi_kr)}</b></span>
+    <span>Fag: <b>${prosjekt.fag.join(', ')}</b></span>
+    <span>Fase: <b>${aktivFase ? aktivFase.fase : '—'}</b></span>
+    <span>Fremdrift: <b>${prosjekt.fremdrift_pct} %</b></span>
+    <span>Anbud: <b>${prosjekt.anbud_id}</b></span>
+  `;
+
+  const flagWrap = document.getElementById('ph-flag-wrap');
+  if (prosjekt.flagg) {
+    flagWrap.innerHTML = `
+      <div class="ph-flag ${prosjekt.flagg === 'gul' ? 'gul' : ''}">
+        <span>${prosjekt.flagg === 'rod' ? '⚠' : '⚠'}</span>
+        <span>${prosjekt.flagg_aarsak || (prosjekt.flagg === 'rod' ? 'Marginvarsel — rødt flagg' : 'Forsinket — gult flagg')}</span>
+      </div>
+    `;
+  } else {
+    flagWrap.innerHTML = '';
+  }
+
+  document.getElementById('tab-meta').textContent =
+    `${prosjekt.id} · ${prosjekt.poweroffice_prosjekt_nr} · ${PROSJEKT_STATUS_LABEL[prosjekt.status]}`;
+}
+
+function renderSummary() {
+  const margin = prosjekt.margin_faktisk_pct;
+  const marginCls = margin == null ? '' : margin < (prosjekt.margin_plan_pct - 2) ? 'bad' : margin < prosjekt.margin_plan_pct ? 'warn' : 'good';
+  document.getElementById('summary-row').innerHTML = `
+    <div class="sa-kpi">
+      <div class="sa-kpi-label">Kontraktsverdi</div>
+      <div class="sa-kpi-value">${fmtKr(prosjekt.kontraktsverdi_kr)}</div>
+      <div class="sa-kpi-detail">${fmtKr(agg.fakturert)} fakturert</div>
+    </div>
+    <div class="sa-kpi ${agg.avvik_pct > 5 ? 'bad' : agg.avvik_pct > 0 ? 'warn' : 'good'}">
+      <div class="sa-kpi-label">Forbruk vs. budsjett</div>
+      <div class="sa-kpi-value">${fmtKr(agg.sumFaktisk)}</div>
+      <div class="sa-kpi-detail">${agg.avvik_pct > 0 ? '+' : ''}${agg.avvik_pct} % projisert</div>
+    </div>
+    <div class="sa-kpi ${marginCls}">
+      <div class="sa-kpi-label">Margin</div>
+      <div class="sa-kpi-value">${fmtPct(margin)}</div>
+      <div class="sa-kpi-detail">Plan: ${fmtPct(prosjekt.margin_plan_pct)}</div>
+    </div>
+    <div class="sa-kpi ${agg.timer_faktisk > agg.timer_planlagt ? 'bad' : 'hi'}">
+      <div class="sa-kpi-label">Timer</div>
+      <div class="sa-kpi-value">${fmtT(agg.timer_faktisk)}</div>
+      <div class="sa-kpi-detail">av ${fmtT(agg.timer_planlagt)} planlagt</div>
+    </div>
+  `;
+}
+
+function renderLifecycle() {
+  const list = document.getElementById('lifecycle-list');
+  let html = '';
+  prosjekt.faser.forEach((f, i) => {
+    const numLabel = i + 1;
+    const statusLabel = f.status === 'completed' ? 'Ferdig' : f.status === 'in_progress' ? 'Pågår' : 'Planlagt';
+    const fremdrift = f.fremdrift != null ? `<div class="lc-fremdrift-bar"><div class="fill" style="width:${f.fremdrift}%"></div></div>` : '';
+    html += `
+      <div class="lc-fase ${f.status}">
+        <span class="lc-num">${numLabel}</span>
+        <span>
+          <div class="lc-name">${f.fase}<span class="lc-status-badge">${statusLabel}</span></div>
+          ${fremdrift}
+        </span>
+        <span class="lc-meta">Start: <b>${fmtDate(f.start)}</b></span>
+        <span class="lc-meta">Slutt: <b>${fmtDate(f.slutt)}</b></span>
+        <span class="lc-meta">Ansvarlig: <b>${f.ansvarlig || '—'}</b></span>
+      </div>
+    `;
+  });
+  list.innerHTML = html;
+}
+
+function renderRegnskap() {
+  const b = prosjekt.budsjett_kr || {};
+  const f = prosjekt.faktisk_kr || {};
+  const rader = [
+    { k: 'Materiell',          b: b.materiell || 0, f: f.materiell || 0 },
+    { k: 'Lønn (egne timer)',  b: b.lonn || 0,      f: f.lonn || 0 },
+    { k: 'Underentreprenør',    b: b.ue || 0,        f: f.ue || 0 },
+    { k: 'Administrasjon',      b: b.admin || 0,     f: f.admin || 0 },
+    { k: 'Risiko / margin-buffer', b: b.risiko || 0, f: f.risiko || 0 },
+  ];
+
+  let html = `
+    <thead>
+      <tr>
+        <th>Kostnadsgruppe</th>
+        <th class="num">Budsjett</th>
+        <th class="num">Faktisk hittil</th>
+        <th class="num">Andel av budsjett</th>
+        <th class="num">Projisert ferdig</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+  rader.forEach(r => {
+    const andel = r.b ? Math.round(r.f / r.b * 100) : 0;
+    const projisert = prosjekt.fremdrift_pct ? r.f / (prosjekt.fremdrift_pct / 100) : r.b;
+    const avvikCls = projisert > r.b * 1.05 ? 'avvik-neg' : projisert < r.b * 0.95 ? 'avvik-pos' : '';
+    html += `
+      <tr>
+        <td>${r.k}</td>
+        <td class="num">${fmtKr(r.b)}</td>
+        <td class="num">${fmtKr(r.f)}</td>
+        <td class="num">${andel} %</td>
+        <td class="num ${avvikCls}">${fmtKr(projisert)}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+      <tr class="total">
+        <td>Sum kostnader</td>
+        <td class="num">${fmtKr(agg.sumBudsjett)}</td>
+        <td class="num">${fmtKr(agg.sumFaktisk)}</td>
+        <td class="num">${agg.sumBudsjett ? Math.round(agg.sumFaktisk / agg.sumBudsjett * 100) : 0} %</td>
+        <td class="num ${agg.avvik_pct > 5 ? 'avvik-neg' : agg.avvik_pct < -2 ? 'avvik-pos' : ''}">${fmtKr(agg.projisert)}</td>
+      </tr>
+      <tr>
+        <td>Kontraktsverdi</td>
+        <td class="num">${fmtKr(prosjekt.kontraktsverdi_kr)}</td>
+        <td class="num">${fmtKr(agg.fakturert)}</td>
+        <td class="num">${prosjekt.kontraktsverdi_kr ? Math.round(agg.fakturert / prosjekt.kontraktsverdi_kr * 100) : 0} %</td>
+        <td class="num">—</td>
+      </tr>
+      <tr class="total">
+        <td>Margin (kontraktsverdi − sum kostnader)</td>
+        <td class="num">${fmtKr(prosjekt.kontraktsverdi_kr - agg.sumBudsjett)}</td>
+        <td class="num">${fmtKr(prosjekt.kontraktsverdi_kr - agg.sumFaktisk)}</td>
+        <td class="num">—</td>
+        <td class="num ${agg.margin_projisert_kr < 0 ? 'avvik-neg' : 'avvik-pos'}">${fmtKr(agg.margin_projisert_kr)}</td>
+      </tr>
+    </tbody>
+  `;
+  document.getElementById('regnskap-tabell').innerHTML = html;
+
+  // Margin-bar
+  const planMargin = prosjekt.margin_plan_pct || 0;
+  const faktiskMargin = prosjekt.margin_faktisk_pct;
+  const maxScale = Math.max(planMargin * 1.5, 15);
+  document.getElementById('margin-bar-wrap').innerHTML = `
+    <div class="margin-bar">
+      <span class="mb-lbl">Plan-margin</span>
+      <span class="mb-bar">
+        <span class="mb-fill" style="width:${planMargin / maxScale * 100}%"></span>
+      </span>
+      <span class="mb-vals">${fmtPct(planMargin)}</span>
+    </div>
+    <div class="margin-bar">
+      <span class="mb-lbl">Faktisk margin</span>
+      <span class="mb-bar">
+        <span class="mb-fill" style="width:${faktiskMargin != null ? faktiskMargin / maxScale * 100 : 0}%; background: ${faktiskMargin != null && faktiskMargin < planMargin - 2 ? 'var(--bad)' : faktiskMargin != null && faktiskMargin < planMargin ? 'var(--warn)' : 'var(--good)'}"></span>
+        <span class="mb-target" style="left:${planMargin / maxScale * 100}%"></span>
+      </span>
+      <span class="mb-vals"><b class="${faktiskMargin != null && faktiskMargin < planMargin - 2 ? 'neg' : faktiskMargin != null && faktiskMargin > planMargin ? 'pos' : ''}">${fmtPct(faktiskMargin)}</b><br><span style="font-size:10.5px">${faktiskMargin != null ? (faktiskMargin > planMargin ? '+' : '') + (faktiskMargin - planMargin).toFixed(1).replace('.', ',') + ' pp vs plan' : ''}</span></span>
+    </div>
+  `;
+
+  // Fakt bar
+  const faktAndel = prosjekt.kontraktsverdi_kr ? agg.fakturert / prosjekt.kontraktsverdi_kr * 100 : 0;
+  document.getElementById('fakt-bar-wrap').innerHTML = `
+    <div class="margin-bar">
+      <span class="mb-lbl">Fakturert</span>
+      <span class="mb-bar">
+        <span class="mb-fill" style="width:${faktAndel}%"></span>
+        <span class="mb-target" style="left:${prosjekt.fremdrift_pct}%"></span>
+      </span>
+      <span class="mb-vals">${fmtKr(agg.fakturert)} av ${fmtKr(prosjekt.kontraktsverdi_kr)}<br><span style="font-size:10.5px">${faktAndel.toFixed(0)} % fakturert · ${prosjekt.fremdrift_pct} % fremdrift</span></span>
+    </div>
+  `;
+}
+
+function renderRessurser() {
+  const r = prosjekt.ressurser || [];
+  let html = `
+    <thead>
+      <tr>
+        <th>Navn / rolle</th>
+        <th>Fag</th>
+        <th class="num">Timer plan</th>
+        <th class="num">Timer faktisk</th>
+        <th class="num">Andel</th>
+        <th class="num">Lønn pr time</th>
+        <th class="num">Sum lønn faktisk</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+  r.forEach(p => {
+    const andel = p.timer_planlagt ? p.timer_faktisk / p.timer_planlagt * 100 : 0;
+    const over = andel > 100;
+    const sumLonn = (p.timer_faktisk || 0) * (p.lonn_pr_t || 0);
+    const ueDisp = p.ue_pakke_kr ? `<td colspan="5" class="num" style="color:var(--muted)">UE-pakke ${fmtKr(p.ue_pakke_kr)}</td>` :
+      `<td class="num">${fmtT(p.timer_planlagt)}</td>
+       <td class="num">${fmtT(p.timer_faktisk)}<span class="timer-bar ${over ? 'over' : ''}"><span class="fill" style="width:${Math.min(100, andel)}%"></span></span></td>
+       <td class="num ${over ? 'avvik-neg' : ''}">${andel.toFixed(0)} %</td>
+       <td class="num">${p.lonn_pr_t ? p.lonn_pr_t.toLocaleString('no-NO') + ' kr' : '—'}</td>
+       <td class="num">${fmtKr(sumLonn)}</td>`;
+    html += `
+      <tr>
+        <td><b>${p.navn}</b><div class="ressurs-rolle">${p.rolle}</div></td>
+        <td>${p.fag}</td>
+        ${ueDisp}
+      </tr>
+    `;
+  });
+  html += `</tbody>`;
+  document.getElementById('ressurs-tabell').innerHTML = html;
+}
+
+function renderDokumenter() {
+  const anbudHref = prosjekt.anbud_id ? `anbud-detalj.html?id=${encodeURIComponent(prosjekt.anbud_id)}` : null;
+  const items = [
+    { t: 'Anbudsdokument', v: `Anbud ${prosjekt.anbud_id} (vunnet)`, l: anbudHref, lblBtn: 'Se anbud-lifecycle →' },
+    { t: 'Kontrakt', v: `${prosjekt.kunde} — ${fmtKr(prosjekt.kontraktsverdi_kr)}`, l: '#' },
+    { t: 'PowerOffice Go', v: `Prosjektnr. ${prosjekt.poweroffice_prosjekt_nr}`, l: '#' },
+    { t: 'Holte SmartKalk', v: 'Kalkylegrunnlag (vunnet)', l: '#' },
+    { t: 'FDV-dokumentasjon', v: 'Genereres ved ferdigstillelse', l: null },
+    { t: 'Fotodokumentasjon', v: 'På SA Læring (per fase)', l: '#' },
+  ];
+  document.getElementById('doc-list').innerHTML = items.map(i => `
+    <div class="doc-item">
+      <div class="dl">${i.t}</div>
+      <b>${i.v}</b>
+      ${i.l ? `<a class="dlink" href="${i.l}">${i.lblBtn || 'Åpne →'}</a>` : ''}
+    </div>
+  `).join('');
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.page-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab)?.classList.add('active');
+  document.querySelector(`.page-tabs .tab[data-tab="${tab}"]`)?.classList.add('active');
+  history.replaceState(null, '', '#' + tab);
+}
+
+function init() {
+  const id = getQueryParam('id');
+  prosjekt = id ? getProsjektById(id) : null;
+
+  if (!prosjekt) {
+    document.querySelector('main').innerHTML = `
+      <header class="page-header">
+        <div class="ph-crumb"><span class="mode-pill" data-mode="daglig">Daglig</span><a href="prosjekter.html">Prosjekter</a><span>›</span><span>Ikke funnet</span></div>
+        <h1>Prosjektet ble ikke funnet</h1>
+        <div class="ph-meta-row">ID: ${id || '—'}</div>
+      </header>
+      <div class="container">
+        <div class="empty-state">
+          Sjekk lenken eller gå til <a href="prosjekter.html">prosjektoversikten</a>.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  agg = aggregateProsjekt(prosjekt);
+
+  // Sett scope automatisk til prosjektets selskap, hvis nåværende scope ikke inneholder det
+  const sc = getActiveScope();
+  const inScope = getProsjekterInScope(sc).find(p => p.id === prosjekt.id);
+  if (!inScope) {
+    setActiveScope({ type: 'selskap', id: prosjekt.selskap_id });
+    // ikke reload; vi har allerede prosjektet
+  }
+
+  renderHeader();
+  renderSummary();
+  renderLifecycle();
+  renderRegnskap();
+  renderRessurser();
+  renderDokumenter();
+
+  // Tab-switching
+  document.querySelectorAll('.page-tabs .tab').forEach(t => {
+    t.addEventListener('click', (e) => {
+      e.preventDefault();
+      showTab(t.dataset.tab);
+    });
+  });
+  // Init fra hash
+  const hash = (location.hash || '#lifecycle').replace('#', '');
+  if (['lifecycle', 'regnskap', 'ressurser', 'dokumenter'].includes(hash)) showTab(hash);
+}
+
+init();
+</script>
+</body>
+</html>

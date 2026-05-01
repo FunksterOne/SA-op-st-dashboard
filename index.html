@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Dashboard — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<script src="prosjekter.js"></script>
+<script src="anbud-data.js"></script>
+<style>
+  :root, :root[data-theme="dark"] {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1f2630; --panel-3: #262d38;
+    --line: #2a313c; --text: #e6edf3; --muted: #8b95a3;
+    --accent: #4f9da6; --accent-2: #66c2cc;
+    --good: #3fb950; --warn: #d29922; --bad: #f85149;
+    --hi: #58a6ff; --pending: #a371f7;
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --panel: #f5f7fa; --panel-2: #eaeef3; --panel-3: #dde3ec;
+    --line: #d8dde5; --text: #1a1f29; --muted: #6b7380;
+    --accent: #2d6e76; --accent-2: #4a8a92;
+    --good: #2e8a3a; --warn: #b87a17; --bad: #c63a35;
+    --hi: #2a6dc7; --pending: #7c5fce;
+  }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0 }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .page-header .ph-left .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .page-header .ph-left h1 {
+    margin: 6px 0 0; font-size: 22px; font-weight: 600; letter-spacing: -0.012em;
+  }
+  .page-header .ph-left .ph-sub {
+    margin: 4px 0 0; font-size: 13px; color: var(--muted);
+  }
+  .page-header .ph-meta {
+    text-align: right; font-size: 12px; color: var(--muted);
+  }
+  .container { padding: 22px 32px; max-width: 1280px }
+  .row { display: grid; gap: 16px; margin-bottom: 18px }
+  .row.r4 { grid-template-columns: repeat(4, 1fr) }
+  .row.r2 { grid-template-columns: 1fr 1fr }
+  .row.r3 { grid-template-columns: 2fr 1fr }
+  @media (max-width: 1100px) {
+    .row.r4 { grid-template-columns: repeat(2, 1fr) }
+    .row.r3 { grid-template-columns: 1fr }
+  }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .panel h2 { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: 0.005em }
+  .panel .panel-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .panel .panel-head a { color: var(--accent); text-decoration: none; font-size: 12px }
+  .panel .panel-head a:hover { text-decoration: underline }
+
+  /* Action-feed */
+  .action-list { display: flex; flex-direction: column; gap: 8px }
+  .action-item {
+    display: flex; gap: 12px; align-items: flex-start; padding: 11px 12px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px;
+    border-left: 3px solid var(--muted); cursor: pointer; transition: 0.15s;
+    text-decoration: none; color: var(--text);
+  }
+  .action-item:hover { border-color: var(--accent); transform: translateX(2px) }
+  .action-item.urgent { border-left-color: var(--bad) }
+  .action-item.warn { border-left-color: var(--warn) }
+  .action-item.info { border-left-color: var(--hi) }
+  .action-item .ai-icon {
+    width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; background: var(--panel-3);
+  }
+  .action-item.urgent .ai-icon { background: rgba(248,81,73,0.15); color: var(--bad) }
+  .action-item.warn .ai-icon { background: rgba(210,153,34,0.15); color: var(--warn) }
+  .action-item.info .ai-icon { background: rgba(88,166,255,0.15); color: var(--hi) }
+  .action-item .ai-body { flex: 1; min-width: 0 }
+  .action-item .ai-title { font-weight: 600; font-size: 13px; line-height: 1.3 }
+  .action-item .ai-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px }
+  .action-item .ai-meta { font-size: 10.5px; color: var(--muted); flex-shrink: 0; text-align: right }
+
+  /* Innkommende-liste */
+  .inc-list { display: flex; flex-direction: column; gap: 6px }
+  .inc-item {
+    display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; padding: 9px 10px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    font-size: 12.5px; align-items: center; cursor: pointer; transition: 0.15s;
+    text-decoration: none; color: var(--text);
+  }
+  .inc-item:hover { border-color: var(--accent) }
+  .inc-item .src {
+    font-size: 9px; padding: 3px 5px; border-radius: 3px; text-transform: uppercase;
+    background: var(--panel-3); color: var(--muted); font-weight: 700; letter-spacing: 0.06em;
+    text-align: center; line-height: 1; white-space: nowrap;
+  }
+  .inc-item .src.mer { background: rgba(79,157,166,0.18); color: var(--accent-2) }
+  .inc-item .src.dof { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .inc-item .src.ten { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .inc-item .src.epo { background: rgba(102,194,204,0.18); color: var(--accent-2) }
+  .inc-item .src.saf { background: rgba(248,81,73,0.18); color: var(--bad) }
+  .inc-item .src.cob { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .inc-item .body { min-width: 0 }
+  .inc-item .ttl {
+    font-weight: 600; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .inc-item .meta { font-size: 10.5px; color: var(--muted); margin-top: 1px }
+  .inc-item .right { text-align: right; font-size: 11px; color: var(--muted); flex-shrink: 0 }
+  .inc-item .right .frist { font-weight: 600; color: var(--text); font-size: 11.5px }
+
+  /* Prosjekter */
+  .prj-list { display: flex; flex-direction: column; gap: 6px }
+  .prj-item {
+    display: grid; grid-template-columns: 8px 1fr auto; gap: 10px; padding: 9px 10px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    font-size: 12.5px; align-items: center;
+  }
+  .prj-item .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex-shrink: 0;
+  }
+  .prj-item.red .dot { background: var(--bad) }
+  .prj-item.yellow .dot { background: var(--warn) }
+  .prj-item .name { font-weight: 600; font-size: 12.5px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .prj-item .sub { font-size: 10.5px; color: var(--muted); margin-top: 1px }
+  .prj-item .right { text-align: right; flex-shrink: 0 }
+  .prj-item .frem {
+    font-size: 11px; color: var(--muted); white-space: nowrap;
+  }
+  .prj-item .selskap-tag {
+    font-size: 9px; padding: 2px 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.06em;
+    font-weight: 700; background: var(--panel-3); color: var(--muted); margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="dashboard"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-left">
+      <div class="ph-crumb">
+        <span class="mode-pill" data-mode="daglig">Daglig</span>
+        <span>Dashboard</span>
+      </div>
+      <h1 id="ph-title">Byggmester Fritzøe</h1>
+      <div class="ph-sub" id="ph-sub">Bodø · 31 ansatte · DL Brynjar Storvik</div>
+    </div>
+    <div class="ph-meta">
+      <div>Live oppdatering hvert 4. sek</div>
+      <div style="font-size:11px;margin-top:2px">Tid og scope vises i topbar over</div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. Speedometer-rad -->
+    <div class="row r4">
+      <div data-gauge id="g-hit"></div>
+      <div data-gauge id="g-pipeline"></div>
+      <div data-gauge id="g-margin"></div>
+      <div data-gauge id="g-frister"></div>
+    </div>
+
+    <!-- 2. Action-feed + Pågående prosjekter -->
+    <div class="row r2">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Krever handling nå</h2>
+          <span style="font-size:11px;color:var(--muted)" id="action-count"></span>
+        </div>
+        <div class="action-list" id="action-list"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Pågående prosjekter</h2>
+          <a href="#" id="link-prosjekter">Se alle prosjekter →</a>
+        </div>
+        <div class="prj-list" id="prj-list"></div>
+      </div>
+    </div>
+
+    <!-- 3. Innkommende -->
+    <div class="row" style="grid-template-columns:1fr">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Innkommende — siste varsler fra alle kanaler</h2>
+          <a href="#" id="link-pipeline">Åpne pipeline →</a>
+        </div>
+        <div class="inc-list" id="inc-list"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="speedometer.js"></script>
+<script src="sidebar.js"></script>
+<script>
+// ---------------------------------------------------------------------
+// Dashboard-rendering
+// ---------------------------------------------------------------------
+
+function fmtMNOK(kr) {
+  if (kr == null || isNaN(kr)) return '—';
+  return (kr / 1000000).toFixed(1).replace('.', ',') + ' M';
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  const days = ['søn','man','tir','ons','tor','fre','lør'];
+  return `${days[d.getDay()]} ${d.getDate()}. ${['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'][d.getMonth()]}`;
+}
+function daysUntil(iso) {
+  if (!iso) return null;
+  const d = new Date(iso); if (isNaN(d)) return null;
+  return Math.ceil((d - Date.now()) / 86400000);
+}
+
+function renderHeader() {
+  const scope = getActiveScope();
+  const lbl = getScopeLabel(scope);
+  document.getElementById('ph-title').textContent = lbl.label;
+  document.getElementById('ph-title').style.color = lbl.farge;
+
+  let sub = lbl.sub;
+  if (scope.type === 'selskap') {
+    const s = getSelskap(scope.id);
+    if (s) sub = `${s.lokasjon.by} · ${s.regnskap_2024.ansatte} ansatte · DL ${s.ledelse.dl_kort}`;
+  } else if (scope.type === 'by') {
+    const by = getBy(scope.id);
+    const selskaper = getSelskaperInScope(scope);
+    const ans = selskaper.reduce((s, x) => s + x.regnskap_2024.ansatte, 0);
+    const oms = selskaper.reduce((s, x) => s + x.regnskap_2024.omsetning_mnok, 0);
+    const dlSet = [...new Set(selskaper.map(s => s.ledelse.dl_kort))];
+    sub = `${by.label} · ${selskaper.length} selskap · ${ans} ansatte · ${oms.toFixed(0)} MNOK · DL ${dlSet.join(' / ')}`;
+  } else if (scope.type === 'konsern') {
+    const ans = SELSKAPER.reduce((s, x) => s + x.regnskap_2024.ansatte, 0);
+    const oms = SELSKAPER.reduce((s, x) => s + x.regnskap_2024.omsetning_mnok, 0);
+    sub = `ServiceAlliansen Bygg · ${SELSKAPER.length} selskap · ${ans} ansatte · ${oms.toFixed(0)} MNOK omsetning 2024`;
+  }
+  document.getElementById('ph-sub').textContent = sub;
+
+}
+
+function renderGauges() {
+  const kpi = getOperativKpi();
+  if (!kpi) return;
+
+  // 1. Hit-rate
+  const won = kpi._won || 0, lost = kpi._lost || 0, decided = won + lost;
+  const hitDetail = decided
+    ? `${won} av ${decided} avgjorte siste 90 d`
+    : (kpi.hit_rate_detail ? kpi.hit_rate_detail.split(' siste')[0] : 'Ingen data');
+  renderGauge(document.getElementById('g-hit'), {
+    label: 'Hit-rate (90 d)',
+    value: kpi.hit_rate_pct ?? 0,
+    min: 0, max: 100,
+    target: kpi.hit_rate_mal_pct ?? 70,
+    unit: '%',
+    zones: [50, 70],
+    detail: hitDetail,
+  });
+
+  // 2. Pipeline-verdi vs mål — bruker MNOK-skala
+  const pVerdi = (kpi.pipeline_verdi_kr || 0) / 1000000;
+  const pMal = (kpi.pipeline_mal_kr || 1) / 1000000;
+  renderGauge(document.getElementById('g-pipeline'), {
+    label: 'Pipeline-verdi',
+    value: pVerdi,
+    min: 0,
+    max: Math.max(pMal * 1.25, pVerdi * 1.1, 1),
+    target: pMal,
+    unit: 'MNOK',
+    zones: [pMal * 0.5, pMal * 0.85],
+    detail: `${kpi.pending_anbud || 0} anbud venter avgjørelse`,
+  });
+
+  // 3. Margin pågående
+  renderGauge(document.getElementById('g-margin'), {
+    label: 'Margin pågående',
+    value: kpi.margin_pct ?? 0,
+    min: 0, max: 12,
+    target: kpi.margin_mal_pct ?? 7.5,
+    unit: '%',
+    zones: [(kpi.margin_mal_pct ?? 7.5) * 0.7, kpi.margin_mal_pct ?? 7.5],
+    detail: `${kpi.aktive_prosjekter || 0} aktive prosjekter`,
+  });
+
+  // 4. Frister neste 7d (lavere er bedre — invert farger)
+  const fr = kpi.frister_neste_7d ?? 0;
+  const frParts = [];
+  if (kpi.frister_kritiske) frParts.push(`${kpi.frister_kritiske} kritisk`);
+  frParts.push(`${kpi.frister_neste_14d || 0} totalt i 14 d`);
+  renderGauge(document.getElementById('g-frister'), {
+    label: 'Frister neste 7 d',
+    value: fr,
+    min: 0, max: 12,
+    target: null,
+    unit: '',
+    zones: [4, 8],
+    invertColors: true,
+    detail: frParts.join(' · '),
+  });
+}
+
+function renderActionList() {
+  const kpi = getOperativKpi();
+  const list = document.getElementById('action-list');
+  list.innerHTML = '';
+  const items = [];
+
+  // Nye varsler
+  const innk = kpi?.innkommende_pipeline || 0;
+  if (innk > 0) {
+    items.push({
+      cls: 'urgent', icon: '!',
+      title: `${innk} nye anbudsvarsler å vurdere`,
+      sub: kpi.innkommende_detail || '',
+      meta: 'Vurder',
+      href: getRouteFor('anbud'),
+    });
+  }
+  // Anbud med kort frist
+  const fr7 = kpi?.frister_neste_7d || 0;
+  if (fr7 > 0) {
+    items.push({
+      cls: 'warn', icon: '⏱',
+      title: `${fr7} anbud med frist neste 7 dager`,
+      sub: kpi.frister_kritiske ? `${kpi.frister_kritiske} kritiske · krever befaring eller dokumentasjon` : 'Tildel kalkulator',
+      meta: '7 d',
+      href: getRouteFor('anbud'),
+    });
+  }
+  // Pending anbud
+  if (kpi?.pending_anbud) {
+    items.push({
+      cls: 'info', icon: '◐',
+      title: `${kpi.pending_anbud} anbud venter avgjørelse`,
+      sub: 'Følg opp innkjøpere · oppdater pipeline',
+      meta: 'Pending',
+      href: getRouteFor('anbud'),
+    });
+  }
+  // Røde prosjekter
+  if (kpi?.prosjekter_flagget) {
+    items.push({
+      cls: 'urgent', icon: '⚠',
+      title: `${kpi.prosjekter_flagget} prosjekt med margin-flagg`,
+      sub: 'Plan-vs-faktisk avvik · ring prosjektleder',
+      meta: 'Rød',
+      href: getRouteFor('okonomi'),
+    });
+  }
+
+  if (items.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:14px;text-align:center">Alt på sporet — ingen aksjoner krever oppmerksomhet akkurat nå.</div>';
+    document.getElementById('action-count').textContent = '0 aksjoner';
+    return;
+  }
+
+  document.getElementById('action-count').textContent = `${items.length} aksjon${items.length === 1 ? '' : 'er'}`;
+  items.forEach(i => {
+    const a = document.createElement('a');
+    a.href = i.href;
+    a.className = `action-item ${i.cls}`;
+    a.innerHTML = `
+      <span class="ai-icon">${i.icon}</span>
+      <span class="ai-body">
+        <div class="ai-title">${i.title}</div>
+        <div class="ai-sub">${i.sub}</div>
+      </span>
+      <span class="ai-meta">${i.meta}</span>
+    `;
+    list.appendChild(a);
+  });
+}
+
+function renderProsjekter() {
+  const list = document.getElementById('prj-list');
+  list.innerHTML = '';
+  const scope = getActiveScope();
+  const prosjekter = getProsjekterInScope(scope)
+    .filter(p => ['utforelse', 'planlegging', 'ferdigstillelse'].includes(p.status))
+    .sort((a, b) => {
+      // Røde først, så gule, så resten
+      const flagOrder = { rod: 0, gul: 1 };
+      return (flagOrder[a.flagg] ?? 9) - (flagOrder[b.flagg] ?? 9);
+    })
+    .slice(0, 5);
+
+  if (prosjekter.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:14px;text-align:center">Ingen aktive prosjekter registrert.</div>';
+    return;
+  }
+  const showSelskap = scope.type !== 'selskap';
+  prosjekter.forEach(p => {
+    const selskap = SELSKAPER.find(s => s.id === p.selskap_id);
+    const tag = showSelskap && selskap ? `<span class="selskap-tag" style="color:${selskap.farge}">${selskap.kortnavn}</span>` : '';
+    const statusClass = p.flagg === 'rod' ? 'red' : p.flagg === 'gul' ? 'yellow' : 'green';
+    const a = document.createElement('a');
+    a.href = `prosjekt.html?id=${encodeURIComponent(p.id)}`;
+    a.className = `prj-item ${statusClass}`;
+    a.style.textDecoration = 'none';
+    a.style.color = 'var(--text)';
+    a.innerHTML = `
+      <span class="dot"></span>
+      <span style="min-width:0">
+        <div class="name">${p.navn}${tag}</div>
+        <div class="sub">${p.flagg_aarsak || (p.margin_faktisk_pct != null ? `Margin ${p.margin_faktisk_pct.toFixed(1).replace('.', ',')} % (plan ${p.margin_plan_pct.toFixed(1).replace('.', ',')} %)` : 'Pågår')}</div>
+      </span>
+      <span class="right">
+        <div class="frem">${p.fremdrift_pct} %</div>
+      </span>
+    `;
+    list.appendChild(a);
+  });
+}
+
+function renderInnkommende() {
+  const list = document.getElementById('inc-list');
+  list.innerHTML = '';
+  const scope = getActiveScope();
+  // Hent pending anbud fra anbud-data.js — sortert etter frist
+  const pending = getAnbudInScope(scope)
+    .filter(a => a.status === 'pending')
+    .sort((a, b) => new Date(a.frist || '9999') - new Date(b.frist || '9999'))
+    .slice(0, 6);
+
+  if (pending.length === 0) {
+    // Fallback: vis seed-data hvis ingen pending i anbud-data.js for valgt scope
+    const kpi = getOperativKpi();
+    const seedItems = (kpi?.preview_innkommende || []).slice(0, 6);
+    if (seedItems.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:14px;text-align:center">Ingen nye varsler i pipeline.</div>';
+      return;
+    }
+    seedItems.forEach(it => {
+      const srcClass = ({Mercell:'mer', Doffin:'dof', TendSign:'ten', 'E-post':'epo', 'SA Forsikring':'saf', CoBrief:'cob'})[it.kilde] || '';
+      const days = daysUntil(it.frist);
+      const tag = it._selskap ? `<span class="selskap-tag" style="color:${it._farge}">${it._selskap}</span>` : '';
+      const a = document.createElement('a');
+      a.href = getRouteFor('anbud');
+      a.className = 'inc-item';
+      a.innerHTML = `
+        <span class="src ${srcClass}">${it.kilde.slice(0,3)}</span>
+        <span class="body">
+          <div class="ttl">${it.tittel}${tag}</div>
+          <div class="meta">${it.kunde}${it.match ? ' · match ' + it.match + ' %' : ''}${it.urgent ? ' · ⚠ haster' : ''}${it.strategisk ? ' · ★ strategisk' : ''}</div>
+        </span>
+        <span class="right">
+          <div class="frist">${days != null && days <= 30 ? days + ' d' : fmtDate(it.frist)}</div>
+          <div>${fmtDate(it.frist)}</div>
+        </span>
+      `;
+      list.appendChild(a);
+    });
+    return;
+  }
+
+  const showSelskap = scope.type !== 'selskap';
+  pending.forEach(it => {
+    const srcClass = ({Mercell:'mer', Doffin:'dof', TendSign:'ten', 'E-post':'epo', 'SA Forsikring':'saf', CoBrief:'cob'})[it.kilde] || '';
+    const days = daysUntil(it.frist);
+    const selskap = showSelskap ? SELSKAPER.find(s => s.id === it.selskap_id) : null;
+    const tag = selskap ? `<span class="selskap-tag" style="color:${selskap.farge}">${selskap.kortnavn}</span>` : '';
+    const urgent = days != null && days <= 7;
+    const a = document.createElement('a');
+    a.href = `anbud-detalj.html?id=${encodeURIComponent(it.id)}`;
+    a.className = 'inc-item';
+    a.innerHTML = `
+      <span class="src ${srcClass}">${it.kilde.slice(0,3)}</span>
+      <span class="body">
+        <div class="ttl">${it.tittel}${tag}</div>
+        <div class="meta">${it.kunde} · AI ${it.ai_score}${urgent ? ' · ⚠ haster' : ''}</div>
+      </span>
+      <span class="right">
+        <div class="frist">${days != null && days <= 30 ? days + ' d' : fmtDate(it.frist)}</div>
+        <div>${fmtDate(it.frist)}</div>
+      </span>
+    `;
+    list.appendChild(a);
+  });
+}
+
+function renderLinks() {
+  document.getElementById('link-pipeline').href = getRouteFor('anbud');
+  document.getElementById('link-prosjekter').href = getRouteFor('prosjekter');
+}
+
+function refresh() {
+  renderHeader();
+  renderGauges();
+  renderActionList();
+  renderProsjekter();
+  renderInnkommende();
+  renderLinks();
+}
+
+// Init
+refresh();
+
+// Re-render hver 4. sek (live-feel)
+setInterval(refresh, 4000);
+
+// Re-render hvis localStorage endres (anbud lagt til/fjernet i annen tab)
+window.addEventListener('storage', refresh);
+window.addEventListener('scope-changed', refresh);
+</script>
+</body>
+</html>

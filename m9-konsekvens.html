@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>M9 — Konsekvensanalyse av onboarding-utsettelse</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  body { font: 13px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .page { padding: 22px 32px; max-width: 1280px; margin: 0 auto }
+
+  /* TLDR */
+  .tldr {
+    background: var(--bad-soft); border-left: 4px solid var(--bad);
+    padding: 14px 18px; margin-bottom: 18px; border-radius: 0 6px 6px 0;
+  }
+  .tldr h2 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bad); font-weight: 700 }
+  .tldr p { margin: 0; font-size: 13px; line-height: 1.6 }
+  .tldr b { color: var(--bad) }
+
+  /* Section header */
+  h2.sec {
+    font-size: 14px; color: var(--text); font-weight: 600;
+    margin: 20px 0 10px; padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* KPI */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 4px }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px;
+    border-top: 3px solid var(--accent);
+  }
+  .kpi.bad { border-top-color: var(--bad); background: var(--bad-soft) }
+  .kpi.warn { border-top-color: var(--warn); background: var(--warn-soft) }
+  .kpi.good { border-top-color: var(--good); background: var(--good-soft) }
+  .kpi.fors { border-top-color: var(--bad); background: var(--bad-soft) }
+  .kpi .l { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700 }
+  .kpi .v { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1.1 }
+  .kpi .v small { font-size: 13px; font-weight: 500; color: var(--muted) }
+  .kpi .d { font-size: 11px; margin-top: 4px; color: var(--text) }
+
+  /* Bar chart */
+  .chart-wrap {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 20px; margin-top: 8px;
+  }
+  .chart-wrap h3 { margin: 0 0 8px; font-size: 13px; font-weight: 700 }
+  .chart-wrap .lead { color: var(--muted); font-size: 11.5px; margin-bottom: 12px; line-height: 1.55 }
+  .bars {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-items: end;
+    height: 180px; margin: 12px 0;
+  }
+  .bar { display: flex; flex-direction: column; align-items: center; position: relative }
+  .bar .stack {
+    width: 60%; display: flex; flex-direction: column-reverse; border-radius: 3px;
+    overflow: hidden; position: relative;
+  }
+  .bar .seg.kept { background: linear-gradient(180deg, var(--accent-2), var(--accent)) }
+  .bar .seg.lost {
+    background: repeating-linear-gradient(45deg, var(--bad), var(--bad) 4px, #a83946 4px, #a83946 8px);
+  }
+  .bar .total {
+    position: absolute; top: -18px; font-size: 11px; font-weight: 700;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .bar .lbl {
+    font-size: 10.5px; color: var(--muted); margin-top: 8px;
+    text-align: center; line-height: 1.35; font-weight: 600;
+  }
+  .bar .lost-lbl {
+    font-size: 10.5px; color: var(--bad); font-weight: 700;
+    margin-top: 3px; font-variant-numeric: tabular-nums;
+  }
+  .chart-legend { display: flex; gap: 16px; font-size: 11.5px; color: var(--muted); margin-top: 12px }
+  .chart-legend .it { display: flex; align-items: center; gap: 6px }
+  .chart-legend .sw { width: 14px; height: 12px; border-radius: 3px }
+
+  /* Table */
+  table.std {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    overflow: hidden;
+  }
+  table.std th {
+    background: var(--panel-2); padding: 10px 12px; text-align: left;
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700;
+  }
+  table.std th.num { text-align: right }
+  table.std td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.std td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.std tbody tr:last-child td { border-bottom: 0 }
+  table.std tr.row-warn td { background: var(--warn-soft) }
+  table.std tr.row-bad td { background: var(--bad-soft) }
+  table.std tr.row-critical td { background: var(--bad-soft); font-weight: 700 }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 11px; font-size: 10.5px; font-weight: 700 }
+  .pill.green { background: var(--good-soft); color: var(--good) }
+  .pill.warn { background: var(--warn-soft); color: var(--warn) }
+  .pill.bad { background: var(--bad-soft); color: var(--bad) }
+
+  /* Risk cards */
+  .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px }
+  .risk-card {
+    border: 1px solid var(--line); border-left: 4px solid var(--warn);
+    border-radius: 8px; padding: 12px 16px;
+    background: var(--warn-soft);
+  }
+  .risk-card.high { border-left-color: var(--bad); background: var(--bad-soft) }
+  .risk-card h4 { margin: 0 0 4px; font-size: 13px; font-weight: 700 }
+  .risk-card p { margin: 0; font-size: 12px; line-height: 1.5 }
+  .risk-card .level {
+    display: inline-block; font-size: 9.5px; padding: 1px 7px; border-radius: 9px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-right: 6px;
+  }
+  .risk-card.high .level { background: var(--bad); color: white }
+  .risk-card .level { background: var(--warn); color: white }
+
+  /* Recommendation */
+  .rec {
+    background: var(--good-soft); border-left: 4px solid var(--good);
+    padding: 14px 18px; margin-top: 12px; border-radius: 0 6px 6px 0;
+  }
+  .rec h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--good) }
+  .rec p { margin: 0; font-size: 12.5px; line-height: 1.6 }
+  .rec ol { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; line-height: 1.65 }
+  .rec li b { color: var(--good) }
+
+  /* Likviditet illustrasjon */
+  .liq {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 18px; margin-top: 6px;
+  }
+  .liq h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700 }
+  .liq p { margin: 0 0 8px; font-size: 12px; line-height: 1.55 }
+  .liq table { width: 100%; border-collapse: collapse; font-size: 11.5px }
+  .liq th { background: var(--panel-2); padding: 8px 10px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; text-align: left }
+  .liq th.num, .liq td.num { text-align: right; font-variant-numeric: tabular-nums }
+  .liq td { padding: 8px 10px; border-bottom: 1px solid var(--line) }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="forsikring"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="implementering">Implementering</span>
+      <span>M9 Forsikring · Konsekvensanalyse</span>
+    </div>
+    <h1>M9 Forsikringsstrøm — kostnaden ved å vente</h1>
+    <div class="ph-meta-row">
+      <span>Periode: <b>Q1 2026</b></span>
+      <span>Versjon: <b>v1.0</b></span>
+      <span>Klassifisering: <b>Konfidensiell</b></span>
+    </div>
+  </header>
+
+  <div class="page">
+
+  <!-- TLDR -->
+  <div class="tldr">
+    <h2>Hovedfunn</h2>
+    <p>Hver kvartal vi utsetter onboarding hos SAs forsikrings-distribusjonsportal koster konsernet <b>~6 MNOK i tapt omsetning og ~400 kNOK i tapt EBIT</b> over en 5-års horisont. Etter 8 kvartalers utsettelse (2 år) faller akkumulert tap til <b>48 MNOK i omsetning og 3,1 MNOK i EBIT</b> — pluss en strategisk risiko for at SA tildeler Bodø-rammen permanent til konkurrent. <b>Anbefalt: M9 prioriteres parallelt med M5/M6, ikke etter.</b></p>
+  </div>
+
+  <h2 class="sec">1. Eksekutiv kostnadsbilde — per kvartal forsinkelse</h2>
+  <div class="kpi-row">
+    <div class="kpi fors">
+      <div class="l">Tap per kvartal</div>
+      <div class="v">~ 6 <small>MNOK</small></div>
+      <div class="d">Omsetning over 5 år</div>
+    </div>
+    <div class="kpi warn">
+      <div class="l">EBIT-tap per kvartal</div>
+      <div class="v">~ 400 <small>kNOK</small></div>
+      <div class="d">@ 6,5 % margin</div>
+    </div>
+    <div class="kpi bad">
+      <div class="l">Tap ved 1 års forsinkelse</div>
+      <div class="v">24 <small>MNOK / 1,6 MNOK</small></div>
+      <div class="d">Omsetning / EBIT</div>
+    </div>
+    <div class="kpi bad">
+      <div class="l">Tap ved 2 års forsinkelse</div>
+      <div class="v">48 <small>MNOK / 3,1 MNOK</small></div>
+      <div class="d">+ strategisk risiko</div>
+    </div>
+  </div>
+
+  <h2 class="sec">2. Kumulativ omsetning 2026–2030 — fem forsinkelses-scenarier</h2>
+  <div class="chart-wrap">
+    <h3>Bevart vs tapt forsikrings-omsetning over 5-års horisont</h3>
+    <div class="lead">Antagelse: ramp 10 → 14 → 18 → 22 → 24 MNOK (offensiv-banen). Forsinkelse forskyver hele rampen — vi mister volum fra slutten av perioden, hvor steady state er på maks (~6 MNOK/kvartal).</div>
+    <div class="bars">
+      <!-- 0 forsinkelse -->
+      <div class="bar">
+        <div class="total" style="color:var(--good)">88</div>
+        <div class="stack" style="height:88%">
+          <div class="seg kept" style="height:100%"></div>
+        </div>
+        <div class="lbl">Q3 2026<br>(planlagt)</div>
+        <div class="lost-lbl" style="color:var(--good)">0 tapt</div>
+      </div>
+      <!-- 1 kv forsinkelse -->
+      <div class="bar">
+        <div class="total">82</div>
+        <div class="stack" style="height:82%">
+          <div class="seg kept" style="height:93.2%"></div>
+          <div class="seg lost" style="height:6.8%"></div>
+        </div>
+        <div class="lbl">Q4 2026<br>(+1 kvartal)</div>
+        <div class="lost-lbl">−6 MNOK</div>
+      </div>
+      <!-- 2 kv -->
+      <div class="bar">
+        <div class="total">76</div>
+        <div class="stack" style="height:76%">
+          <div class="seg kept" style="height:86.4%"></div>
+          <div class="seg lost" style="height:13.6%"></div>
+        </div>
+        <div class="lbl">Q1 2027<br>(+2 kvartal)</div>
+        <div class="lost-lbl">−12 MNOK</div>
+      </div>
+      <!-- 4 kv -->
+      <div class="bar">
+        <div class="total">64</div>
+        <div class="stack" style="height:64%">
+          <div class="seg kept" style="height:72.7%"></div>
+          <div class="seg lost" style="height:27.3%"></div>
+        </div>
+        <div class="lbl">Q3 2027<br>(+1 år)</div>
+        <div class="lost-lbl">−24 MNOK</div>
+      </div>
+      <!-- 8 kv -->
+      <div class="bar">
+        <div class="total">40</div>
+        <div class="stack" style="height:40%">
+          <div class="seg kept" style="height:45.5%"></div>
+          <div class="seg lost" style="height:54.5%"></div>
+        </div>
+        <div class="lbl">Q3 2028<br>(+2 år)</div>
+        <div class="lost-lbl">−48 MNOK</div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <div class="it"><span class="sw" style="background:linear-gradient(180deg,var(--accent-2),var(--accent))"></span>Bevart omsetning (MNOK)</div>
+      <div class="it"><span class="sw" style="background:repeating-linear-gradient(45deg,var(--bad),var(--bad) 4px,#a83946 4px,#a83946 8px)"></span>Tapt ved utsettelse</div>
+    </div>
+  </div>
+
+  <h2 class="sec">3. Detaljert kvartalsvis tap</h2>
+  <table class="std">
+    <thead>
+      <tr>
+        <th>Onboarding-start</th>
+        <th class="num">Forsinkelse (kv)</th>
+        <th class="num">Akkumulert oms. 5 år</th>
+        <th class="num">Tap omsetning</th>
+        <th class="num">Tap EBIT</th>
+        <th>Strategisk effekt</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Q3 2026 (planlagt)</td>
+        <td class="num">0</td>
+        <td class="num">88,0</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="pill green">På sporet</span></td>
+      </tr>
+      <tr>
+        <td>Q4 2026</td>
+        <td class="num">1</td>
+        <td class="num">82,0</td>
+        <td class="num">−6,0</td>
+        <td class="num">−0,4</td>
+        <td><span class="pill green">Ubetydelig</span></td>
+      </tr>
+      <tr class="row-warn">
+        <td>Q1 2027</td>
+        <td class="num">2</td>
+        <td class="num">76,0</td>
+        <td class="num">−12,0</td>
+        <td class="num">−0,8</td>
+        <td><span class="pill warn">Akseptabelt</span></td>
+      </tr>
+      <tr class="row-warn">
+        <td>Q2 2027</td>
+        <td class="num">3</td>
+        <td class="num">70,0</td>
+        <td class="num">−18,0</td>
+        <td class="num">−1,2</td>
+        <td><span class="pill warn">SA flagger forsinkelse</span></td>
+      </tr>
+      <tr class="row-bad">
+        <td>Q3 2027 (+1 år)</td>
+        <td class="num">4</td>
+        <td class="num">64,0</td>
+        <td class="num">−24,0</td>
+        <td class="num">−1,6</td>
+        <td><span class="pill bad">SA vurderer alternativ</span></td>
+      </tr>
+      <tr class="row-bad">
+        <td>Q3 2028 (+2 år)</td>
+        <td class="num">8</td>
+        <td class="num">40,0</td>
+        <td class="num">−48,0</td>
+        <td class="num">−3,1</td>
+        <td><span class="pill bad">SA tildeler annet selskap</span></td>
+      </tr>
+      <tr class="row-critical">
+        <td>Aldri (avlyst)</td>
+        <td class="num">∞</td>
+        <td class="num">0</td>
+        <td class="num">−88,0</td>
+        <td class="num">−5,7</td>
+        <td><span class="pill bad">Permanent tap</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec" style="margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-size:16px;border-left:0;padding-left:0;color:var(--accent-2)">Del 2 — Strategisk risiko, likviditet og anbefaling</h2>
+  <p class="lead" style="font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.55">Hvorfor de finansielle tallene undervurderer den reelle kostnaden — og hva styret bør beslutte denne uken.</p>
+
+  <h2 class="sec">4. Strategiske risikoer ved utsettelse — utover finansielle tall</h2>
+  <div class="risk-grid">
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>SA tildeler Bodø-rammen til alternativ aktør</h4>
+      <p>SA er pliktig å betjene forsikringsselskapenes rammeavtaler. Hvis Fritzøe/Areal ikke er klar i tide, må SA finne alternativ — enten lokalt søsterselskap, ny partner, eller direkte konkurrent (Polygon Bodø-avdeling). Når den tildelingen er gjort, er tilbakehenting krevende.</p>
+    </div>
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>Forsikringsselskaper bygger lokal preferanse</h4>
+      <p>Skadebehandlere som har god opplevelse med en lokal håndverker, ber gjerne om samme firma neste gang. Etter 12 mnd med konkurrent-håndverker etablert blir Fritzøe/Areal &laquo;den nye&raquo; — selv etter onboarding må vi konkurrere om hver enkelt sak.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Sertifiseringer foreldes</h4>
+      <p>Fukt-, brann- og HMS-sertifiseringer som tas i 2026 må fornyes 2028–2029. Hvis vi ikke utnytter dem aktivt, har vi i praksis betalt for kompetanse vi ikke får avkastning på.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>24/7 vakttelefon-investering</h4>
+      <p>Vakttelefon og rotasjonsordning krever rekruttering og opplæring (~250 kNOK fast årskostnad). Hvis volumet ikke kommer, betaler vi for kapasitet vi ikke bruker.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Margin-mix forblir sårbar</h4>
+      <p>Uten forsikringsstrøm er konsernet 100 % avhengig av offentlig ROT-volum. Det er konjunkturelt og politisk eksponert — rentekutt eller kommunebudsjett-kutt slår direkte gjennom på topplinjen uten dempende strøm.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Konsern-prioritet senkes</h4>
+      <p>SA bruker porteføljebedriftens initiativ-takt som indikator på «rett selskap å investere i». Utsettelse av M9 signaliserer at lokal ledelse ikke ser konsernverdien — dette kan slå ut i kapital-allokering for M&amp;A og geografisk ekspansjon.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">5. Likviditetseffekt — bonus ved tidlig start</h2>
+  <div class="liq">
+    <h3>Forsikringsstrøm har bedre arbeidskapitalsyklus enn offentlig ROT</h3>
+    <p>Forsikringsoppdrag betales typisk 30 dager etter ferdigstillelse, mot 45–60 dager for offentlig ROT. Tidlig onboarding gir bedre likviditet utover det rene EBIT-bidraget.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>WC-syklus</th>
+          <th class="num">Offentlig ROT</th>
+          <th class="num">Forsikring (SA)</th>
+          <th class="num">Differanse</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Gj.snittlig betalingstid</td><td class="num">52 dager</td><td class="num">30 dager</td><td class="num">−22 dager</td></tr>
+        <tr><td>WIP-binding (% av oms)</td><td class="num">14 %</td><td class="num">8 %</td><td class="num">−6 %p</td></tr>
+        <tr><td>Frigjort likviditet ved 22 MNOK forsikring</td><td class="num">—</td><td class="num">~ 1,3 MNOK</td><td class="num">løpende</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:8px;font-size:11.5px;color:var(--muted)"><b>Implikasjon:</b> Hver kvartal forsinkelse betyr 6 MNOK senere innfasing av positiv WC-effekt. Akkumulert er dette ~360 kNOK ekstra likviditet bundet uten verdiskaping per kvartal forsinkelse.</p>
+  </div>
+
+  <h2 class="sec">6. Hva med fast-kostnader som påløper uavhengig av onboarding?</h2>
+  <table class="std">
+    <thead>
+      <tr>
+        <th>Fast kostnad</th>
+        <th class="num">Årlig</th>
+        <th>Status uten onboarding</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Fuktprotokoll-sertifisering (5 ansatte)</td><td class="num">85 kNOK</td><td>Kreves uansett — kompetansen forblir hos oss</td></tr>
+      <tr><td>Brann-rehab-kompetanse (kurs + tilrettelegging)</td><td class="num">120 kNOK</td><td>Engangs-kost. Sløser hvis vi ikke utnytter.</td></tr>
+      <tr><td>24/7 vakttelefon (rotasjon + tillegg)</td><td class="num">~ 250 kNOK</td><td>Kan utsettes til onboarding er nært ferdig</td></tr>
+      <tr><td>SA-portalen lisens og oppkobling</td><td class="num">~ 60 kNOK</td><td>Aktiveres ved onboarding</td></tr>
+      <tr><td>ISO 9001 / 14001 (gjelder hele konsernet)</td><td class="num">130 kNOK</td><td>Allerede planlagt, uavhengig</td></tr>
+      <tr style="background:var(--panel-2);font-weight:700"><td>Sum «friksjons-kost» ved utsettelse</td><td class="num">~ 205 kNOK/år</td><td>Engangs- og forskuddsbetalt kompetanse</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">7. Anbefaling — beslutning denne uken</h2>
+  <div class="rec">
+    <h3>Prioriter M9 parallelt med M5/M6, ikke etter</h3>
+    <p>Den tradisjonelle implementeringssekvensen var: først integrer kalkulasjon (M5/M6), så aktiver SA-forsikring (M9). Anbefalingen er å gjøre <b>SA-onboarding parallelt</b> fordi 4–8 ukers onboardingsperiode er ren administrasjon (kvalifisering, sertifiseringer, kontraktssignering) som ikke krever teknisk utvikling. Det betyr ingen ekstra ressursbelastning på utviklingsteamet.</p>
+    <ol>
+      <li><b>Uke 1–2:</b> DL formaliserer interesse hos SA-distribusjonsportalen. Sender sertifikatdokumentasjon (HMS, ISO der det er klart).</li>
+      <li><b>Uke 3–6:</b> SA gjennomfører kvalifiseringsvurdering. Parallelt: vi tar fuktprotokoll-kurs og oppretter 24/7 vakttelefon-rotasjon.</li>
+      <li><b>Uke 7–10:</b> Teknisk integrasjon mot SA-distribusjonsportalen (60 timer dev-arbeid). Live-mottak av første test-claim.</li>
+      <li><b>Uke 11–12:</b> Første reelle skadeoppdrag mottas. Pipeline-portalen viser pioneer-volum. Margin-tracking via PowerOffice Go (avhengig av M5/M6).</li>
+      <li><b>Q4 2026:</b> Stabil drift med ~10 MNOK årsbasis-volum nådd.</li>
+    </ol>
+    <p style="margin-top:10px;font-size:11.5px;font-style:italic;color:var(--muted)"><b>Beslutningseier:</b> SA-styret må formelt godkjenne onboarding-prioritering på neste møte. Daglig leder må mandat for å starte prosessen denne uken — ikke vente på neste kvartalsmøte.</p>
+  </div>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

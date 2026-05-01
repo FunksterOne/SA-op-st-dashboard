@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>M5/M6 — Konsekvensanalyse: PowerOffice-integrasjon</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="selskaper.js"></script>
+<style>
+  body { font: 13px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .page { padding: 22px 32px; max-width: 1280px; margin: 0 auto }
+
+  /* Lokalt PO-aksent (oransje) — bruker --warn som basis */
+  :root { --po: var(--warn); --po-soft: var(--warn-soft) }
+
+  .tldr { background: var(--warn-soft); border-left: 4px solid var(--warn); padding: 14px 18px; margin-bottom: 18px; border-radius: 0 6px 6px 0 }
+  .tldr h2 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--warn); font-weight: 700 }
+  .tldr p { margin: 0; font-size: 13px; line-height: 1.6 }
+  .tldr b { color: var(--warn) }
+
+  h2.sec { font-size: 14px; text-transform: none; letter-spacing: 0; color: var(--text); font-weight: 600; margin: 20px 0 10px; padding-left: 10px; border-left: 3px solid var(--accent) }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 4px }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; border-top: 3px solid var(--accent) }
+  .kpi.bad { border-top-color: var(--bad); background: var(--bad-soft) }
+  .kpi.warn { border-top-color: var(--warn); background: var(--warn-soft) }
+  .kpi.good { border-top-color: var(--good); background: var(--good-soft) }
+  .kpi.po { border-top-color: var(--warn); background: var(--warn-soft) }
+  .kpi .l { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700 }
+  .kpi .v { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1.1 }
+  .kpi .v small { font-size: 13px; font-weight: 500; color: var(--muted) }
+  .kpi .d { font-size: 11px; margin-top: 4px; color: var(--text) }
+
+  table.std { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+  table.std th { background: var(--panel-2); padding: 10px 12px; text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700 }
+  table.std th.num { text-align: right }
+  table.std td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle }
+  table.std td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.std tbody tr:last-child td { border-bottom: 0 }
+  table.std tr.subtotal td { background: var(--panel-2); font-weight: 700 }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 11px; font-size: 10.5px; font-weight: 700 }
+  .pill.green { background: var(--good-soft); color: var(--good) }
+  .pill.warn { background: var(--warn-soft); color: var(--warn) }
+  .pill.bad { background: var(--bad-soft); color: var(--bad) }
+
+  /* Cost-buckets visualization */
+  .cost-buckets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0 }
+  .bucket { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; border-top: 3px solid var(--warn) }
+  .bucket h4 { margin: 0 0 4px; font-size: 13px; font-weight: 700 }
+  .bucket .v { font-size: 18px; font-weight: 700; color: var(--warn); font-variant-numeric: tabular-nums; margin: 4px 0 }
+  .bucket p { margin: 0; font-size: 11.5px; color: var(--muted); line-height: 1.5 }
+
+  /* Cascade visual */
+  .cascade { display: grid; grid-template-columns: 1fr 24px 1fr 24px 1fr; gap: 10px; align-items: center; margin: 14px 0 }
+  .cascade .node { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; text-align: center }
+  .cascade .node.start { border-color: var(--warn); border-left: 3px solid var(--warn); background: var(--warn-soft) }
+  .cascade .node.mid { border-color: var(--warn); border-left: 3px solid var(--warn); background: var(--warn-soft) }
+  .cascade .node.end { border-color: var(--bad); border-left: 3px solid var(--bad); background: var(--bad-soft) }
+  .cascade .node h5 { margin: 0 0 4px; font-size: 12px }
+  .cascade .node p { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5 }
+  .cascade .arrow { color: var(--muted); font-size: 20px; text-align: center; font-weight: 700 }
+
+  /* Risk cards */
+  .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px }
+  .risk-card { border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 8px; padding: 12px 16px; background: var(--warn-soft) }
+  .risk-card.high { border-left-color: var(--bad); background: var(--bad-soft) }
+  .risk-card h4 { margin: 0 0 4px; font-size: 13px; font-weight: 700 }
+  .risk-card p { margin: 0; font-size: 12px; line-height: 1.5 }
+  .risk-card .level { display: inline-block; font-size: 9.5px; padding: 1px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-right: 6px }
+  .risk-card.high .level { background: var(--bad); color: white }
+  .risk-card .level { background: var(--warn); color: white }
+
+  .rec { background: var(--good-soft); border-left: 4px solid var(--good); padding: 14px 18px; margin-top: 12px; border-radius: 0 6px 6px 0 }
+  .rec h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--good) }
+  .rec p { margin: 0; font-size: 12.5px; line-height: 1.6 }
+  .rec ol { margin: 8px 0 0; padding-left: 20px; font-size: 12.5px; line-height: 1.65 }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="m5-poweroffice"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="implementering">Implementering</span>
+      <span>M5/M6 PowerOffice · Konsekvensanalyse</span>
+    </div>
+    <h1>M5/M6 PowerOffice-integrasjon — kostnaden ved manuell drift</h1>
+    <div class="ph-meta-row">
+      <span>Periode: <b>Q1 2026</b></span>
+      <span>Versjon: <b>v1.0</b></span>
+      <span>Klassifisering: <b>Konfidensiell</b></span>
+    </div>
+  </header>
+
+  <div class="page">
+
+  <div class="tldr">
+    <h2>Hovedfunn</h2>
+    <p>M5/M6 er <i>infrastruktur-modulen</i> som åpner for margin live underveis i pågående prosjekter, automatisert handover, og månedlig P&amp;L uten regnskapsfører-frist. Kostnaden ved utsettelse er primært <b>frigjort lederkapasitet og unngåtte prosjekttap</b> — ikke direkte tapt omsetning. Per kvartal utsettelse: <b>~180 kNOK i direkte tap</b> (manuell tid 100 kNOK + ett unødvendig prosjekttap 80 kNOK). Ved 1 års utsettelse: <b>720 kNOK direkte</b> + kaskaderisiko som forsinker M6, M8 og M9 (forsikringsstrøm-margin-tracking).</p>
+  </div>
+
+  <h2 class="sec">1. Direkte kostnadskategorier per kvartal forsinkelse</h2>
+  <div class="cost-buckets">
+    <div class="bucket">
+      <h4>Manuell tilbudsleder/DL-tid</h4>
+      <div class="v">100 kNOK</div>
+      <p>~7 t/uke handover, statussjekk, marginvurdering = 90 t/kvartal × 1 200 kr/t</p>
+    </div>
+    <div class="bucket">
+      <h4>Unngått prosjekttap</h4>
+      <div class="v">80 kNOK</div>
+      <p>~1 prosjekt per kvartal med 5–8 % margin-avvik. Med margin live kunne 2–3 % vært reddet på 4 MNOK prosjekt.</p>
+    </div>
+    <div class="bucket">
+      <h4>Forsinket fakturering</h4>
+      <div class="v">~ 25 kNOK</div>
+      <p>Manuell sammenstilling av delfaktura-grunnlag forsinker fakturering ~10 dager. Likviditet bundet, ingen direkte tap.</p>
+    </div>
+    <div class="bucket">
+      <h4>Forsinket månedsrapport</h4>
+      <div class="v">~ 15 kNOK</div>
+      <p>SA-COO får tall ~3 uker etter månedsskifte. Beslutningstap: 2–3 saker per kvartal.</p>
+    </div>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0;line-height:1.55"><b>Sum direkte kvartal:</b> ~220 kNOK · 880 kNOK årlig — ekvivalent til 0,75 stilling som ikke skal måtte gå til manuell rapportering.</p>
+
+  <h2 class="sec">2. Detaljert kvartalstap ved utsettelse</h2>
+  <table class="std">
+    <thead>
+      <tr>
+        <th>Forsinkelse</th>
+        <th class="num">Manuell tid (kNOK)</th>
+        <th class="num">Unngått prosj.tap (kNOK)</th>
+        <th class="num">Likv. + rapport (kNOK)</th>
+        <th class="num">Sum direkte</th>
+        <th>Kaskade-risiko</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>0 (planlagt Q4 2026)</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><b>0</b></td><td><span class="pill green">Ingen</span></td></tr>
+      <tr><td>1 kvartal</td><td class="num">100</td><td class="num">80</td><td class="num">40</td><td class="num"><b>220</b></td><td><span class="pill green">Lav</span></td></tr>
+      <tr><td>2 kvartaler (H1 2027)</td><td class="num">200</td><td class="num">160</td><td class="num">80</td><td class="num"><b>440</b></td><td><span class="pill warn">M6 forsinkes</span></td></tr>
+      <tr><td>4 kvartaler (1 år)</td><td class="num">400</td><td class="num">320</td><td class="num">160</td><td class="num"><b>880</b></td><td><span class="pill bad">M9 marginbase mangler</span></td></tr>
+      <tr><td>8 kvartaler (2 år)</td><td class="num">800</td><td class="num">640</td><td class="num">320</td><td class="num"><b>1 760</b></td><td><span class="pill bad">M8 SA-rapport forsinkes</span></td></tr>
+      <tr class="subtotal"><td>Aldri (avlyst)</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><b>—</b></td><td><span class="pill bad">Permanent operasjonell handicap</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">3. Kaskaderisiko — moduler som blokkeres</h2>
+  <div class="cascade">
+    <div class="node start"><h5>M5 forsinkes</h5><p>Konfigurasjon HoltePortalen ↔ PowerOffice Go ikke aktivert</p></div>
+    <div class="arrow">→</div>
+    <div class="node mid"><h5>M6 forsinkes</h5><p>PowerOffice REST-data kan ikke hentes inn i pipelinen</p></div>
+    <div class="arrow">→</div>
+    <div class="node end"><h5>M8 og M9 rammes</h5><p>SA-rapportering og forsikringsstrøm-marginer mangler datagrunnlag</p></div>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted);margin:0 0 6px;line-height:1.55">Tre moduler er bygget oppå M5/M6:</p>
+  <ul style="font-size:12.5px;line-height:1.65;margin:0 0 8px;padding-left:20px">
+    <li><b>M6</b> kan ikke startes før M5 er aktivert (avhengighet på data-mapping)</li>
+    <li><b>M8 SA-rapportering</b> trenger margin-data fra M6 — uten det er rapporten tilbakeskuende fra Brreg-tall</li>
+    <li><b>M9 forsikringsstrøm-margin-tracking</b> krever PowerOffice-strømmen for å kunne sammenligne plan vs faktisk på skadeoppdrag</li>
+  </ul>
+
+  <h2 class="sec">4. Strategisk risiko — utover finansiell kalkulasjon</h2>
+  <div class="risk-grid">
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>«Margin live» forsvinner som differensiator</h4>
+      <p>Hvis konkurrenter (SA-søsterselskap eller Bodø-konkurrenter) implementerer tilsvarende kobling først, taper vi den argumentasjonen vi har bygget i strategien («unike for SA-porteføljen»). Vinduet er kort fordi PowerOffice/HoltePortalen-integrasjonen er en hyllevare.</p>
+    </div>
+    <div class="risk-card high">
+      <h4><span class="level">Høy</span>Marginpress på offensiv-bane uten margin live</h4>
+      <p>Offensiv case har EBIT 7,8 % som forutsetter aktiv inngripen mot prosjektavvik. Uten M5/M6 oppdager vi avvik først ved kvartalsslutt — for sent. Realistisk margin uten margin live: 7,2–7,5 %. På 207 MNOK omsetning = <b>0,6–1,2 MNOK lavere EBIT/år</b>.</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Tilbudsleder utbrent</h4>
+      <p>Manuell handover, statussjekk og rapportering tar 7+ t/uke fra én person. Risiko for at tilbudsleder slutter (rekruttering kostnad ~150 kNOK + 6 mnd produktivitetstap).</p>
+    </div>
+    <div class="risk-card">
+      <h4><span class="level">Middels</span>Datagrunnlag for kalkulasjons-læring uteblir</h4>
+      <p>Plan-vs-faktisk-data er fundamentet for å forbedre kalkylene over tid. Uten systematisk innsamling forbedrer vi ikke vinnersannsynlighet eller marginpresisjon.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">5. Likviditets- og rapporteringseffekt</h2>
+  <table class="std">
+    <thead>
+      <tr><th>Effekt</th><th>Uten M5/M6</th><th>Med M5/M6</th><th>Forskjell</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Tid fra månedsslutt til P&amp;L</td><td>~ 3 uker (regnskapsfører)</td><td>1–2 dager</td><td><span class="pill green">−18 dager</span></td></tr>
+      <tr><td>Margin oppdaget i pågående prosjekt</td><td>Ved sluttoppgjør</td><td>Live, varsel ved &gt;5 % avvik</td><td><span class="pill green">Mulighet til inngripen</span></td></tr>
+      <tr><td>Handover-tid per nytt prosjekt</td><td>60–90 min</td><td>5–10 min</td><td><span class="pill green">−80 min</span></td></tr>
+      <tr><td>Faktura-grunnlag</td><td>Manuell sammenstilling</td><td>Auto generert ved milestone</td><td><span class="pill green">~ 10 dager raskere fakturering</span></td></tr>
+      <tr><td>SA-COO ukentlig data</td><td>Manuell sammenstilling</td><td>Live API til konsernportal</td><td><span class="pill green">Standardisert</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">6. Anbefaling</h2>
+  <div class="rec">
+    <h3>Start M5 i uke 3, parallelt med M2/M3 og M4</h3>
+    <p>M5 er <i>konfigurasjon hos Holte/PowerOffice</i>, ikke utvikling fra vår side. Vi sender bare bestilling og venter på at integrasjonen aktiveres. Ingen ressurskonflikt med utviklingsteamet vårt. <b>Den eneste grunnen til å vente med M5 er hvis HoltePortalen-lisensen vår ikke har PowerOffice Go-modulen aktivert</b> — det må bekreftes før uke 1.</p>
+    <ol>
+      <li><b>Denne uken:</b> DL ringer EG (Holte) og bekrefter at PowerOffice Go-integrasjonen er inkludert i nåværende lisens. Hvis ikke: bestill oppgradering (~50–80 kNOK engangs).</li>
+      <li><b>Uke 1–2:</b> Send bestilling på aktivering, mapping av prosjekt-ID, kontoplan, timetyper.</li>
+      <li><b>Uke 3–5:</b> Holte/PowerOffice konfigurerer i bakgrunnen. Parallelt kan vi forberede M6 (REST-API mot PowerOffice).</li>
+      <li><b>Uke 6:</b> Test data-flyt på et faktisk pågående prosjekt (gjerne Hunstad ungdomsskole). Brukerinnføring kalkulator og lønnsansvarlig.</li>
+      <li><b>Uke 7+:</b> M6-utvikling klar til å bruke dataen. M9 forsikrings-margin-tracking ufordret.</li>
+    </ol>
+    <p style="margin-top:10px;font-size:11.5px;font-style:italic;color:var(--muted)"><b>Beslutningseier:</b> DL kan starte denne uken — krever bare oppringning til EG og budsjett-godkjenning innenfor egen ramme.</p>
+  </div>
+
+  </div>
+</main>
+
+<script src="sidebar.js"></script>
+</body>
+</html>
