@@ -23,7 +23,7 @@
     [MODE_DAGLIG]: 'Daglig',
     [MODE_STRATEGISK]: 'Strategisk',
     [MODE_IMPL]: 'Implementering',
-    [MODE_REFERANSE]: 'Referanse',
+    [MODE_REFERANSE]: 'Markedsdata',
   };
 
   // Standard landingsside for hver mode (tab-klikk i topbar)
@@ -59,7 +59,7 @@
       { id: 'forsikring',      icon: '◆', label: 'M9 Forsikring',     page: 'M9 SA Forsikringsstrøm' },
       { id: 'epc-satsing',     icon: '⊕', label: 'EPC-satsing',       page: 'EPC-satsing — konsekvens' },
     ]},
-    { section: 'Referanse', mode: MODE_REFERANSE, part: 'strategi', items: [
+    { section: 'Markedsdata', mode: MODE_REFERANSE, part: 'strategi', items: [
       { id: 'bransjekart',     icon: '·', label: 'ROT-marked',      page: 'ROT-marked' },
       { id: 'oversikt',        icon: '·', label: 'Konsernoversikt', page: 'Konsernoversikt' },
       { id: 'sa-rapport',      icon: '·', label: 'SA-rapport',      page: 'SA-konsernrapport' },
