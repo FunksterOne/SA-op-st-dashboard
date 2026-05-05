@@ -46,11 +46,12 @@
       { id: 'bruksanvisning', icon: '?', label: 'Bruksanvisning',  page: 'Bruksanvisning' },
     ]},
     { section: 'Strategisk', mode: MODE_STRATEGISK, part: 'strategi', items: [
-      { id: 'strategi-doc', icon: '⚑', label: 'Strategi-dokument', page: 'Strategi-dokument' },
-      { id: 'strategi',     icon: '↗', label: 'Vekst-scenarier', page: 'Vekst-scenarier' },
-      { id: 'styrerapport', icon: '◧', label: 'Styrerapport',    page: 'Styrerapport (kvartal)' },
-      { id: 'ma-screening', icon: '+', label: 'M&A-screening',   page: 'M&A-screening' },
-      { id: 'ma-konsern',   icon: '⊞', label: 'M&A konsern',     page: 'M&A konsern' },
+      { id: 'strategi-doc',    icon: '⚑', label: 'Strategi-dokument', page: 'Strategi-dokument' },
+      { id: 'strategi-status', icon: '◷', label: 'Strategi-status',   page: 'Strategi-status' },
+      { id: 'strategi',        icon: '↗', label: 'Vekst-scenarier',   page: 'Vekst-scenarier' },
+      { id: 'styrerapport',    icon: '◧', label: 'Styrerapport',      page: 'Styrerapport (kvartal)' },
+      { id: 'ma-screening',    icon: '+', label: 'M&A-screening',     page: 'M&A-screening' },
+      { id: 'ma-konsern',      icon: '⊞', label: 'M&A konsern',       page: 'M&A konsern' },
     ]},
     { section: 'Implementering', mode: MODE_IMPL, part: 'operativ', items: [
       { id: 'implementering',  icon: '⚙', label: 'Teknisk plan',     page: 'Teknisk implementering' },
@@ -59,7 +60,7 @@
       { id: 'epc-satsing',     icon: '⊕', label: 'EPC-satsing',       page: 'EPC-satsing — konsekvens' },
     ]},
     { section: 'Referanse', mode: MODE_REFERANSE, part: 'strategi', items: [
-      { id: 'bransjekart',     icon: '·', label: 'Bransjekart',     page: 'Bransjekart' },
+      { id: 'bransjekart',     icon: '·', label: 'ROT-marked',      page: 'ROT-marked' },
       { id: 'oversikt',        icon: '·', label: 'Konsernoversikt', page: 'Konsernoversikt' },
       { id: 'sa-rapport',      icon: '·', label: 'SA-rapport',      page: 'SA-konsernrapport' },
     ]},
@@ -411,6 +412,10 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
         </span>
         <span class="tb-time" id="sa-tb-time"></span>
         <span class="tb-live">Live</span>
+        <button class="tb-theme-toggle" data-theme-toggle onclick="toggleTheme()" title="Bytt tema" aria-label="Bytt tema">
+          <span class="t-icon-dark">☾</span>
+          <span class="t-icon-light">☀</span>
+        </button>
       </div>
     `;
   }

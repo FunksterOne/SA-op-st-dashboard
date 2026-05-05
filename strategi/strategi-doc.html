@@ -220,26 +220,30 @@ function init() {
   const scope = getActiveScope();
   const content = document.getElementById('content');
 
-  // Strategi-dokumentet er foreløpig kun definert for Fritzøe
-  if (scope.type !== 'selskap') {
-    renderEmpty(content, scope, 'Strategi-dokumentet vises per selskap. Velg et selskap fra scope-velgeren.');
-    return;
-  }
-  const selskap = getSelskap(scope.id);
-  if (!selskap?.strategi) {
-    renderEmpty(content, scope,
-      `Strategi-dokumentet er ikke etablert for ${selskap?.label || 'dette selskapet'} ennå. ` +
-      `Foreløpig er det bare ${getSelskap('byggmester-fritzoe').label} som har et komplett dokument.`);
+  const s = getStrategiForScope(scope);
+  if (!s) {
+    if (scope.type === 'by') {
+      renderEmpty(content, scope, 'Strategi-dokument på by-nivå er ikke etablert. Velg et selskap eller konsern fra scope-velgeren.');
+    } else {
+      renderEmpty(content, scope, 'Strategi-dokumentet er ikke etablert for valgt scope ennå.');
+    }
     return;
   }
 
-  // Sett header
-  document.getElementById('ph-title').textContent = `Strategi-dokument — ${selskap.label}`;
-  document.getElementById('ph-title').style.color = selskap.farge;
-  document.getElementById('ph-sub').textContent =
-    `${selskap.lokasjon.by} · ${selskap.regnskap_2024.ansatte} ansatte · ${selskap.fagprofil}`;
+  // Sett header — håndter både selskap og konsern
+  const lbl = getScopeLabel(scope);
+  document.getElementById('ph-title').textContent = `Strategi-dokument — ${lbl.label}`;
+  document.getElementById('ph-title').style.color = lbl.farge;
+  if (scope.type === 'selskap') {
+    const selskap = getSelskap(scope.id);
+    document.getElementById('ph-sub').textContent =
+      `${selskap.lokasjon.by} · ${selskap.regnskap_2024.ansatte} ansatte · ${selskap.fagprofil}`;
+  } else {
+    const r = getRegnskap2024(scope);
+    document.getElementById('ph-sub').textContent =
+      `Konsern-strategi · ${r.n} selskap · ${r.ansatte} ansatte · ${r.omsetning_mnok.toFixed(0)} MNOK omsetning 2024`;
+  }
 
-  const s = selskap.strategi;
   let html = '';
 
   // 1. Strategisk intensjon
@@ -249,6 +253,85 @@ function init() {
       <h2>${s.intensjon}</h2>
     </div>
   `;
+
+  // 1b. Konsern-spesifikke seksjoner: portefølje­logikk + synergier + SA-verdiløfte
+  if (s.portefolje_logikk) {
+    html += `
+      <div class="panel">
+        <h2>Portefølje­logikk</h2>
+        <p class="lead">Hvorfor SA eier disse tre selskapene — og hvordan de skaper verdi sammen.</p>
+        <p style="font-size:13px;line-height:1.6;color:var(--text);margin:0">${s.portefolje_logikk}</p>
+      </div>
+    `;
+  }
+  if (s.synergier) {
+    html += `
+      <div class="panel">
+        <h2>Synergier</h2>
+        <p class="lead">Konkrete koblinger mellom selskapene og felles SA-tjenester.</p>
+        <div style="display:grid;gap:10px">
+          ${s.synergier.map(syn => `
+            <div style="padding:12px 14px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;border-left:3px solid var(--accent)">
+              <div style="font-size:11px;color:var(--accent-2);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${syn.tema}</div>
+              <div style="font-size:12.5px;line-height:1.5">${syn.tekst}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  if (s.sa_verdiloeftet) {
+    html += `
+      <div class="panel">
+        <h2>SA-verdi­løfte til selskapene</h2>
+        <p class="lead">Hva SA-konsernet leverer til hvert datterselskap.</p>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+          ${s.sa_verdiloeftet.map(v => `
+            <div style="padding:11px 14px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
+              <div style="font-size:11px;color:var(--mode-strategisk,#d29922);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">${v.tema}</div>
+              <div style="font-size:12.5px;line-height:1.5">${v.tekst}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // 1c. Lenke til ekstern markedsrapport (Bodø-scopes — Fritzøe, Areal, konsern)
+  const isBodoScope = (scope.type === 'selskap' && getSelskap(scope.id)?.by === 'bodo')
+    || (scope.type === 'by' && scope.id === 'bodo')
+    || scope.type === 'konsern';
+  if (isBodoScope) {
+    html += `
+      <div class="panel" style="border-left:3px solid var(--accent)">
+        <h2>Markedsdata-grunnlag (Affectum, mars 2026)</h2>
+        <p class="lead">SWOT-påstander om markedsposisjon og konkurrenter er forankret i den uavhengige ROT-markedsmodellen for Bodø — Brreg/SSB/Regnskapsregisteret-data.</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+          <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
+            <div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Bodø ROT 2024</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">2 346 MNOK</div>
+            <div style="font-size:10.5px;color:var(--muted)">Totalmarked (top-down)</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
+            <div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Storvik-konsern</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px;color:var(--good)">#2</div>
+            <div style="font-size:10.5px;color:var(--muted)">Fritzøe + Areal · 117 MNOK</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
+            <div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Markedsandel</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px">~5 %</div>
+            <div style="font-size:10.5px;color:var(--muted)">Vekst +46 % vs marked +28 %</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
+            <div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">ROT-sysselsatte</div>
+            <div style="font-size:18px;font-weight:700;margin-top:2px;color:var(--bad)">−14 %</div>
+            <div style="font-size:10.5px;color:var(--muted)">Bodø 2019–2025 (SSB)</div>
+          </div>
+        </div>
+        <a href="bodo-rot-marked.html" style="color:var(--accent);text-decoration:none;font-size:13px;font-weight:600">→ Åpne full ROT-markedsmodell Bodø</a>
+      </div>
+    `;
+  }
 
   // 2. Situasjonsanalyse — SWOT + PESTEL
   html += `
