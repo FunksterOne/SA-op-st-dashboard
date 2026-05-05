@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>Scenario — ServiceAlliansen Bygg</title>
-<link rel="stylesheet" href="style.css">
-<script src="theme.js"></script>
-<script src="selskaper.js"></script>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
 <style>
   .main-content { padding: 0 0 60px }
   .page-header {
@@ -155,7 +156,7 @@
 </head>
 <body>
 
-<div data-sidebar data-active="scenario"></div>
+<div data-sidebar data-active="scenario" data-section="strategi"></div>
 
 <main class="main-content">
 
@@ -246,7 +247,7 @@
   </div>
 </main>
 
-<script src="sidebar.js"></script>
+<script src="../sidebar.js"></script>
 <script>
 function getQueryParam(name) {
   return new URLSearchParams(location.search).get(name);
@@ -296,7 +297,8 @@ function init() {
     byEntity = null;
   }
 
-  scData = byEntity?.scenarioer?.[scenarioName] || null;
+  // Foretrekk selskap-spesifikt scenario (f.eks. Fritzøe sin base_case)
+  scData = getScenarioMetaForScope(scenarioName, scope);
 
   renderHeader();
   renderBanner();
@@ -494,9 +496,12 @@ function renderKapital() {
 }
 
 function renderBemanning() {
-  const start = getRegnskap2024(scope).ansatte;
-  const ansatte2029 = scData ? scData.ansatte_2029
-    : BYER.reduce((s, b) => s + b.scenarioer[scenarioName].ansatte_2029, 0);
+  // Bruk 2025-bemanning som startpunkt hvis selskapet har det, ellers 2024
+  const selskap = scope.type === 'selskap' ? getSelskap(scope.id) : null;
+  const startYear = selskap?.bemanning_2025 ? 2025 : 2024;
+  const start = selskap?.bemanning_2025?.total ?? getRegnskap2024(scope).ansatte;
+  const ansatte2029 = scData?.ansatte_2029
+    ?? (BYER.reduce((s, b) => s + (b.scenarioer[scenarioName]?.ansatte_2029 || 0), 0));
   const total = ansatte2029 - start;
   // Lineær vekst-modell: fordel jevnt over 4 år
   const yearly = [
@@ -506,19 +511,30 @@ function renderBemanning() {
     ansatte2029,
   ];
 
-  // Faggrupper — typisk fordeling for byggeentreprenør
-  const fag = [
-    { navn: 'Snekker / tømrer',   andel: 0.45 },
-    { navn: 'Maler / overflate',  andel: 0.20 },
-    { navn: 'Bygg-rehab / fasade',andel: 0.15 },
-    { navn: 'PL / kalkulasjon',   andel: 0.10 },
-    { navn: 'Admin / SA-felles',  andel: 0.05 },
-    { navn: 'Lærling / annet',    andel: 0.05 },
-  ];
+  // Faggrupper — selskap-spesifikt for Fritzøe (kun tømrere/snekkere/lærlinger),
+  // ellers generisk for by/konsern.
+  let fag;
+  if (selskap?.bemanning_2025) {
+    const b = selskap.bemanning_2025;
+    fag = [
+      { navn: 'Tømrer',   andel: b.tomrere / b.total },
+      { navn: 'Snekker',  andel: b.snekkere / b.total },
+      { navn: 'Lærling',  andel: b.laerlinger / b.total },
+    ];
+  } else {
+    fag = [
+      { navn: 'Snekker / tømrer',   andel: 0.45 },
+      { navn: 'Maler / overflate',  andel: 0.20 },
+      { navn: 'Bygg-rehab / fasade',andel: 0.15 },
+      { navn: 'PL / kalkulasjon',   andel: 0.10 },
+      { navn: 'Admin / SA-felles',  andel: 0.05 },
+      { navn: 'Lærling / annet',    andel: 0.05 },
+    ];
+  }
 
   let html = `<thead><tr>
     <th>Faggruppe</th>
-    <th class="num">2024 (start)</th>
+    <th class="num">${startYear} (start)</th>
     <th class="num">2026</th>
     <th class="num">2027</th>
     <th class="num">2028</th>
@@ -649,26 +665,26 @@ function renderCompare() {
     { lbl: '2029 ROT (MNOK)', fn: (s) => getScenarioForScope(s, 2029, scope).rot.toFixed(0) },
     { lbl: '2029 forsikring (MNOK)', fn: (s) => getScenarioForScope(s, 2029, scope).forsikring.toFixed(0) },
     { lbl: 'CAGR (%)', fn: (s) => {
-      if (scope.type === 'by') return getBy(scope.id).scenarioer[s].cagr_pct;
-      if (scope.type === 'selskap') return getBy(getSelskap(scope.id).by).scenarioer[s].cagr_pct;
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.cagr_pct;
       const cagrs = BYER.map(b => b.scenarioer[s].cagr_pct);
       return Math.round(cagrs.reduce((a, b) => a + b, 0) / cagrs.length);
     }},
     { lbl: 'EBIT-margin 2029 (%)', fn: (s) => {
-      if (scope.type === 'by') return getBy(scope.id).scenarioer[s].ebit_margin_2029_pct.toFixed(1).replace('.', ',');
-      if (scope.type === 'selskap') return getBy(getSelskap(scope.id).by).scenarioer[s].ebit_margin_2029_pct.toFixed(1).replace('.', ',');
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.ebit_margin_2029_pct.toFixed(1).replace('.', ',');
       const ms = BYER.map(b => b.scenarioer[s].ebit_margin_2029_pct);
       return (ms.reduce((a, b) => a + b, 0) / ms.length).toFixed(1).replace('.', ',');
     }},
     { lbl: 'Ansatte 2029', fn: (s) => {
-      if (scope.type === 'by') return getBy(scope.id).scenarioer[s].ansatte_2029;
-      if (scope.type === 'selskap') return getBy(getSelskap(scope.id).by).scenarioer[s].ansatte_2029;
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.ansatte_2029;
       return BYER.reduce((sum, b) => sum + b.scenarioer[s].ansatte_2029, 0);
     }},
     { lbl: 'Kapitalbehov', fn: (s) => {
-      if (scope.type === 'konsern') return BYER.map(b => b.scenarioer[s].kapitalbehov).join(' + ');
-      if (scope.type === 'by') return getBy(scope.id).scenarioer[s].kapitalbehov;
-      return getBy(getSelskap(scope.id).by).scenarioer[s].kapitalbehov;
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.kapitalbehov;
+      return BYER.map(b => b.scenarioer[s].kapitalbehov).join(' + ');
     }},
   ];
 

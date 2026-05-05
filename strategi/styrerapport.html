@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>Styrerapport — ServiceAlliansen Bygg</title>
-<link rel="stylesheet" href="style.css">
-<script src="theme.js"></script>
-<script src="selskaper.js"></script>
-<script src="prosjekter.js"></script>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<script src="../prosjekter.js"></script>
 <style>
   .main-content { padding: 0 0 60px }
   .page-header {
@@ -123,7 +124,7 @@
 </head>
 <body>
 
-<div data-sidebar data-active="styrerapport"></div>
+<div data-sidebar data-active="styrerapport" data-section="strategi"></div>
 
 <main class="main-content">
 
@@ -208,7 +209,7 @@
   </div>
 </main>
 
-<script src="sidebar.js"></script>
+<script src="../sidebar.js"></script>
 <script>
 function build() {
   const scope = getActiveScope();

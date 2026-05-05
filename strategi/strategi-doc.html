@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Strategi-dokument — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-sub { color: var(--muted); font-size: 13px; margin-top: 2px }
+
+  .container { padding: 22px 32px; max-width: 1280px }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 12px; margin: 0 0 14px }
+
+  /* Intensjon-banner */
+  .intent-banner {
+    padding: 24px 28px; margin-bottom: 18px;
+    background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 100%);
+    border: 1px solid var(--line); border-left: 4px solid var(--mode-strategisk, #d29922);
+    border-radius: 10px;
+  }
+  .intent-banner .lbl {
+    font-size: 10.5px; color: var(--mode-strategisk, #d29922); text-transform: uppercase;
+    letter-spacing: 0.12em; font-weight: 700;
+  }
+  .intent-banner h2 {
+    margin: 8px 0 0; font-size: 18px; font-weight: 600; line-height: 1.45; letter-spacing: -0.005em;
+  }
+
+  /* SWOT 2x2 */
+  .swot { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+  @media (max-width: 800px) { .swot { grid-template-columns: 1fr } }
+  .swot-quad {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; border-top: 3px solid var(--accent);
+  }
+  .swot-quad.q-s { border-top-color: var(--good) }
+  .swot-quad.q-w { border-top-color: var(--bad) }
+  .swot-quad.q-o { border-top-color: var(--hi) }
+  .swot-quad.q-t { border-top-color: var(--warn) }
+  .swot-quad h3 {
+    margin: 0 0 10px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .swot-quad.q-s h3 { color: var(--good) }
+  .swot-quad.q-w h3 { color: var(--bad) }
+  .swot-quad.q-o h3 { color: var(--hi) }
+  .swot-quad.q-t h3 { color: var(--warn) }
+  .swot-quad ul { margin: 0; padding: 0; list-style: none }
+  .swot-quad li {
+    font-size: 12.5px; line-height: 1.45; padding: 6px 0;
+    border-bottom: 1px solid var(--line); color: var(--text);
+  }
+  .swot-quad li:last-child { border-bottom: 0 }
+  .swot-quad li::before {
+    content: '·'; color: var(--muted); margin-right: 8px; font-weight: 700;
+  }
+
+  /* PESTEL */
+  .pestel { display: grid; gap: 8px }
+  .pestel-row {
+    display: grid; grid-template-columns: 140px 1fr 24px; gap: 12px; align-items: center;
+    padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    font-size: 12.5px;
+  }
+  .pestel-row .kat {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+    color: var(--muted);
+  }
+  .pestel-row .tone { font-size: 14px; text-align: center }
+  .pestel-row .tone.opp { color: var(--good) }
+  .pestel-row .tone.ned { color: var(--bad) }
+  .pestel-row .tone.flat { color: var(--muted) }
+
+  /* Three Horizons */
+  .horisonter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px }
+  @media (max-width: 900px) { .horisonter { grid-template-columns: 1fr } }
+  .horisont {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; position: relative;
+    border-top: 3px solid var(--horisont-color, var(--hi));
+  }
+  .horisont.h-h1 { --horisont-color: var(--hi) }
+  .horisont.h-h2 { --horisont-color: var(--warn) }
+  .horisont.h-h3 { --horisont-color: var(--good) }
+  .horisont .h-tag {
+    display: inline-block; padding: 3px 9px; border-radius: 11px;
+    background: var(--horisont-color); color: #fff; font-size: 9.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .horisont h3 {
+    margin: 10px 0 4px; font-size: 14px; font-weight: 600;
+  }
+  .horisont .h-periode { font-size: 11px; color: var(--muted); margin-bottom: 8px }
+  .horisont .h-fokus {
+    font-size: 12.5px; color: var(--text); line-height: 1.5;
+  }
+  .horisont .h-scenario {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--muted);
+  }
+  .horisont .h-scenario b { color: var(--horisont-color); font-weight: 600 }
+
+  /* Initiativ-tabell */
+  .table { width: 100%; border-collapse: collapse; font-size: 12.5px }
+  .table th {
+    text-align: left; padding: 10px 12px; background: var(--panel-2);
+    border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .table td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top }
+  .table tr:last-child td { border-bottom: 0 }
+  .table tr:hover td { background: rgba(79,157,166,0.04) }
+
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    background: var(--panel-3); color: var(--muted);
+  }
+  .pill.h-h1 { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .pill.h-h2 { background: rgba(210,153,34,0.18); color: var(--warn) }
+  .pill.h-h3 { background: rgba(63,185,80,0.18); color: var(--good) }
+  .pill.h-h12 { background: linear-gradient(90deg, rgba(88,166,255,0.18), rgba(210,153,34,0.18)); color: var(--hi) }
+  .pill.h-h23 { background: linear-gradient(90deg, rgba(210,153,34,0.18), rgba(63,185,80,0.18)); color: var(--warn) }
+
+  .ansoff-pill {
+    font-size: 10.5px; padding: 2px 7px; border-radius: 4px;
+    background: var(--panel-3); color: var(--muted); font-weight: 600; white-space: nowrap;
+  }
+  .ansoff-pill.a-pen  { background: rgba(79,157,166,0.18); color: var(--accent-2) }
+  .ansoff-pill.a-mark { background: rgba(88,166,255,0.18); color: var(--hi) }
+  .ansoff-pill.a-prod { background: rgba(163,113,247,0.18); color: var(--pending) }
+  .ansoff-pill.a-div  { background: rgba(248,81,73,0.18); color: var(--bad) }
+
+  /* Strategy Map */
+  .smap-section {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 10px;
+    border-left: 4px solid var(--smap-color, var(--accent));
+  }
+  .smap-section.s-fin { --smap-color: var(--good) }
+  .smap-section.s-kunde { --smap-color: var(--hi) }
+  .smap-section.s-prosess { --smap-color: var(--warn) }
+  .smap-section.s-laering { --smap-color: var(--pending) }
+  .smap-section h3 {
+    margin: 0 0 10px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--smap-color);
+  }
+  .smap-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+  }
+  @media (max-width: 800px) { .smap-grid { grid-template-columns: 1fr } }
+  .smap-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .smap-card .smap-label {
+    font-size: 11px; color: var(--muted); font-weight: 600;
+  }
+  .smap-card .smap-baseline {
+    font-size: 11.5px; margin-top: 4px; color: var(--muted);
+  }
+  .smap-card .smap-baseline b { color: var(--text); font-weight: 600 }
+  .smap-card .smap-target {
+    font-size: 12.5px; margin-top: 2px; color: var(--text);
+  }
+  .smap-card .smap-target b { color: var(--smap-color); font-weight: 700 }
+
+  /* Empty state */
+  .empty-state {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 40px; text-align: center; color: var(--muted); font-size: 13px;
+  }
+  .empty-state h3 { color: var(--text); margin: 0 0 8px }
+  .empty-state a { color: var(--accent); text-decoration: none }
+  .empty-state a:hover { text-decoration: underline }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="strategi-doc" data-section="strategi"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+      <span>Strategi-dokument</span>
+    </div>
+    <h1 id="ph-title">Strategi-dokument</h1>
+    <div class="ph-sub" id="ph-sub">Situasjonsanalyse · Three Horizons · Strategiske initiativer · Målbilde 2029</div>
+  </header>
+
+  <div class="container" id="content"></div>
+</main>
+
+<script src="../sidebar.js"></script>
+<script>
+function init() {
+  const scope = getActiveScope();
+  const content = document.getElementById('content');
+
+  // Strategi-dokumentet er foreløpig kun definert for Fritzøe
+  if (scope.type !== 'selskap') {
+    renderEmpty(content, scope, 'Strategi-dokumentet vises per selskap. Velg et selskap fra scope-velgeren.');
+    return;
+  }
+  const selskap = getSelskap(scope.id);
+  if (!selskap?.strategi) {
+    renderEmpty(content, scope,
+      `Strategi-dokumentet er ikke etablert for ${selskap?.label || 'dette selskapet'} ennå. ` +
+      `Foreløpig er det bare ${getSelskap('byggmester-fritzoe').label} som har et komplett dokument.`);
+    return;
+  }
+
+  // Sett header
+  document.getElementById('ph-title').textContent = `Strategi-dokument — ${selskap.label}`;
+  document.getElementById('ph-title').style.color = selskap.farge;
+  document.getElementById('ph-sub').textContent =
+    `${selskap.lokasjon.by} · ${selskap.regnskap_2024.ansatte} ansatte · ${selskap.fagprofil}`;
+
+  const s = selskap.strategi;
+  let html = '';
+
+  // 1. Strategisk intensjon
+  html += `
+    <div class="intent-banner">
+      <div class="lbl">Strategisk intensjon</div>
+      <h2>${s.intensjon}</h2>
+    </div>
+  `;
+
+  // 2. Situasjonsanalyse — SWOT + PESTEL
+  html += `
+    <div class="panel">
+      <h2>Situasjonsanalyse</h2>
+      <p class="lead">SWOT mot konkurranse­landskap og makro­drivere. Grunnlag for strategiske valg.</p>
+      <div class="swot">
+        <div class="swot-quad q-s">
+          <h3>Styrker</h3>
+          <ul>${s.swot.styrker.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="swot-quad q-w">
+          <h3>Svakheter</h3>
+          <ul>${s.swot.svakheter.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="swot-quad q-o">
+          <h3>Muligheter</h3>
+          <ul>${s.swot.muligheter.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="swot-quad q-t">
+          <h3>Trusler</h3>
+          <ul>${s.swot.trusler.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="panel">
+      <h2>Markeds­drivere (PESTEL)</h2>
+      <p class="lead">Eksterne krefter som påvirker veksten. Pil viser om driveren trekker opp eller ned for ROT-marked i Bodø/Salten.</p>
+      <div class="pestel">
+        ${s.pestel.map(p => `
+          <div class="pestel-row">
+            <span class="kat">${p.kat}</span>
+            <span>${p.tekst}</span>
+            <span class="tone ${p.tone}">${p.tone === 'opp' ? '↑' : p.tone === 'ned' ? '↓' : '→'}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // 3. Three Horizons
+  html += `
+    <div class="panel">
+      <h2>Three Horizons — strategisk tidslinje</h2>
+      <p class="lead">Hvordan strategien tar selskapet fra forsvarsposisjon i 2026 til skalering i 2029+. Hver horisont kobler direkte til et scenario.</p>
+      <div class="horisonter">
+        ${['h1','h2','h3'].map(k => {
+          const h = s.horisonter[k];
+          return `
+            <div class="horisont h-${k}">
+              <span class="h-tag">${k.toUpperCase()}</span>
+              <h3>${h.tittel}</h3>
+              <div class="h-periode">${h.periode}</div>
+              <div class="h-fokus">${h.fokus}</div>
+              <div class="h-scenario">Aktiverer scenario: <b>${h.scenario}</b></div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  // 4. Initiativer
+  html += `
+    <div class="panel">
+      <h2>Strategiske initiativer</h2>
+      <p class="lead">Hvert initiativ tagget med Ansoff-kvadrant, horisont, ansvarlig og 2029-mål. <b>Base+</b> er obligatorisk; <b>Offensiv+</b> aktiveres ved valg av Offensiv- eller Bull-scenarioet.</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Initiativ</th>
+            <th>Ansoff</th>
+            <th>Horisont</th>
+            <th>Ansvarlig</th>
+            <th>2029-mål</th>
+            <th>Aktiv i</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${s.initiativer.map(i => `
+            <tr>
+              <td><b>${i.nr}</b></td>
+              <td>${i.navn}</td>
+              <td><span class="ansoff-pill ${ansoffClass(i.ansoff)}">${i.ansoff}</span></td>
+              <td><span class="pill ${horisontClass(i.horisont)}">${i.horisont}</span></td>
+              <td style="color:var(--muted)">${i.ansvarlig}</td>
+              <td><b>${i.mal_2029}</b></td>
+              <td style="color:var(--muted);font-size:11.5px">${i.scenario}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  // 5. Strategy Map
+  html += `
+    <div class="panel">
+      <h2>Strategy Map — målbilde 2029</h2>
+      <p class="lead">Fire perspektiver. Finansielle mål nås gjennom kunde- og prosess-mål, som forutsetter læring og bemanning. Verdier kan styres kvartalsvis.</p>
+      ${renderSmapSection('s-fin', 'Finansielt', s.strategy_map.finansielt)}
+      ${renderSmapSection('s-kunde', 'Kunde', s.strategy_map.kunde)}
+      ${renderSmapSection('s-prosess', 'Intern prosess', s.strategy_map.prosess)}
+      ${renderSmapSection('s-laering', 'Læring & vekst', s.strategy_map.laering)}
+    </div>
+  `;
+
+  // 6. Lenker til scenarioer — scope-aware
+  const scLinks = ['base', 'offensiv', 'bull'].map(name => {
+    const totals = getScenarioForScope(name, 2029, scope);
+    const meta = getScenarioMetaForScope(name, scope);
+    return {
+      name,
+      total_2029: totals.total,
+      cagr: meta?.cagr_pct,
+      kapital: meta?.kapitalbehov || '—',
+      beskrivelse: meta?.beskrivelse || '',
+    };
+  });
+  html += `
+    <div class="panel">
+      <h2>Neste steg — kobling til scenarioer</h2>
+      <p class="lead">Strategien realiseres gjennom valg av scenario. Drill ned for tall, ramp og bemanningsplan.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        ${scLinks.map((sc, i) => `
+          <a class="horisont h-${'h' + (i + 1)}" href="scenario.html?type=${sc.name}" style="text-decoration:none;color:inherit">
+            <span class="h-tag">H${i + 1}</span>
+            <h3>${sc.name.charAt(0).toUpperCase() + sc.name.slice(1)}-scenario</h3>
+            <div class="h-fokus">${sc.cagr ? sc.cagr + ' % CAGR' : 'aggregert'}${sc.kapital !== '—' ? ' · ' + sc.kapital : ''} · <b>${sc.total_2029.toFixed(0)} MNOK i 2029</b></div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  content.innerHTML = html;
+}
+
+function renderSmapSection(cls, tittel, items) {
+  return `
+    <div class="smap-section ${cls}">
+      <h3>${tittel}</h3>
+      <div class="smap-grid">
+        ${items.map(i => `
+          <div class="smap-card">
+            <div class="smap-label">${i.mal}</div>
+            <div class="smap-baseline">I dag: <b>${i.baseline}</b></div>
+            <div class="smap-target">2029: <b>${i.mal_2029}</b></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function ansoffClass(a) {
+  if (a.startsWith('Markedspen')) return 'a-pen';
+  if (a.startsWith('Markedsutv')) return 'a-mark';
+  if (a.startsWith('Produkt'))    return 'a-prod';
+  if (a.startsWith('Diversif'))   return 'a-div';
+  return '';
+}
+
+function horisontClass(h) {
+  if (h === 'H1')    return 'h-h1';
+  if (h === 'H2')    return 'h-h2';
+  if (h === 'H3')    return 'h-h3';
+  if (h === 'H1–H2') return 'h-h12';
+  if (h === 'H2–H3') return 'h-h23';
+  return '';
+}
+
+function renderEmpty(root, scope, msg) {
+  root.innerHTML = `
+    <div class="empty-state">
+      <h3>Strategi-dokument ikke tilgjengelig</h3>
+      <p>${msg}</p>
+      <p><a href="strategi.html">← Tilbake til vekst-scenarier</a></p>
+    </div>
+  `;
+}
+
+init();
+window.addEventListener('scope-changed', init);
+</script>
+</body>
+</html>

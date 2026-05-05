@@ -37,7 +37,7 @@
   // Navigasjonstre — én entry per modul som kan navigeres til.
   // Hovedsporet i Daglig: Dashboard → Anbud → Prosjekter (drill-down per prosjekt).
   const NAV = [
-    { section: 'Daglig', mode: MODE_DAGLIG, items: [
+    { section: 'Daglig', mode: MODE_DAGLIG, part: 'operativ', items: [
       { id: 'dashboard',      icon: '◉', label: 'Dashboard',       page: 'Dashboard' },
       { id: 'anbud',          icon: '►', label: 'Anbudspipeline',  page: 'Anbudspipeline' },
       { id: 'overlevering',   icon: '⇄', label: 'Overlevering',    page: 'Overlevering — anbud → prosjekt' },
@@ -45,24 +45,34 @@
       { id: 'okonomi',        icon: '$', label: 'Økonomi (live)',  page: 'Økonomi (live)' },
       { id: 'bruksanvisning', icon: '?', label: 'Bruksanvisning',  page: 'Bruksanvisning' },
     ]},
-    { section: 'Strategisk', mode: MODE_STRATEGISK, items: [
+    { section: 'Strategisk', mode: MODE_STRATEGISK, part: 'strategi', items: [
+      { id: 'strategi-doc', icon: '⚑', label: 'Strategi-dokument', page: 'Strategi-dokument' },
       { id: 'strategi',     icon: '↗', label: 'Vekst-scenarier', page: 'Vekst-scenarier' },
       { id: 'styrerapport', icon: '◧', label: 'Styrerapport',    page: 'Styrerapport (kvartal)' },
       { id: 'ma-screening', icon: '+', label: 'M&A-screening',   page: 'M&A-screening' },
       { id: 'ma-konsern',   icon: '⊞', label: 'M&A konsern',     page: 'M&A konsern' },
     ]},
-    { section: 'Implementering', mode: MODE_IMPL, items: [
+    { section: 'Implementering', mode: MODE_IMPL, part: 'operativ', items: [
       { id: 'implementering',  icon: '⚙', label: 'Teknisk plan',     page: 'Teknisk implementering' },
       { id: 'm5-poweroffice',  icon: '∷', label: 'M5/M6 PowerOffice', page: 'M5/M6 PowerOffice-integrasjon' },
       { id: 'forsikring',      icon: '◆', label: 'M9 Forsikring',     page: 'M9 SA Forsikringsstrøm' },
       { id: 'epc-satsing',     icon: '⊕', label: 'EPC-satsing',       page: 'EPC-satsing — konsekvens' },
     ]},
-    { section: 'Referanse', mode: MODE_REFERANSE, items: [
+    { section: 'Referanse', mode: MODE_REFERANSE, part: 'strategi', items: [
       { id: 'bransjekart',     icon: '·', label: 'Bransjekart',     page: 'Bransjekart' },
       { id: 'oversikt',        icon: '·', label: 'Konsernoversikt', page: 'Konsernoversikt' },
       { id: 'sa-rapport',      icon: '·', label: 'SA-rapport',      page: 'SA-konsernrapport' },
     ]},
   ];
+
+  // Hvilken del en modul tilhører — styrer hvilken sidebar som vises
+  function getPartFor(moduleId) {
+    const eff = MODULE_PARENT[moduleId] || moduleId;
+    for (const sec of NAV) {
+      if (sec.items.find(i => i.id === eff)) return sec.part;
+    }
+    return 'operativ';
+  }
 
   // Modul kan ha "kontekstuell" mode (samme sb-link), brukes når man drar til
   // detalj-sider som ikke er primær-modul (f.eks. prosjekt → tilhører prosjekter).
@@ -215,6 +225,14 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
 }
 .sa-sidebar .sb-section[data-mode="referanse"] .sb-link:hover { color: var(--text, #e6edf3) }
 
+.sa-sidebar .sb-bridge {
+  margin-top: 14px; padding-top: 10px;
+  border-top: 1px dashed var(--line, #2a313c);
+}
+.sa-sidebar .sb-bridge-link {
+  color: var(--muted, #8b95a3); font-size: 12px; font-style: italic;
+}
+.sa-sidebar .sb-bridge-link:hover { color: var(--accent, #4f9da6) }
 .sa-sidebar .sb-foot {
   padding: 11px 16px 14px; border-top: 1px solid var(--line, #2a313c);
   display: flex; gap: 8px; align-items: center;
@@ -298,10 +316,10 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
     return html;
   }
 
-  function buildNav(activeId) {
+  function buildNav(activeId, part) {
     const sidebarActive = getActiveSidebarId(activeId);
     let html = '';
-    NAV.forEach(sec => {
+    NAV.filter(sec => sec.part === part).forEach(sec => {
       html += `<div class="sb-section" data-mode="${sec.mode}">
         <div class="sb-section-label">${sec.section}</div>`;
       sec.items.forEach(item => {
@@ -311,10 +329,18 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
       });
       html += '</div>';
     });
+    // Bro-lenke til den andre delen
+    if (part === 'operativ') {
+      html += `<div class="sb-section sb-bridge"><a class="sb-link sb-bridge-link" href="${getRouteFor('strategi')}">
+        <span class="sb-icon">↗</span>Strategi →</a></div>`;
+    } else {
+      html += `<div class="sb-section sb-bridge"><a class="sb-link sb-bridge-link" href="${getRouteFor('dashboard')}">
+        <span class="sb-icon">←</span>Operativ</a></div>`;
+    }
     return html;
   }
 
-  function buildSidebarHTML(activeId) {
+  function buildSidebarHTML(activeId, part) {
     const scopeLabel = getScopeLabel();
     return `
       <button class="sb-toggle-mobile" aria-label="Vis meny">☰</button>
@@ -336,7 +362,7 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
         </div>
       </div>
       <nav class="sb-nav">
-        ${buildNav(activeId)}
+        ${buildNav(activeId, part)}
       </nav>
       <div class="sb-foot">
         <button class="theme-toggle" data-theme-toggle onclick="toggleTheme()" title="Bytt tema" aria-label="Bytt tema">
@@ -351,13 +377,17 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
   // ------------------------------------------------------------------
   // Topbar HTML
   // ------------------------------------------------------------------
-  function buildTopbarHTML(activeId) {
+  function buildTopbarHTML(activeId, part) {
     const currentMode = getModeFor(activeId);
     const pageLabel = getPageLabel(activeId);
     const scope = getActiveScope();
     const scopeLabel = getScopeLabel(scope);
 
-    const tabs = [MODE_DAGLIG, MODE_STRATEGISK, MODE_REFERANSE].map(m => {
+    // Topbar-tabs: bare moder som tilhører aktiv del
+    const tabModes = part === 'strategi'
+      ? [MODE_STRATEGISK, MODE_REFERANSE]
+      : [MODE_DAGLIG, MODE_IMPL];
+    const tabs = tabModes.map(m => {
       const isActive = m === currentMode;
       const defaultModule = MODE_DEFAULT[m];
       const href = getRouteFor(defaultModule);
@@ -385,7 +415,7 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
     `;
   }
 
-  function buildTopbar(activeId) {
+  function buildTopbar(activeId, part) {
     // Skap topbar-element
     let bar = document.querySelector('.sa-topbar');
     if (!bar) {
@@ -399,7 +429,7 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
         document.body.insertBefore(bar, document.body.firstChild);
       }
     }
-    bar.innerHTML = buildTopbarHTML(activeId);
+    bar.innerHTML = buildTopbarHTML(activeId, part);
     bar.dataset.mode = getModeFor(activeId);
 
     // Live-tid
@@ -445,15 +475,20 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
     const slots = document.querySelectorAll('[data-sidebar]');
     if (slots.length === 0) return;
     let activeId = 'dashboard';
+    let part = 'operativ';
     slots.forEach(slot => {
       activeId = slot.dataset.active || activeId;
+      // data-section overstyrer auto-deteksjon; ellers ut fra modul
+      part = slot.dataset.section || getPartFor(activeId);
       slot.classList.add('sa-sidebar');
-      slot.innerHTML = buildSidebarHTML(activeId);
+      slot.dataset.part = part;
+      slot.innerHTML = buildSidebarHTML(activeId, part);
       wireSidebar(slot);
     });
     document.body.classList.add('has-sidebar');
     document.body.dataset.mode = getModeFor(activeId);
-    buildTopbar(activeId);
+    document.body.dataset.part = part;
+    buildTopbar(activeId, part);
   }
 
   injectCss();

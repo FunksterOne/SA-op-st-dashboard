@@ -19,3 +19,6 @@ npm-debug.log*
 .env
 .env.local
 node_modules/
+
+# Browser-testing artefakter
+.playwright-mcp/

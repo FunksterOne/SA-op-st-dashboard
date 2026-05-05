@@ -68,7 +68,143 @@ const SELSKAPER = [
       ansatte: 31,
     },
 
-    historikk: { y2022: 60, y2023: 66, y2024: 72 },
+    // 2025 baseline — svakt opp fra 2024 (+5 % omsetning, samme lønnsomhet).
+    // Brukes som startpunkt for strategiske scenarioer.
+    regnskap_2025: {
+      omsetning_mnok: 75.64,
+      driftsresultat_mnok: 5.82,
+      driftsmargin_pct: 7.7,
+      arsresultat_mnok: 4.63,
+      ek_mnok: 6.11,
+      ansatte: 31,
+    },
+
+    historikk: { y2022: 60, y2023: 66, y2024: 72, y2025: 76 },
+
+    // Bemanning 2025 — kun tømrere, snekkere og lærlinger (ingen malere)
+    bemanning_2025: {
+      tomrere: 18,
+      snekkere: 8,
+      laerlinger: 5,
+      total: 31,
+    },
+
+    // Strategi-dokument — situasjonsanalyse, horisonter, initiativer, målbilde.
+    // Brukes av strategi/strategi-doc.html.
+    strategi: {
+      intensjon: 'Bli Saltens foretrukne ROT-partner for offentlig sektor, forsikringsskader og borettslag — gjennom fagdyktig håndverk, leveringssikkerhet og SA-konsernsynergier.',
+      intensjon_kort: 'Saltens foretrukne ROT-partner',
+
+      swot: {
+        styrker: [
+          'ROT-andel 65 % — beskyttet mot konjunktur',
+          'Driftsmargin 7,7 % over bransjesnitt (snitt Bodø ≈ 5 %)',
+          '5 lærlinger av 31 — aktivt opplæringsmiljø',
+          'Nylig konsernintegrert (juni 2024) med tilgang til SA-ressurser',
+          'Fast DL Brynjar Storvik og felles styreleder gir kontinuitet',
+        ],
+        svakheter: [
+          'Lav egenkapital: 1,48 MNOK (2024), 6,1 MNOK (2025)',
+          'Konsentrert i Bodø — ingen geografisk diversifisering',
+          'Forsikringsstrøm ikke aktivert ennå (0 MNOK 2025)',
+          'Manuell anbudsprosess før CoBrief-utrulling',
+          'Ingen formaliserte rammeavtaler med offentlige nøkkel­kunder',
+        ],
+        muligheter: [
+          'SA forsikringsstrøm ramper 10–22 MNOK/år for Bodø-byen',
+          'EU EPBD og TEK17-skjerping driver energi-rehab',
+          'Kommunalt vedlikeholdsetterslep i Salten estimert 2–3 mrd NOK',
+          'Fragmentert konkurranse i Salten — M&A-muligheter',
+          'Fauske/Saltdal/Sørfold/Steigen mangler dominerende ROT-aktør',
+        ],
+        trusler: [
+          'Rentepress reduserer kommunale ROT-budsjetter',
+          'Strukturell fagarbeider­mangel i Nordland',
+          'Volatile materialpriser (trelast, isolasjon)',
+          'Snekker\'n AS og Nord-Norsk Maler aggressiv prising',
+          'Tap av nøkkelpersonell (DL/kalkulator) ville treffe hardt',
+        ],
+      },
+
+      pestel: [
+        { kat: 'Politikk / juridisk', tekst: 'TEK17, EU EPBD, sirkulærøkonomi-forskrift øker ROT-volum', tone: 'opp' },
+        { kat: 'Økonomi',             tekst: 'Igangsatte boliger Nordland −38 % siden 2020. ROT relativt stabilt', tone: 'ned' },
+        { kat: 'Sosialt',             tekst: 'Lokalt næringsliv-imperative, lærlingplikt i offentlige anbud', tone: 'opp' },
+        { kat: 'Teknologi',           tekst: 'Mercell/Doffin/CoBrief modnes, BIM-light-verktøy for ROT', tone: 'opp' },
+        { kat: 'Miljø',               tekst: 'Energi-rehab + sirkulær ombruk gir ny vekstmotor', tone: 'opp' },
+      ],
+
+      horisonter: {
+        h1: {
+          tittel: 'Forsvar & optimalisering',
+          periode: '2026',
+          fokus: 'Kjernemarked Bodø. Anbudsdisiplin, marginbeskyttelse, lærling-rekruttering.',
+          scenario: 'Base',
+        },
+        h2: {
+          tittel: 'Utvidelse',
+          periode: '2027–2028',
+          fokus: 'Salten geografisk, forsikringsstrøm via SA, energi-rehab pakker, første oppkjøp.',
+          scenario: 'Offensiv',
+        },
+        h3: {
+          tittel: 'Skalering',
+          periode: '2029+',
+          fokus: 'Helgeland/Lofoten-Vesterålen, ledende ROT-aktør i Nordland, evt. integrering med Areal.',
+          scenario: 'Bull',
+        },
+      },
+
+      initiativer: [
+        { nr: 1, navn: 'Anbudsdisiplin + AI-screening (CoBrief)',           ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL',                  mal_2029: 'Hit-rate ≥ 75 %',         scenario: 'Base+' },
+        { nr: 2, navn: 'Rammeavtaler offentlig sektor',                      ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + kalkulator',     mal_2029: '4 aktive ramme',          scenario: 'Base+' },
+        { nr: 3, navn: 'Lærlingprogram 5 → 8',                               ansoff: 'Markedspenetrasjon', horisont: 'H1–H2', ansvarlig: 'DL + SA Læring',      mal_2029: '8 lærlinger',             scenario: 'Base+' },
+        { nr: 4, navn: 'Forsikringsstrøm via SA',                            ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + SA Forsikring',  mal_2029: '6 MNOK forsikring',       scenario: 'Offensiv+' },
+        { nr: 5, navn: 'Energi-rehab pakke (TEK17/EPBD)',                    ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + kalkulator',     mal_2029: '12 MNOK pakkeomsetning',  scenario: 'Offensiv+' },
+        { nr: 6, navn: 'Salten satellitt (Fauske/Saltdal/Sørfold/Steigen)',  ansoff: 'Markedsutvikling',   horisont: 'H2–H3', ansvarlig: 'DL + styre',          mal_2029: '1 satellitt-team',        scenario: 'Offensiv+' },
+        { nr: 7, navn: 'M&A 1–2 oppkjøp i Salten',                            ansoff: 'Diversifisering',    horisont: 'H3',    ansvarlig: 'SA-konsern + styre',  mal_2029: '1 fullført, 1 i DD',      scenario: 'Offensiv+' },
+      ],
+
+      strategy_map: {
+        finansielt: [
+          { mal: 'Omsetning',              baseline: '76 MNOK (2025)', mal_2029: '92 / 141 MNOK (Base/Off)' },
+          { mal: 'Driftsmargin',           baseline: '7,7 %',          mal_2029: '7,7 % / 7,8 %' },
+          { mal: 'Egenkapital',            baseline: '6,1 MNOK (2025)',mal_2029: '≥ 12 MNOK' },
+        ],
+        kunde: [
+          { mal: 'Hit-rate',               baseline: '72 %',           mal_2029: '≥ 75 %' },
+          { mal: 'NPS',                    baseline: 'ikke målt',      mal_2029: '≥ 50' },
+          { mal: 'Andel rammeavtaler',     baseline: '< 25 %',         mal_2029: '≥ 40 %' },
+        ],
+        prosess: [
+          { mal: 'Anbud time-to-tilbud',   baseline: '14 d snitt',     mal_2029: '≤ 10 d (−30 %)' },
+          { mal: 'Prosjektmargin-avvik',   baseline: '> 5 %',          mal_2029: '≤ 5 %' },
+          { mal: 'CoBrief-screening dekning', baseline: '0 %',         mal_2029: '100 %' },
+        ],
+        laering: [
+          { mal: 'Lærlinger',              baseline: '5',              mal_2029: '8' },
+          { mal: 'SA Læring-deltakelse',   baseline: 'ikke målt',      mal_2029: '100 %' },
+          { mal: 'Nøkkelpersonell-tap',    baseline: '0',              mal_2029: '0' },
+        ],
+      },
+    },
+
+    // Strategi: Base case som uavhengig fundament for Fritzøe.
+    // 5 % årlig vekst på omsetning, lønnsomhet konstant 7,7 %, bemanning uendret.
+    // Offensiv og Bull bygger på dette ved å legge til geografi-, M&A- og
+    // forsikringsstrøm-deltaer.
+    base_case: {
+      navn: 'Base — Fritzøe (uavhengig fundament)',
+      cagr_pct: 5,
+      // Omsetning i MNOK — 75,64 i 2025 + 5 % per år
+      rot_2026: 79, rot_2027: 83, rot_2028: 88, rot_2029: 92,
+      forsikring_2026: 0, forsikring_2027: 0, forsikring_2028: 0, forsikring_2029: 0,
+      ebit_margin_pct: 7.7,
+      ebit_margin_2029_pct: 7.7,
+      ansatte_2026: 31, ansatte_2027: 31, ansatte_2028: 31, ansatte_2029: 31,
+      kapitalbehov: 'Drift / kontantstrøm',
+      beskrivelse: 'Holder dagens posisjon i Bodø: tømrere, snekkere og lærlinger uten utvidelse. 5 % årlig vekst på eksisterende ROT-portefølje, lønnsomhet stabil på 7,7 %, bemanning uendret. Offensiv og Bull legger geografi- og M&A-deltaer på toppen av denne banen.',
+    },
 
     // Operativ seed — KPI-fallback når localStorage er tom
     operativ_seed: {
@@ -186,6 +322,104 @@ const SELSKAPER = [
     pipeline_kilder: ['Doffin', 'Mercell', 'TendSign', 'CoBrief', 'SA Forsikring', 'E-post'],
     rot_andel_pct: 58,
     nybygg_andel_pct: 0,
+
+    strategi: {
+      intensjon: 'Bli Saltens foretrukne maler- og overflate­leverandør for forsikrings­skader, offentlig sektor og borettslag — gjennom rask responstid, høy hit-rate og spisset fagkompetanse.',
+      intensjon_kort: 'Saltens spissede overflate­spesialist',
+
+      swot: {
+        styrker: [
+          'Hit-rate 75 % — best i SA-porteføljen',
+          'Spisset fagprofil (maler/overflate) — tydelig markedsposisjon',
+          'Felles DL og kontor med Fritzøe — lave overhead-kostnader',
+          'Driftsmargin 7,5 % i et lavmargin-segment',
+          'ROT-andel 58 % gir konjunktur-buffer',
+        ],
+        svakheter: [
+          'Liten egenkapital: 1,30 MNOK (2024)',
+          'Mistet Saltstraumen-anbud på pris (2025) — pris-disiplin under press',
+          'Sesongavhengighet (utvendig maling konsentrert mai–september)',
+          'Lite forsikringsstrøm aktivert (potensial via SA Forsikring)',
+          'Smalere fagprofil enn Fritzøe — mindre tverrgående salg',
+        ],
+        muligheter: [
+          'Forsikringsstrøm 24h-vakt for vannskade-overflate',
+          'Borettslag/sameier vedlikeholdsbølge (2010-talls byggemasse)',
+          'Sirkulær overflate (gjenbruk maling, lav-VOC) som differensiator',
+          'Rammeavtale Bodø kommune maler/overflate 2027–2030',
+          'UE-allianse med Fritzøe inn mot Salten-utvidelse',
+        ],
+        trusler: [
+          'Nord-Norsk Maler aggressiv prising (vant Saltstraumen 2025)',
+          'Bodø Malermester etablert med 6 anbud/år',
+          'Fagarbeidermangel — særlig erfarne malere',
+          'Material­prisvolatilitet (maling, polyurethan)',
+          'Sesong-redusert kapasitet vinter (utvendig)',
+        ],
+      },
+
+      pestel: [
+        { kat: 'Politikk / juridisk', tekst: 'Lav-VOC-krav og helsebetonet maling-regulering driver moderne overflate', tone: 'opp' },
+        { kat: 'Økonomi',             tekst: 'ROT-marked stabilt; igangsatte boliger Nordland −38 % (mindre nybygg-overflate)', tone: 'flat' },
+        { kat: 'Sosialt',             tekst: 'Borettslag/sameier prioriterer fasade- og overflate-vedlikehold etter EK-styrking', tone: 'opp' },
+        { kat: 'Teknologi',           tekst: 'Mercell rammeavtaler + sprøytemaling-utstyr senker timeforbruk per m²', tone: 'opp' },
+        { kat: 'Miljø',               tekst: 'Sirkulær overflate (gjenbruk, ombruk) blir innkjøpskriterium i offentlig sektor', tone: 'opp' },
+      ],
+
+      horisonter: {
+        h1: {
+          tittel: 'Hit-rate-forsvar',
+          periode: '2026',
+          fokus: 'Beskytte 75 % hit-rate, sikre rammeavtale Bodø kommune, lærling-rekruttering maler.',
+          scenario: 'Base',
+        },
+        h2: {
+          tittel: 'Forsikring + Salten-allianse',
+          periode: '2027–2028',
+          fokus: 'Aktivere SA Forsikring 24h-vakt, sirkulær overflate-pilot, UE-allianse med Fritzøe inn mot Salten.',
+          scenario: 'Offensiv',
+        },
+        h3: {
+          tittel: 'Egne avdelinger',
+          periode: '2029+',
+          fokus: 'Egen Salten-avdeling, evt. integrering med Fritzøe under felles SA-Bodø-struktur.',
+          scenario: 'Bull',
+        },
+      },
+
+      initiativer: [
+        { nr: 1, navn: 'Hit-rate-disiplin (CoBrief screening)',                   ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL',                    mal_2029: 'Hit-rate ≥ 80 %',         scenario: 'Base+' },
+        { nr: 2, navn: 'Rammeavtale Bodø kommune maler/overflate',                ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + kalkulator',       mal_2029: '3 aktive ramme',          scenario: 'Base+' },
+        { nr: 3, navn: 'Lærling- og rekrutteringsprogram maler',                  ansoff: 'Markedspenetrasjon', horisont: 'H1–H2', ansvarlig: 'DL + SA Læring',        mal_2029: '4 lærlinger',             scenario: 'Base+' },
+        { nr: 4, navn: 'Forsikrings­skade 24h-vakt (vannskade overflate)',        ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + SA Forsikring',    mal_2029: '8 MNOK forsikring',       scenario: 'Offensiv+' },
+        { nr: 5, navn: 'Sirkulær overflate-pakke (lav-VOC, gjenbruk)',            ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + kalkulator',       mal_2029: '6 MNOK pakkeomsetning',   scenario: 'Offensiv+' },
+        { nr: 6, navn: 'UE-allianse Fritzøe inn mot Salten',                       ansoff: 'Markedsutvikling',   horisont: 'H2',    ansvarlig: 'DL + Fritzøe DL',       mal_2029: '4 MNOK UE-omsetning',     scenario: 'Offensiv+' },
+        { nr: 7, navn: 'Egen Salten-avdeling',                                     ansoff: 'Markedsutvikling',   horisont: 'H3',    ansvarlig: 'DL + styre',            mal_2029: '1 satellitt-team',        scenario: 'Offensiv+' },
+      ],
+
+      strategy_map: {
+        finansielt: [
+          { mal: 'Omsetning',              baseline: '45 MNOK (2024)', mal_2029: 'andel av Bodø-scenario' },
+          { mal: 'Driftsmargin',           baseline: '7,5 %',          mal_2029: '≥ 7,5 %' },
+          { mal: 'Egenkapital',            baseline: '1,3 MNOK (2024)',mal_2029: '≥ 8 MNOK' },
+        ],
+        kunde: [
+          { mal: 'Hit-rate',               baseline: '75 %',           mal_2029: '≥ 80 %' },
+          { mal: 'Forsikrings­responstid',  baseline: 'ikke aktiv',     mal_2029: '≤ 24 t' },
+          { mal: 'Andel rammeavtaler',     baseline: '< 30 %',         mal_2029: '≥ 50 %' },
+        ],
+        prosess: [
+          { mal: 'Anbud time-to-tilbud',   baseline: '12 d snitt',     mal_2029: '≤ 8 d' },
+          { mal: 'Sesong­utjevning kapasitet', baseline: '−30 % vinter', mal_2029: '−15 % vinter' },
+          { mal: 'CoBrief-screening dekning', baseline: '0 %',         mal_2029: '100 %' },
+        ],
+        laering: [
+          { mal: 'Lærlinger maler',        baseline: '2',              mal_2029: '4' },
+          { mal: 'Sertifisering lav-VOC',  baseline: '0 av 28',        mal_2029: '12 av 28' },
+          { mal: 'Nøkkelpersonell-tap',    baseline: '0',              mal_2029: '0' },
+        ],
+      },
+    },
   },
 
   {
@@ -266,6 +500,104 @@ const SELSKAPER = [
     pipeline_kilder: ['Doffin', 'Mercell', 'TendSign', 'CoBrief', 'SA Forsikring', 'E-post'],
     rot_andel_pct: 55,
     nybygg_andel_pct: 15,
+
+    strategi: {
+      intensjon: 'Bli Trøndelags ledende totalrehab-aktør for offentlig sektor og forsikrings­skader — gjennom radikalt marginløft, kalkulasjons­disiplin og prosjekt­kontroll.',
+      intensjon_kort: 'Trøndelags ledende totalrehab-aktør',
+
+      swot: {
+        styrker: [
+          'Sterk EK 13,46 MNOK — solid finansieringskapasitet',
+          '32 ansatte (størst i SA-porteføljen) gir prosjektkapasitet',
+          'Bredde: snekker + total-rehab dekker større prosjekter',
+          'Trondheim-marked større enn Bodø (oms 22 mrd vs 6 mrd ROT)',
+          'Etablert med Forsvarsbygg og fylkeskommunale ramme',
+        ],
+        svakheter: [
+          'Kritisk lav driftsmargin 0,6 % — bør være 6 %+',
+          'Svak kalkulasjonsdisiplin: Lade barnehage 348 t / 25 % fremdrift',
+          'Pipeline 5,9 MNOK mot mål 18 MNOK (33 %)',
+          'Hit-rate 67 % under mål 70 %',
+          'Prosjekt-kontroll svak — minst én aktiv red-flagg',
+        ],
+        muligheter: [
+          'SA forsikringsstrøm 12–25 MNOK/år (Trondheim-segment)',
+          'Helse Midt-Norge RHF rammeavtale 2027–2030 (100 % match)',
+          'Innherred + Stjørdal-Fosen lite dekket av total-rehab-aktører',
+          'NTNU + St. Olavs hospital store ROT-volum',
+          'Marginløft fra 0,6 → 6 % gir +3 MNOK EBIT på samme volum',
+        ],
+        trusler: [
+          'Modulvegger Trøndelag aggressiv prising',
+          'Veidekke/NCC tar større rammer i Trondheim',
+          'Fagarbeider-konkurranse fra større aktører',
+          'Kontinuerlige prosjekt­avvik kan gi konsekvens­kostnader',
+          'Fortsatt lav margin tærer på solid EK over tid',
+        ],
+      },
+
+      pestel: [
+        { kat: 'Politikk / juridisk', tekst: 'TEK17, EU EPBD og nye energikrav driver total-rehab på offentlig bygg', tone: 'opp' },
+        { kat: 'Økonomi',             tekst: 'Igangsatte boliger Trøndelag −23 % siden 2020. ROT-marked stabilt', tone: 'flat' },
+        { kat: 'Sosialt',             tekst: 'Lærlingplikt og lokalt næringsliv-imperative i offentlig anbud', tone: 'opp' },
+        { kat: 'Teknologi',           tekst: 'BIM/VDC blir standard for total-rehab — krever investering, gir margin', tone: 'opp' },
+        { kat: 'Miljø',               tekst: 'Sirkulær ombruk, energi-rehab og passivhus-rehab vokser raskt', tone: 'opp' },
+      ],
+
+      horisonter: {
+        h1: {
+          tittel: 'Marginløft & disiplin',
+          periode: '2026',
+          fokus: 'Marginløft 0,6 → 5 %, kalkulasjons­program, prosjekt­kontroll, sikre Helse Midt-rammen.',
+          scenario: 'Base',
+        },
+        h2: {
+          tittel: 'Innherred + forsikring',
+          periode: '2027–2028',
+          fokus: 'Aktivere SA Forsikring, total-rehab spesialisering, Innherred-utvidelse, første oppkjøp.',
+          scenario: 'Offensiv',
+        },
+        h3: {
+          tittel: 'Skalering Midt-Norge',
+          periode: '2029+',
+          fokus: 'Hele Trøndelag + Møre/Romsdal-grenseland, 2–3 oppkjøp, ledende total-rehab-aktør.',
+          scenario: 'Bull',
+        },
+      },
+
+      initiativer: [
+        { nr: 1, navn: 'Marginløft 0,6 → 5 % (kalkulasjons­program)',     ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + kalkulator',       mal_2029: 'Margin ≥ 7 %',            scenario: 'Base+' },
+        { nr: 2, navn: 'Prosjekt­kontroll (timeforbruk vs plan)',          ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + PL',               mal_2029: 'Avvik ≤ 5 %',             scenario: 'Base+' },
+        { nr: 3, navn: 'Rammeavtale Helse Midt-Norge / NTNU',            ansoff: 'Markedspenetrasjon', horisont: 'H1–H2', ansvarlig: 'DL',                     mal_2029: '3 aktive ramme',          scenario: 'Base+' },
+        { nr: 4, navn: 'Forsikringsstrøm via SA',                          ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + SA Forsikring',    mal_2029: '12 MNOK forsikring',      scenario: 'Offensiv+' },
+        { nr: 5, navn: 'Total-rehab spesialisering (BIM-light)',           ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + kalkulator',       mal_2029: '18 MNOK pakkeomsetning',  scenario: 'Offensiv+' },
+        { nr: 6, navn: 'Innherred-utvidelse (Stjørdal/Fosen)',              ansoff: 'Markedsutvikling',   horisont: 'H2–H3', ansvarlig: 'DL + styre',             mal_2029: '1 satellitt-team',        scenario: 'Offensiv+' },
+        { nr: 7, navn: 'M&A 1 oppkjøp Innherred/Møre',                      ansoff: 'Diversifisering',    horisont: 'H3',    ansvarlig: 'SA-konsern + styre',    mal_2029: '1 fullført',              scenario: 'Offensiv+' },
+      ],
+
+      strategy_map: {
+        finansielt: [
+          { mal: 'Omsetning',              baseline: '58 MNOK (2024)', mal_2029: '77 / 102 MNOK (Base/Off)' },
+          { mal: 'Driftsmargin',           baseline: '0,6 %',          mal_2029: '5,5 % / 7,0 %' },
+          { mal: 'Egenkapital',            baseline: '13,5 MNOK (2024)', mal_2029: '≥ 18 MNOK' },
+        ],
+        kunde: [
+          { mal: 'Hit-rate',               baseline: '67 %',           mal_2029: '≥ 75 %' },
+          { mal: 'NPS',                    baseline: 'ikke målt',      mal_2029: '≥ 40' },
+          { mal: 'Andel rammeavtaler',     baseline: '< 20 %',         mal_2029: '≥ 35 %' },
+        ],
+        prosess: [
+          { mal: 'Prosjekt­margin-avvik',   baseline: '> 8 %',          mal_2029: '≤ 5 %' },
+          { mal: 'Kalkulasjons­presisjon',   baseline: '−5 %',           mal_2029: '±2 %' },
+          { mal: 'Red-flagg prosjekter',    baseline: '1 av 12',        mal_2029: '0 av aktive' },
+        ],
+        laering: [
+          { mal: 'Lærlinger',              baseline: 'ikke kartlagt',  mal_2029: '5' },
+          { mal: 'BIM/VDC-sertifisering',  baseline: '0 av 32',        mal_2029: '8 av 32' },
+          { mal: 'Nøkkelpersonell-tap',    baseline: '0',              mal_2029: '0' },
+        ],
+      },
+    },
   },
 ];
 
@@ -539,12 +871,38 @@ function getRegnskap2024(scope = null) {
 // SCENARIO-AGGREGERING (per by / konsern)
 // =====================================================================
 
+// Returner scenario-metadata (navn, cagr, margin, ansatte, kapital, beskrivelse)
+// for valgt scope. Foretrekker selskap-spesifikt base_case når relevant,
+// ellers faller tilbake til by-scenarioet.
+function getScenarioMetaForScope(scenario, scope = null) {
+  scope = scope || getActiveScope();
+  if (scope.type === 'selskap') {
+    const s = getSelskap(scope.id);
+    if (!s) return null;
+    const selskapScenario = scenario === 'base' ? s.base_case : null;
+    if (selskapScenario) return selskapScenario;
+    const by = BYER.find(b => b.id === s.by);
+    return by?.scenarioer?.[scenario] || null;
+  }
+  if (scope.type === 'by') {
+    return getBy(scope.id)?.scenarioer?.[scenario] || null;
+  }
+  return null; // konsern — aggregeres i UI
+}
+
 function getScenarioForScope(scenario, year, scope = null) {
   scope = scope || getActiveScope();
-  // Selskap: bruker by-scenarioet (fordi scenarioene er per by)
+  // Selskap: foretrekk selskap-spesifikt scenario (f.eks. Fritzøe sin base_case)
+  // hvis det finnes; ellers skaler by-scenarioet etter omsetnings-andel.
   if (scope.type === 'selskap') {
     const s = getSelskap(scope.id);
     if (!s) return { rot: 0, forsikring: 0, total: 0 };
+    const selskapScenario = scenario === 'base' ? s.base_case : null;
+    if (selskapScenario) {
+      const rot = selskapScenario[`rot_${year}`] || 0;
+      const forsikring = selskapScenario[`forsikring_${year}`] || 0;
+      return { rot, forsikring, total: rot + forsikring };
+    }
     const by = BYER.find(b => b.id === s.by);
     const sc = by?.scenarioer?.[scenario];
     if (!sc) return { rot: 0, forsikring: 0, total: 0 };
@@ -578,8 +936,11 @@ function getScenarioForScope(scenario, year, scope = null) {
 // =====================================================================
 // ROUTING — hvilken side hører til hvilken modul, gitt scope
 // =====================================================================
-// Sidebar bruker dette til å bygge riktige href-er
-function getRouteFor(modul, scope = null) {
+// Sidebar bruker dette til å bygge riktige href-er.
+// Strategi-modulene ligger i undermappa strategi/. Sider i den mappa
+// setter window.SA_BASE = '../' før denne fila lastes, slik at lenker
+// til rot-sider får riktig prefiks.
+function _routePath(modul, scope) {
   scope = scope || getActiveScope();
   const isTrondheim = scope.type === 'selskap' ? getSelskap(scope.id)?.by === 'trondheim'
     : scope.type === 'by' ? scope.id === 'trondheim' : false;
@@ -592,21 +953,32 @@ function getRouteFor(modul, scope = null) {
     case 'prosjekt': return 'prosjekt.html';
     case 'okonomi': return isTrondheim ? 'okonomi-trondheim.html' : 'okonomi.html';
     case 'bruksanvisning': return isTrondheim ? 'bruksanvisning-trondheim.html' : 'bruksanvisning.html';
-    case 'strategi': return 'strategi.html';
-    case 'scenario': return 'scenario.html';
-    case 'styrerapport': return 'styrerapport.html';
-    case 'ma-screening': return isTrondheim ? 'ma-screening-trondheim.html' : 'ma-screening-bodo.html';
-    case 'ma-kandidat': return 'ma-kandidat.html';
-    case 'ma-konsern': return 'ma-konsern.html';
+    case 'strategi': return 'strategi/strategi.html';
+    case 'strategi-doc': return 'strategi/strategi-doc.html';
+    case 'scenario': return 'strategi/scenario.html';
+    case 'styrerapport': return 'strategi/styrerapport.html';
+    case 'ma-screening': return isTrondheim ? 'strategi/ma-screening-trondheim.html' : 'strategi/ma-screening-bodo.html';
+    case 'ma-kandidat': return 'strategi/ma-kandidat.html';
+    case 'ma-konsern': return 'strategi/ma-konsern.html';
     case 'forsikring': return 'm9-konsekvens.html';
     case 'm5-poweroffice': return 'm5-konsekvens.html';
     case 'epc-satsing': return 'epc-konsekvens.html';
     case 'implementering': return 'implementering.html';
-    case 'bransjekart': return isTrondheim ? 'dashboard-trondheim.html' : 'dashboard.html';
-    case 'oversikt': return isTrondheim ? 'oversikt-trondheim.html' : 'oversikt.html';
-    case 'sa-rapport': return 'sa-rapport.html';
+    case 'bransjekart': return isTrondheim ? 'strategi/dashboard-trondheim.html' : 'strategi/dashboard.html';
+    case 'oversikt': return isTrondheim ? 'strategi/oversikt-trondheim.html' : 'strategi/oversikt.html';
+    case 'sa-rapport': return 'strategi/sa-rapport.html';
     default: return 'index.html';
   }
+}
+
+function getRouteFor(modul, scope = null) {
+  const base = (typeof window !== 'undefined' && window.SA_BASE) ? window.SA_BASE : '';
+  const path = _routePath(modul, scope);
+  // Hvis vi allerede er i strategi/ og lenken peker dit, drop omveien via roten
+  if (base === '../' && path.startsWith('strategi/')) {
+    return path.substring('strategi/'.length);
+  }
+  return base + path;
 }
 
 // =====================================================================

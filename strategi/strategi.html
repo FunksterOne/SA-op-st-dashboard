@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>Strategi — ServiceAlliansen Bygg</title>
-<link rel="stylesheet" href="style.css">
-<script src="theme.js"></script>
-<script src="selskaper.js"></script>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
 <style>
   :root, :root[data-theme="dark"] {
     --bg: #0e1116; --panel: #161b22; --panel-2: #1f2630; --panel-3: #262d38;
@@ -99,7 +100,7 @@
 </head>
 <body>
 
-<div data-sidebar data-active="strategi"></div>
+<div data-sidebar data-active="strategi" data-section="strategi"></div>
 
 <main class="main-content">
   <header class="page-header">
@@ -153,7 +154,7 @@
   </div>
 </main>
 
-<script src="sidebar.js"></script>
+<script src="../sidebar.js"></script>
 <script>
 function renderHeader() {
   const lbl = getScopeLabel();
@@ -219,10 +220,12 @@ function renderScenarios() {
       beskrivelse = sc.beskrivelse; cagr = sc.cagr_pct + ' % CAGR';
       kapital = sc.kapitalbehov; ansatte = sc.ansatte_2029; margin = sc.ebit_margin_2029_pct;
     } else if (scope.type === 'selskap') {
-      const s = getSelskap(scope.id);
-      const sc = getBy(s.by).scenarioer[name];
+      // Foretrekk selskap-spesifikt scenario (f.eks. Fritzøe sin base_case)
+      const sc = getScenarioMetaForScope(name, scope);
       beskrivelse = sc.beskrivelse; cagr = sc.cagr_pct + ' % CAGR';
-      kapital = sc.kapitalbehov; ansatte = '—'; margin = sc.ebit_margin_2029_pct;
+      kapital = sc.kapitalbehov;
+      ansatte = sc.ansatte_2029 ?? '—';
+      margin = sc.ebit_margin_2029_pct;
     } else {
       // Konsern: gjennomsnitt
       const cagrs = BYER.map(b => b.scenarioer[name].cagr_pct);
