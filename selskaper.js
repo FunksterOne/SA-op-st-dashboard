@@ -48,7 +48,7 @@ const KONSERN = {
     swot: {
       styrker: [
         '3 selskaper · 175 MNOK omsetning · 91 ansatte (2024-baseline)',
-        'Storvik-konsern (Fritzøe+Areal) er rang #2 i Bodø ROT-marked på 2 346 MNOK',
+        'Fritzøe + Areal samlet er rang #2 i Bodø ROT-marked på 2 346 MNOK',
         'Komplementære fagprofiler dekker bredt ROT-spekter — 90 %+ av offentlig + forsikring',
         'Felles styreleder og governance-struktur',
         'Eksisterende forsikrings­avtaler med Gjensidige/If/Tryg/Fremtind',
@@ -215,7 +215,7 @@ const SELSKAPER = [
       swot: {
         styrker: [
           'Markedsrang #2 i Bodø ROT (Fritzøe+Areal samlet) — kun GJ Bygg over (ROT-justert)',
-          'EBITDA 8,2 % (Storvik-konsern) klart over bransjesnittet — 3 av 9 byggmestere hadde tap 2024',
+          'EBITDA 8,2 % (Fritzøe + Areal samlet) klart over bransjesnittet — 3 av 9 byggmestere hadde tap 2024',
           'Markedsandel 4,4–5,0 % med vekst +46 % vs marked +28 % (2020–2024) — tar markedsandeler',
           'ROT-andel 65 % — beskyttet mot konjunktur (mens nybygg-volum NACE 41 falt −7,2 % i 2024)',
           '5 lærlinger av 31 — aktivt opplæringsmiljø i et marked med −14 % ROT-sysselsatte siden 2019',

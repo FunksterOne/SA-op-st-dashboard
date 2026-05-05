@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ROT-markedsmodell — Bodø 2025</title>
+<link rel="stylesheet" href="../style.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
 /* Console-polyfill — må kjøre FØR Chart.js. Enkelte kjøremiljøer
@@ -22,15 +23,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root, :root[data-theme="light"] {
+  /* Synkronisert med portalens lyse palett (style.css) for koordinerte
+     paneler mellom sidebar/topbar og rapportens egne kort. */
   --bg:       #ffffff;
-  --bg2:      #f5f5f4;
-  --bg3:      #eeede9;
-  --border:   #e5e4df;
-  --border2:  #d6d4cc;
-  --border3:  #eae9e4;
-  --text:     #1a1915;
-  --text2:    #6b6962;
-  --text3:    #9b9890;
+  --bg2:      #f5f7fa;
+  --bg3:      #eaeef3;
+  --border:   #d8dde5;
+  --border2:  #c8cfdb;
+  --border3:  #dde3ec;
+  --text:     #1a1f29;
+  --text2:    #6b7380;
+  --text3:    #9aa3b1;
   --green:    #1a6b3c;
   --green-bg: #E1F5EE;
   --blue:     #185FA5;
@@ -48,11 +51,12 @@
   --c4:#534AB7; --c5:#888780; --c6:#D85A30; --c7:#EF9F27;
 }
 :root[data-theme="dark"] {
+  /* Synkronisert med portalens mørke palett (style.css). */
   --bg:       #0e1116;
   --bg2:      #161b22;
   --bg3:      #1f2630;
   --border:   #2a313c;
-  --border2:  #3a414c;
+  --border2:  #353d4a;
   --border3:  #262d38;
   --text:     #e6edf3;
   --text2:    #8b95a3;
@@ -390,7 +394,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);
       <thead><tr><th>#</th><th>Selskap</th><th class="r">Ans.</th><th class="r">Omsetn. 2024</th><th class="r">EBITDA</th><th class="r">Res. f. skatt</th><th>Stiftet</th><th>Status</th></tr></thead>
       <tbody>
         <tr><td class="ht">01</td><td><div class="nm">Gunvald Johansen Bygg AS</div><div class="ht">Bodø · GJ-konsernet · Totalentreprenør #1 · Total omsetn. 393 mill. — herav 67 % nybygg / 33 % ROT</div></td><td class="r mn">22 <span class="ht">(ROT)</span></td><td class="r mn">130 mill. <span class="ht">(ROT)</span></td><td class="r"><span class="pos">4,7 %</span></td><td class="r mn pos">5,6 mill.</td><td class="ht">2004</td><td><span class="b b-am">67 % nybygg</span></td></tr>
-        <tr class="sto"><td class="ht" style="color:var(--green)">02</td><td><div class="nm" style="color:var(--green)">Fritzøe + Areal (Storvik) <span class="stag">▲ PRIMÆR</span></div><div class="ht">Byggmester Fritzøe AS + Areal Byggservice AS · Påls vei 1B · 59 ans. samlet</div></td><td class="r mn">59</td><td class="r mn">117 mill.</td><td class="r"><span class="pos">8,2 %</span></td><td class="r mn pos">9,2 mill.</td><td class="ht">2002/11</td><td><span class="b b-gr">ROT-ledende</span></td></tr>
+        <tr class="sto"><td class="ht" style="color:var(--green)">02</td><td><div class="nm" style="color:var(--green)">Fritzøe + Areal <span class="stag">▲ PRIMÆR</span></div><div class="ht">Byggmester Fritzøe AS + Areal Byggservice AS · Påls vei 1B · 59 ans. samlet</div></td><td class="r mn">59</td><td class="r mn">117 mill.</td><td class="r"><span class="pos">8,2 %</span></td><td class="r mn pos">9,2 mill.</td><td class="ht">2002/11</td><td><span class="b b-gr">ROT-ledende</span></td></tr>
         <tr><td class="ht">03</td><td><div class="nm">Fasaderenovering AS</div><div class="ht">Bodø · Fasadespesialist</div></td><td class="r mn">31</td><td class="r mn">49 mill.</td><td class="r"><span class="pos">1,1 %</span></td><td class="r mn pos">0,5 mill.</td><td class="ht">2007</td><td><span class="b b-gy">Spesialist</span></td></tr>
         <tr><td class="ht">04</td><td><div class="nm">Byggproffen Bodø AS</div></td><td class="r mn">26</td><td class="r mn">48 mill.</td><td class="r"><span class="pos">2,3 %</span></td><td class="r mn neg">–1,0 mill.</td><td class="ht">2019</td><td><span class="b b-gy">Aktiv</span></td></tr>
         <tr><td class="ht">05</td><td><div class="nm">Byggmester Erling Skipnes AS</div></td><td class="r mn">21</td><td class="r mn">49 mill.</td><td class="r"><span class="neg">–3,4 %</span></td><td class="r mn neg">–0,8 mill.</td><td class="ht">1996</td><td><span class="b b-rd">Underskudd</span></td></tr>
