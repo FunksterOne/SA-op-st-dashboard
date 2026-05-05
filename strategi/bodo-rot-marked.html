@@ -226,16 +226,24 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);
 <script src="../selskaper.js"></script>
 <style>
   /* Tilpass rapportens layout for å koeksistere med portalens sidebar/topbar.
-     Sidebar er fixed left 248px, topbar er sticky øverst. Rapportens egne body-
-     padding nullstilles slik at topbar og rapport-header møtes uten luft. */
+     Match portalens horisontale padding (32px) og header-topp-luft (22px) for
+     konsistent vertikal og horisontal margin på tvers av sider. */
   body.has-sidebar {
     padding-left: 248px !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
   }
-  body.has-sidebar .page { padding-top: 0; padding-bottom: 24px }
+  body.has-sidebar .page {
+    max-width: 1280px;
+    padding: 0 32px 24px;
+  }
+  body.has-sidebar .hdr {
+    padding: 22px 0 16px;
+    margin-bottom: 18px;
+  }
   @media (max-width: 900px) {
     body.has-sidebar { padding-left: 0 !important; }
+    body.has-sidebar .page { padding: 0 16px 24px }
   }
 </style>
 </head>
