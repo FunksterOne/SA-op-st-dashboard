@@ -131,6 +131,11 @@ const SELSKAPER = [
     //   horisonter        — h1/h2/h3 (Three Horizons)
     //   initiativer       — strategiske tiltak med status og fremdrift
     //   strategy_map      — Balanced Scorecard (finansielt/kunde/prosess/læring)
+    //
+    // MERK: Markørene under brukes av Vercel-funksjonen (api/push-strategi.js)
+    // til å finne og erstatte blokken når DL pusher via form-editoren.
+    // IKKE FJERN dem eller endre formatet.
+    // strategi-start: byggmester-fritzoe
     strategi: {
       utkast_status: 'utkast',
       sist_endret: '2026-04-30',
@@ -234,6 +239,7 @@ const SELSKAPER = [
         ],
       },
     },
+    // strategi-end: byggmester-fritzoe
 
     // Strategi: Base case som uavhengig fundament for Fritzøe.
     // 5 %, samt forventet KPI årlig vekst på omsetning, lønnsomhet konstant 7,7 %, bemanning uendret.
@@ -372,6 +378,7 @@ const SELSKAPER = [
     // === STRATEGI — DAGLIG LEDER EIER DENNE BLOKKEN ===
     // DL: Brynjar Storvik (felles med Byggmester Fritzøe). Editer
     // feltene direkte. Se file-headeren for full beskrivelse av feltene.
+    // strategi-start: areal-byggservice
     strategi: {
       utkast_status: 'utkast',
       sist_endret: '2026-04-30',
@@ -475,6 +482,7 @@ const SELSKAPER = [
         ],
       },
     },
+    // strategi-end: areal-byggservice
   },
 
   {
@@ -559,6 +567,7 @@ const SELSKAPER = [
     // === STRATEGI — DAGLIG LEDER EIER DENNE BLOKKEN ===
     // DL: Øyvind Berggren. Editer feltene direkte. Se file-headeren
     // for full beskrivelse av feltene.
+    // strategi-start: braa-sorvaag-bygg
     strategi: {
       utkast_status: 'utkast',
       sist_endret: '2026-04-30',
@@ -660,6 +669,7 @@ const SELSKAPER = [
         ],
       },
     },
+    // strategi-end: braa-sorvaag-bygg
   },
 ];
 
@@ -1176,23 +1186,27 @@ const REPO_DEV_URL  = 'https://github.dev/FunksterOne/SA-op-st-dashboard/blob/ma
 
 function renderEditStrategiCta(selskap) {
   if (!selskap) return '';
+  // Bestem URL til form-editoren basert på hvilken side vi er på
+  const base = (typeof window !== 'undefined' && window.SA_BASE) ? window.SA_BASE : '';
+  const editorUrl = base === '../' ? 'strategi-rediger.html' : base + 'strategi/strategi-rediger.html';
   return `
     <div class="edit-strategi-cta">
       <div class="esc-body">
         <div class="esc-title">Editer denne strategien</div>
         <div class="esc-text">
-          Åpne <code>selskaper.js</code> og søk (Ctrl+F / Cmd+F) etter <code>${selskap.id}</code>.
-          Finn blokken <code>strategi: { ... }</code> og editer feltene.
-          Husk å oppdatere <code>sist_endret</code> og endre <code>utkast_status</code>
-          til <code>'validert'</code> når du står for innholdet.
+          Klikk under for å åpne form-editoren. Du editerer alle felter i et vanlig skjema —
+          ingen JS-syntaks å håndtere. Trenger DL-passord (fra Halvard) for å pushe direkte til main.
+          <br><br>
+          For avansert redigering kan du åpne <code>selskaper.js</code> i GitHub-editoren og endre direkte
+          (søk på <code>${selskap.id}</code>).
         </div>
       </div>
       <div class="esc-actions">
-        <a class="esc-btn esc-btn-primary" href="${REPO_EDIT_URL}" target="_blank" rel="noopener">
-          Åpne i GitHub-editor →
+        <a class="esc-btn esc-btn-primary" href="${editorUrl}">
+          Editer i skjema →
         </a>
-        <a class="esc-btn esc-btn-secondary" href="${REPO_DEV_URL}" target="_blank" rel="noopener">
-          Åpne i github.dev (VS Code)
+        <a class="esc-btn esc-btn-secondary" href="${REPO_EDIT_URL}" target="_blank" rel="noopener">
+          Editer i GitHub-editor
         </a>
       </div>
     </div>
