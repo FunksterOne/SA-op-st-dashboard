@@ -25,3 +25,4 @@ node_modules/
 *-light.png
 *-dark.png
 *-fresh.png
+.vercel
