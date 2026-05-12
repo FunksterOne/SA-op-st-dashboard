@@ -114,6 +114,9 @@
 
   <div class="container">
 
+    <!-- Utkast-banner (settes via JS når scope er selskap) -->
+    <div id="draft-banner"></div>
+
     <!-- Sammendrag 2024-tall -->
     <div class="summary-row" id="summary-row"></div>
 
@@ -292,8 +295,14 @@ function renderMarket() {
   `;
 }
 
+function renderDraftBanner() {
+  const s = getStrategiForScope();
+  document.getElementById('draft-banner').innerHTML = renderStrategiDraftBanner(s);
+}
+
 function refresh() {
   renderHeader();
+  renderDraftBanner();
   renderSummary();
   renderScenarios();
   renderMarket();

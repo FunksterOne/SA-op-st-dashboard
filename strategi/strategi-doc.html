@@ -223,28 +223,26 @@ function init() {
   const s = getStrategiForScope(scope);
   if (!s) {
     if (scope.type === 'by') {
-      renderEmpty(content, scope, 'Strategi-dokument på by-nivå er ikke etablert. Velg et selskap eller konsern fra scope-velgeren.');
+      renderEmpty(content, scope, 'Strategi-dokument er per-selskap. Velg et selskap fra scope-velgeren.');
     } else {
       renderEmpty(content, scope, 'Strategi-dokumentet er ikke etablert for valgt scope ennå.');
     }
     return;
   }
 
-  // Sett header — håndter både selskap og konsern
+  // Sett header (kun selskap-scope kommer hit, ettersom getStrategiForScope
+  // returnerer null for by-scope)
   const lbl = getScopeLabel(scope);
   document.getElementById('ph-title').textContent = `Strategi-dokument — ${lbl.label}`;
   document.getElementById('ph-title').style.color = lbl.farge;
-  if (scope.type === 'selskap') {
-    const selskap = getSelskap(scope.id);
-    document.getElementById('ph-sub').textContent =
-      `${selskap.lokasjon.by} · ${selskap.regnskap_2024.ansatte} ansatte · ${selskap.fagprofil}`;
-  } else {
-    const r = getRegnskap2024(scope);
-    document.getElementById('ph-sub').textContent =
-      `Konsern-strategi · ${r.n} selskap · ${r.ansatte} ansatte · ${r.omsetning_mnok.toFixed(0)} MNOK omsetning 2024`;
-  }
+  const selskap = getSelskap(scope.id);
+  document.getElementById('ph-sub').textContent =
+    `${selskap.lokasjon.by} · ${selskap.regnskap_2024.ansatte} ansatte · ${selskap.fagprofil}`;
 
   let html = '';
+
+  // 0. Utkast-banner — vises alltid mens utkast_status ≠ 'vedtatt'
+  html += renderStrategiDraftBanner(s);
 
   // 1. Strategisk intensjon
   html += `

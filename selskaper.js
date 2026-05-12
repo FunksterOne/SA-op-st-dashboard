@@ -1,12 +1,36 @@
 // =====================================================================
-// SELSKAPER.JS — Multi-tenant datamodell for ServiceAlliansen-portefølje
+// SELSKAPER.JS — Datamodell for ServiceAlliansens tre porteføljeselskaper
 // =====================================================================
 // Modell:
-//   - 3 separate datterselskap, alle direkte eid av ServiceAlliansen
-//   - Dimensjoner: SELSKAP / BY / KONSERN
+//   - 3 selvstendige selskaper, alle eid av ServiceAlliansen
+//   - Hvert selskap eier sin egen strategi (ingen aggregering på tvers)
+//   - Dimensjoner: SELSKAP / BY (Bodø grupperer Fritzøe + Areal)
 //   - Aktivt valg lagres som { type, id } i localStorage
 //
 // Tall: Brreg regnskapsregister 2024 (verifisert).
+//
+// ===== TIL DAGLIG LEDER — HVORDAN REDIGERE EGEN STRATEGI =====
+//
+// 1. Finn selskapets blokk i `SELSKAPER`-arrayet under:
+//      - Byggmester Fritzøe:   søk på 'id: \'byggmester-fritzoe\''
+//      - Areal Byggservice:    søk på 'id: \'areal-byggservice\''
+//      - Braa og Sørvåg Bygg:  søk på 'id: \'braa-sorvaag-bygg\''
+//
+// 2. Editer feltene under `strategi: { ... }`-blokken direkte.
+//    Feltene er forklart i kommentaren over hver strategi-blokk.
+//
+// 3. Når du har gjort endringer:
+//      - Oppdater `strategi.sist_endret` til dagens dato (YYYY-MM-DD)
+//      - Sett `strategi.sist_endret_av` til ditt navn
+//      - Endre `strategi.utkast_status`:
+//          'utkast'    — utgangsforslag (fra portal-eier, ikke validert av DL)
+//          'validert'  — DL står for innholdet
+//          'vedtatt'   — strategien er behandlet og godkjent av styret
+//
+// 4. Lagre filen. Endringene vises automatisk på strategi-sidene neste gang
+//    du åpner dashboardet (eller refresh F5).
+//
+// Tips: Hold strukturen identisk. Editer tekst og tall — ikke fjerne felter.
 // =====================================================================
 
 const KONSERN = {
@@ -92,9 +116,26 @@ const SELSKAPER = [
       total: 31,
     },
 
-    // Strategi-dokument — situasjonsanalyse, horisonter, initiativer, målbilde.
-    // Brukes av strategi/strategi-doc.html.
+    // === STRATEGI — DAGLIG LEDER EIER DENNE BLOKKEN ===
+    // DL: Brynjar Storvik. Editer feltene direkte og oppdater
+    // sist_endret + utkast_status når du gjør endringer.
+    //
+    // Felter:
+    //   utkast_status     — 'utkast' | 'validert' | 'vedtatt'
+    //   sist_endret       — dato i format YYYY-MM-DD
+    //   sist_endret_av    — ditt navn
+    //   intensjon         — én setning som beskriver hvor selskapet skal
+    //   intensjon_kort    — 3–5 ord til header
+    //   swot              — { styrker, svakheter, muligheter, trusler }
+    //   pestel            — 5 punkter med kat/tekst/tone (opp|ned|flat)
+    //   horisonter        — h1/h2/h3 (Three Horizons)
+    //   initiativer       — strategiske tiltak med status og fremdrift
+    //   strategy_map      — Balanced Scorecard (finansielt/kunde/prosess/læring)
     strategi: {
+      utkast_status: 'utkast',
+      sist_endret: '2026-04-30',
+      sist_endret_av: 'Halvard Nordang (portal-eier)',
+
       intensjon: 'Bli Saltens foretrukne ROT-partner for offentlig sektor, forsikringsskader og borettslag — gjennom fagdyktig håndverk, leveringssikkerhet og SA-konsernsynergier.',
       intensjon_kort: 'Saltens foretrukne ROT-partner',
 
@@ -328,7 +369,14 @@ const SELSKAPER = [
     rot_andel_pct: 58,
     nybygg_andel_pct: 0,
 
+    // === STRATEGI — DAGLIG LEDER EIER DENNE BLOKKEN ===
+    // DL: Brynjar Storvik (felles med Byggmester Fritzøe). Editer
+    // feltene direkte. Se file-headeren for full beskrivelse av feltene.
     strategi: {
+      utkast_status: 'utkast',
+      sist_endret: '2026-04-30',
+      sist_endret_av: 'Halvard Nordang (portal-eier)',
+
       intensjon: 'Bli Saltens foretrukne maler- og overflate­leverandør for forsikrings­skader, offentlig sektor og borettslag — gjennom rask responstid, høy hit-rate og spisset fagkompetanse.',
       intensjon_kort: 'Saltens spissede overflate­spesialist',
 
@@ -508,7 +556,14 @@ const SELSKAPER = [
     rot_andel_pct: 55,
     nybygg_andel_pct: 15,
 
+    // === STRATEGI — DAGLIG LEDER EIER DENNE BLOKKEN ===
+    // DL: Øyvind Berggren. Editer feltene direkte. Se file-headeren
+    // for full beskrivelse av feltene.
     strategi: {
+      utkast_status: 'utkast',
+      sist_endret: '2026-04-30',
+      sist_endret_av: 'Halvard Nordang (portal-eier)',
+
       intensjon: 'Bli Trøndelags ledende totalrehab-aktør for offentlig sektor og forsikrings­skader — gjennom radikalt marginløft, kalkulasjons­disiplin og prosjekt­kontroll.',
       intensjon_kort: 'Trøndelags ledende totalrehab-aktør',
 
@@ -993,6 +1048,35 @@ function getRouteFor(modul, scope = null) {
     return path.substring('strategi/'.length);
   }
   return base + path;
+}
+
+// =====================================================================
+// STRATEGI-UTKAST-BANNER — kalles fra strategi-sider med selskap.strategi
+// =====================================================================
+// Returnerer HTML for et banner som forteller leseren om strategien er
+// utkast, validert av DL, eller vedtatt av styret. Returnerer tom streng
+// hvis strategien er 'vedtatt' (da vises ingen banner).
+function renderStrategiDraftBanner(strategi) {
+  if (!strategi) return '';
+  const status = strategi.utkast_status || 'utkast';
+  if (status === 'vedtatt') return '';
+  const dato = strategi.sist_endret || '—';
+  const av = strategi.sist_endret_av || '—';
+  let melding;
+  if (status === 'validert') {
+    melding = `Strategien er validert av daglig leder. Venter behandling i styret.`;
+  } else {
+    melding = `Dette er et utgangsforslag fra portal-eier. Daglig leder må gå gjennom innholdet, justere og deretter sette <code>utkast_status</code> til <code>validert</code> i <code>selskaper.js</code>.`;
+  }
+  return `
+    <div class="strategi-draft-banner" data-status="${status}">
+      <span class="sdb-status">${status}</span>
+      <div class="sdb-body">
+        <div class="sdb-title">${melding}</div>
+        <div class="sdb-meta">Sist endret ${dato} av ${av}</div>
+      </div>
+    </div>
+  `;
 }
 
 // =====================================================================

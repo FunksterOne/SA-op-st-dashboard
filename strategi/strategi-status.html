@@ -250,6 +250,9 @@ function init() {
 
   let html = '';
 
+  // 0. Utkast-banner
+  html += renderStrategiDraftBanner(s);
+
   // 1. Sammendrag-stripe — antall per status
   const counts = countByStatus(s.initiativer);
   html += `

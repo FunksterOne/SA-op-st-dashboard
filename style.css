@@ -414,3 +414,36 @@ button { font: inherit; }
   .sa-hide-print { display: none !important }
   .sa-topbar { display: none !important }
 }
+
+/* --- 14. Strategi-utkast-banner --------------------------------------- */
+.strategi-draft-banner {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 18px; margin: 0 0 18px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-left: 4px solid var(--warn);
+  border-radius: 8px;
+  font-size: 13px; line-height: 1.5;
+}
+.strategi-draft-banner[data-status="validert"] { border-left-color: var(--hi) }
+.strategi-draft-banner[data-status="vedtatt"]  { border-left-color: var(--good) }
+.strategi-draft-banner .sdb-status {
+  flex: 0 0 auto;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 4px;
+  background: var(--warn); color: #0e1116;
+  align-self: center;
+}
+.strategi-draft-banner[data-status="validert"] .sdb-status { background: var(--hi); color: #fff }
+.strategi-draft-banner[data-status="vedtatt"]  .sdb-status { background: var(--good); color: #0e1116 }
+.strategi-draft-banner .sdb-body { flex: 1 1 auto }
+.strategi-draft-banner .sdb-title {
+  font-weight: 600; color: var(--text); margin-bottom: 2px;
+}
+.strategi-draft-banner .sdb-meta {
+  color: var(--muted); font-size: 12px;
+}
+.strategi-draft-banner code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px; padding: 1px 5px; border-radius: 3px;
+  background: var(--panel-3); color: var(--text);
+}
