@@ -405,7 +405,6 @@ function build() {
     let beskr = '';
     if (scope.type === 'by') beskr = getBy(scope.id).scenarioer[name].beskrivelse;
     else if (scope.type === 'selskap') beskr = getBy(getSelskap(scope.id).by).scenarioer[name].beskrivelse;
-    else beskr = `Aggregert ${name}-scenario for konsernet (Bodø + Trondheim).`;
     const ttl = name === 'base' ? 'Base' : name === 'offensiv' ? 'Offensiv' : 'Bull';
     scHtml += `<div class="sc-card s-${name}">
       <h3>${ttl}</h3>
@@ -426,7 +425,7 @@ function build() {
   } else if (avgMargin != null && avgMargin > 8) {
     anbef += `Styret konstaterer at margin er over plan og vurderer akselerering av offensiv-banen i Q2. `;
   }
-  anbef += `For neste kvartal anbefales fortsatt aktiv pipeline-styring mot rammeavtaler, samt at SA-konsernet vurderer kapitaltilskudd ved endelig valg av offensiv-banen.`;
+  anbef += `For neste kvartal anbefales fortsatt aktiv pipeline-styring mot rammeavtaler, samt at eier vurderer kapitaltilskudd ved endelig valg av offensiv-banen.`;
   document.getElementById('anbefaling').textContent = anbef;
 }
 

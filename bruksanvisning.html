@@ -170,7 +170,7 @@
 <header class="top">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
     <div>
-      <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a> · <a href="bruksanvisning-trondheim.html">Braa og Sørvåg →</a></div>
+      <div class="crumb"><a href="index.html">← Operativt og strategisk dashboard</a></div>
       <h1>Bruksanvisning — Byggmester Fritzøe</h1>
       <div class="sub">
         Tre brukerroller, tre rytmer. Daglig leder kjører pipelinen daglig, styret tar strategiske beslutninger kvartalsvis, ServiceAlliansen-konsernet rapporteres månedlig og kvartalsvis. Denne siden er en oppskrift for hver rolle på <i>hvilken side de starter på, hvilke handlinger de gjør, og hva som er output</i>.
@@ -188,7 +188,6 @@
     <li><a href="#dl">For daglig leder — daglig drift</a></li>
     <li><a href="#dl-tilbud">Håndtering av e-post-tilbud (drag-and-drop)</a></li>
     <li><a href="#styre">For styret — kvartalsmøte</a></li>
-    <li><a href="#sa">For ServiceAlliansen — konsernrapportering</a></li>
     <li><a href="#quickref">Quick reference — alle sider</a></li>
   </ul>
 </div>
@@ -471,22 +470,15 @@
       <div class="step-num">3</div>
       <div class="step-content">
         <h4>Punkt 3 (15 min): Beslutning og lagring</h4>
-        <p>Bli enig om hvilket scenario som skal kommuniseres til SA-konsernet og være rettesnor til neste møte. Skriv inn navn (f.eks. «Q2 2026 — vedtatt offensiv med Salten-fokus») og klikk «Lagre scenario». Scenario lagres lokalt og reflekteres i oversikt.html og sa-rapport.html.</p>
+        <p>Bli enig om hvilket scenario som skal være rettesnor til neste møte. Skriv inn navn (f.eks. «Q2 2026 — vedtatt offensiv med Salten-fokus») og klikk «Lagre scenario». Scenario lagres lokalt og reflekteres i oversikt.html.</p>
       </div>
     </div>
   </div>
 
   <div class="steps">
-    <h3>Etter møtet — distribusjon <span class="freq-badge quarterly">10 min</span></h3>
+    <h3>Etter møtet — oppfølging <span class="freq-badge quarterly">10 min</span></h3>
     <div class="step-row">
       <div class="step-num">1</div>
-      <div class="step-content">
-        <h4>Generér SA-konsernrapport</h4>
-        <p>Åpne <a href="strategi/sa-rapport.html">sa-rapport.html</a>. Strategisk-seksjonen reflekterer det vedtaket styret nettopp lagret. Send lenken til SA-COO og SA-styret.</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">2</div>
       <div class="step-content">
         <h4>Følg opp til neste møte</h4>
         <p>Triggere som ble identifisert (f.eks. «hit-rate &gt;70 % stabilt») må følges via DL ukentlig. Hvis triggere bryter — DL eskalerer til styreleder før neste planlagte møte.</p>
@@ -501,93 +493,6 @@
       <li>Hvis vi ligger &gt;10 % under valgt bane to halvår på rad: vurder å trekke seg tilbake (offensiv → base, eller bull → offensiv).</li>
       <li>Hvis triggere for eskalering oppfylles: vurder å gå opp ett trinn (base → offensiv).</li>
       <li>Ved hver halvårlig revurdering: lagre nytt scenario, ny merkelapp (f.eks. «H1 2027 — bekreftet offensiv»).</li>
-    </ul>
-  </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- SERVICEALLIANSEN                                              -->
-<!-- ============================================================ -->
-<section class="role-section sa" id="sa">
-  <div class="head">
-    <h2>Slik bruker ServiceAlliansen-konsernet dashboardet</h2>
-    <span class="who">Konsernrapportering · SA-COO + SA-styret</span>
-  </div>
-  <div class="lead">
-    SA har to grensesnitt mot Byggmester Fritzøe: SA-COO som følger drift månedlig, og SA-styret som tar konsernbeslutninger kvartalsvis. Begge får all informasjon de trenger fra to dashboard-sider som er tilgjengelig direkte i nettleseren.
-  </div>
-
-  <div class="steps">
-    <h3>SA-COO — månedlig <span class="freq-badge monthly">Månedlig · 3. virkedag</span></h3>
-    <div class="step-row">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <h4>Mottar én-side oversikt fra DL via e-post</h4>
-        <p>DL genererer fra <a href="strategi/oversikt.html">oversikt.html</a> 3. virkedag etter månedslutt. Inneholder operativ status, økonomi, strategisk fremdrift og implementerings-progress.</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <h4>Sammenlign mot SA-portefølje-snitt</h4>
-        <p>Åpne <a href="strategi/sa-rapport.html">sa-rapport.html</a> som har dedikert peer-comparison-tabell (avsnitt 3): Fritzøe+Areal vs SA-snitt vs SA-best på lønnsomhet, vekst, hit-rate, EK-andel, ROT-andel, ordrebok.</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <h4>Identifisér grønne / gule / røde lamper</h4>
-        <p>SA-rapportens «eksekutiv ampel» (avsnitt 1) er bygget for dette: 6 dimensjoner med fargekoding. Røde lamper → ring DL samme dag. Gule → ta opp på månedlig portefølje-møte.</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <h4>Allokér konsernressurser ved behov</h4>
-        <p>Hvis Fritzøe trenger UE-hjelp, vurder om SA-søsterselskap har ledig kapasitet. Hvis margin er presset på materialer, sjekk konsern-innkjøpsavtaler.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="steps">
-    <h3>SA-styret — kvartalsvis <span class="freq-badge quarterly">Kvartalsvis · etter Q-rapport</span></h3>
-    <div class="step-row">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <h4>Mottar to-siders SA-konsernrapport</h4>
-        <p><a href="strategi/sa-rapport.html">sa-rapport.html</a> — inneholder finansiell oversikt, operativ status, strategisk milepæler og kritisk: <i>Asks</i> (hva selskapet trenger fra SA-konsernet for å eksekvere strategien).</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <h4>Diskutér Asks-seksjonen (avsnitt 8)</h4>
-        <p>Beslutninger SA må ta: kapital-allokering for M&amp;A, Mercell Enterprise på konsernnivå, bekreftelse av strategi-bane, felles innkjøpsavtaler.</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <h4>Vurder synergi-muligheter (avsnitt 7)</h4>
-        <p>Seks konkrete områder for porteføljesynergi. SA-styret avgjør prioritet og tildeler eierskap (typisk SA-COO eller dedikert konsernsjef).</p>
-      </div>
-    </div>
-    <div class="step-row">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <h4>Bekreft eller juster strategisk bane</h4>
-        <p>Strategisk-seksjonen viser hvilket scenario styret har valgt + YTD-bane. SA kan be om revurdering hvis konsern-perspektivet tilsier annet enn lokalt-perspektivet.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="summary-box">
-    <h4>Hvorfor dette er forskjellig fra typisk konsernrapportering</h4>
-    <ul>
-      <li>Live data, ikke månedsgammel utskrift — alle tall kommer fra PowerOffice Go i sanntid.</li>
-      <li>Standardisert sammenligning med portefølje — peer-dot-visualisering gjør avvik tydelig på sekunder.</li>
-      <li>Kontant Asks-seksjon — fjerner usikkerhet om hva selskapet faktisk trenger fra konsernet.</li>
-      <li>Strategisk bane som <i>delt artefakt</i> — styret og SA-styret ser samme valgte scenario, ikke hver sin tolkning.</li>
     </ul>
   </div>
 </section>
@@ -617,8 +522,7 @@
         <tr><td><a href="okonomi.html">okonomi.html</a></td><td>DL</td><td>Ukentlig</td><td>Live regnskap, prosjekt-margin, timeføring, lønn (PowerOffice Go).</td></tr>
         <tr><td><a href="strategi/dashboard.html">dashboard.html</a></td><td>Styret + DL</td><td>Kvartalsvis</td><td>Konkurrentbilde i Bodø, M&amp;A-screening, soliditet av peers.</td></tr>
         <tr><td><a href="implementering.html">implementering.html</a></td><td>DL + Styret + SA</td><td>Månedlig</td><td>14-uker Gantt, beta-spor, kostnader, beslutningspunkter.</td></tr>
-        <tr><td><a href="strategi/oversikt.html">oversikt.html</a></td><td>DL → SA-COO</td><td>Ukentlig (mandag)</td><td>Print-vennlig én-side med alle fire dimensjoner.</td></tr>
-        <tr><td><a href="strategi/sa-rapport.html">sa-rapport.html</a></td><td>Styret → SA-styret</td><td>Kvartalsvis</td><td>To-siders SA-konsernformat med peer-comparison og Asks.</td></tr>
+        <tr><td><a href="strategi/oversikt.html">oversikt.html</a></td><td>DL → Styret</td><td>Ukentlig (mandag)</td><td>Print-vennlig én-side med alle fire dimensjoner.</td></tr>
         <tr><td><a href="bruksanvisning.html">bruksanvisning.html</a></td><td>Alle nye brukere</td><td>Onboarding</td><td>Du leser den nå.</td></tr>
       </tbody>
     </table>

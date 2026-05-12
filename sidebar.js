@@ -51,7 +51,6 @@
       { id: 'strategi',        icon: '↗', label: 'Vekst-scenarier',   page: 'Vekst-scenarier' },
       { id: 'styrerapport',    icon: '◧', label: 'Styrerapport',      page: 'Styrerapport (kvartal)' },
       { id: 'ma-screening',    icon: '+', label: 'M&A-screening',     page: 'M&A-screening' },
-      { id: 'ma-konsern',      icon: '⊞', label: 'M&A konsern',       page: 'M&A konsern' },
     ]},
     { section: 'Implementering', mode: MODE_IMPL, part: 'operativ', items: [
       { id: 'implementering',  icon: '⚙', label: 'Teknisk plan',     page: 'Teknisk implementering' },
@@ -60,9 +59,8 @@
       { id: 'epc-satsing',     icon: '⊕', label: 'EPC-satsing',       page: 'EPC-satsing — konsekvens' },
     ]},
     { section: 'Markedsdata', mode: MODE_REFERANSE, part: 'strategi', items: [
-      { id: 'bransjekart',     icon: '·', label: 'ROT-marked',      page: 'ROT-marked' },
-      { id: 'oversikt',        icon: '·', label: 'Konsernoversikt', page: 'Konsernoversikt' },
-      { id: 'sa-rapport',      icon: '·', label: 'SA-rapport',      page: 'SA-konsernrapport' },
+      { id: 'bransjekart',     icon: '·', label: 'ROT-marked',        page: 'ROT-marked' },
+      { id: 'oversikt',        icon: '·', label: 'Selskapsoversikt',  page: 'Selskapsoversikt' },
     ]},
   ];
 
@@ -306,14 +304,6 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
           <span class="sb-pop-sub">${b.sub} · ${ans} ans · ${oms.toFixed(0)} M</span>
         </button>`;
     });
-    html += '<div class="sb-pop-section">Konsern</div>';
-    const totOms = SELSKAPER.reduce((s, x) => s + x.regnskap_2024.omsetning_mnok, 0);
-    const totAns = SELSKAPER.reduce((s, x) => s + x.regnskap_2024.ansatte, 0);
-    html += `
-      <button class="sb-pop-item ${isActive('konsern', 'konsern') ? 'active' : ''}" data-scope='{"type":"konsern","id":"konsern"}'>
-        <span style="font-weight:600">SA Bygg (alle tre)</span>
-        <span class="sb-pop-sub">${SELSKAPER.length} selskap · ${totAns} ans · ${totOms.toFixed(0)} M</span>
-      </button>`;
     return html;
   }
 

@@ -292,9 +292,6 @@ function init() {
     byEntity = getBy(scope.id);
   } else if (scope.type === 'selskap') {
     byEntity = getBy(getSelskap(scope.id).by);
-  } else {
-    // konsern — ingen direkte scData (vi aggregerer)
-    byEntity = null;
   }
 
   // Foretrekk selskap-spesifikt scenario (f.eks. Fritzøe sin base_case)

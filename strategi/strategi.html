@@ -169,9 +169,6 @@ function renderHeader() {
   } else if (scope.type === 'by') {
     const r = getRegnskap2024(scope);
     sub = `${getBy(scope.id).label} · ${r.n} selskap · ${r.omsetning_mnok.toFixed(1).replace('.', ',')} MNOK 2024`;
-  } else {
-    const r = getRegnskap2024(scope);
-    sub = `Konsern · ${r.n} selskap · ${r.omsetning_mnok.toFixed(1).replace('.', ',')} MNOK 2024`;
   }
   document.getElementById('ph-sub').textContent = sub;
 }
@@ -226,14 +223,6 @@ function renderScenarios() {
       kapital = sc.kapitalbehov;
       ansatte = sc.ansatte_2029 ?? '—';
       margin = sc.ebit_margin_2029_pct;
-    } else {
-      // Konsern: gjennomsnitt
-      const cagrs = BYER.map(b => b.scenarioer[name].cagr_pct);
-      cagr = `~${Math.round(cagrs.reduce((s,x)=>s+x,0)/cagrs.length)} % CAGR (snitt)`;
-      kapital = BYER.map(b => b.scenarioer[name].kapitalbehov).join(' + ');
-      ansatte = BYER.reduce((s, b) => s + b.scenarioer[name].ansatte_2029, 0);
-      margin = (BYER.reduce((s, b) => s + b.scenarioer[name].ebit_margin_2029_pct, 0) / BYER.length).toFixed(1);
-      beskrivelse = `Aggregert ${name}-scenario for hele konsernet (${BYER.length} byer).`;
     }
 
     grid.innerHTML += `
@@ -264,13 +253,13 @@ function renderMarket() {
   const grid = document.getElementById('market-grid');
   grid.innerHTML = '';
 
-  // Bestem hvilke byer som er relevante
+  // Bestem hvilken by som er relevant (selskap → by; by → by)
   let byer = [];
   if (scope.type === 'by') byer = [getBy(scope.id)];
   else if (scope.type === 'selskap') {
     const s = getSelskap(scope.id);
     byer = [getBy(s.by)];
-  } else byer = BYER;
+  }
 
   byer.forEach(by => {
     const m = by.marked;
