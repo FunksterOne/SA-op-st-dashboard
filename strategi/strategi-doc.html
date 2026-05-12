@@ -297,10 +297,9 @@ function init() {
     `;
   }
 
-  // 1c. Lenke til ekstern markedsrapport (Bodø-scopes — Fritzøe, Areal, konsern)
+  // 1c. Lenke til ekstern markedsrapport (Bodø-scopes — Fritzøe, Areal)
   const isBodoScope = (scope.type === 'selskap' && getSelskap(scope.id)?.by === 'bodo')
-    || (scope.type === 'by' && scope.id === 'bodo')
-    || scope.type === 'konsern';
+    || (scope.type === 'by' && scope.id === 'bodo');
   if (isBodoScope) {
     html += `
       <div class="panel" style="border-left:3px solid var(--accent)">

@@ -22,123 +22,9 @@ const KONSERN = {
     revisor: 'Hordaland Revisjon AS',
     innkjop: 'SA-konsernavtaler (trelast, festemidler)',
   },
-
-  // Konsern-strategi: hvordan SA skaper verdi på tvers av selskapene
-  strategi: {
-    intensjon: 'Bygge Norges fremste portefølje av lokale ROT-spesialister gjennom konsern­synergier, forsikrings­distribusjon og strukturert M&A — med Bodø og Trondheim som strategiske hub-er.',
-    intensjon_kort: 'Norges fremste lokale ROT-portefølje',
-
-    portefolje_logikk: 'De tre selskapene utgjør komplementære posisjoner i ROT-markedet: Fritzøe (Bodø, snekker/tømrer) er det brede ankeret. Areal (Bodø, maler/overflate) gir spisset overflate-spesialisering og forsikrings­strøm-respons. Braa (Trondheim, total-rehab) er ekspansjonen til Midt-Norge og bredere fagprofil. Sammen dekker porteføljen 90 %+ av ROT-arbeidstyper i offentlig sektor og forsikrings­skade.',
-
-    synergier: [
-      { tema: 'Bodø: Fritzøe + Areal',     tekst: 'Felles DL og kontor (Påls vei 1B). UE-allianse i krysningen mellom snekker- og maler-tunge anbud. Vurdering av fusjon i 2028 for redusert governance-overhead.' },
-      { tema: 'Bodø ↔ Trondheim',          tekst: 'Kalkulasjons-praksis-deling, felles ramme­avtaler nasjonale (Forsvarsbygg, Helse-foretak), kunnskaps­overføring fra Areal/Fritzøe (margin) til Braa.' },
-      { tema: 'SA-felles infrastruktur',    tekst: 'Forsikringsavtaler (Gjensidige/If/Tryg/Fremtind), HR (Visma Lønn 5.0), SA Læring, innkjøp (trelast/festemidler), M&A-team, revisor.' },
-    ],
-
-    sa_verdiloeftet: [
-      { tema: 'Kapital',     tekst: 'SA-konserninnskudd kan finansiere geo-utvidelse og M&A. 25–120 MNOK ramme avhengig av scenario.' },
-      { tema: 'Forsikring',  tekst: 'SA Forsikring distribuerer 24h-vakt forsikringsskader via Gjensidige/If/Tryg/Fremtind. 22+ MNOK årlig ramp på offensiv-banen.' },
-      { tema: 'Læring',      tekst: 'SA Læring-platform, lærling-opplegg, sertifiseringer (lav-VOC, BIM/VDC, energi-rehab).' },
-      { tema: 'Innkjøp',     tekst: 'SA-konsernavtaler reduserer materialkostnad 3–5 % (trelast, festemidler, maling).' },
-      { tema: 'M&A',         tekst: 'Konsern-team gjør screening, due diligence og integrasjon. Skalerbar pipeline.' },
-      { tema: 'HR',          tekst: 'Felles rekrutterer, onboarding-platform, lønnssystem, succession planning.' },
-    ],
-
-    swot: {
-      styrker: [
-        '3 selskaper · 175 MNOK omsetning · 91 ansatte (2024-baseline)',
-        'Fritzøe + Areal samlet er rang #2 i Bodø ROT-marked på 2 346 MNOK',
-        'Komplementære fagprofiler dekker bredt ROT-spekter — 90 %+ av offentlig + forsikring',
-        'Felles styreleder og governance-struktur',
-        'Eksisterende forsikrings­avtaler med Gjensidige/If/Tryg/Fremtind',
-        'Fast SA-konsern­team for HR/læring/innkjøp/M&A',
-      ],
-      svakheter: [
-        'Liten skala vs landsdekkende aktører (Veidekke/NCC)',
-        'Konsern-EK 16,2 MNOK begrenser stor M&A',
-        'Braa drar vektet konsern-margin ned (0,6 %)',
-        'Forsikrings­strøm ikke aktivert i porteføljen ennå',
-        'Fragmentert governance: 3 styrer + SA-styret',
-      ],
-      muligheter: [
-        'Forsikrings­strøm 22+ MNOK årlig ramp på tvers av tre selskaper',
-        'M&A-konsolidering i fragmentert ROT-marked Nord/Midt',
-        'Energi-rehab marked vekstfase (TEK17, EU EPBD)',
-        'Geografiske hvit-flekker: Salten, Innherred, Helgeland, Lofoten',
-        'Mulig konsolidering Fritzøe+Areal (2028 review)',
-      ],
-      trusler: [
-        'Renteoppgang reduserer kommunale ROT-budsjetter',
-        'Veidekke/NCC kan respondere med oppkjøp i regionene',
-        'Strukturell fagarbeider­mangel begrenser vekst',
-        'Regulatoriske endringer for SA Forsikrings­distribusjon',
-        'Fortsatt lav margin Braa tærer på solid EK over tid',
-      ],
-    },
-
-    pestel: [
-      { kat: 'Politikk / juridisk', tekst: 'TEK17, EU EPBD, sirkulær­økonomi-forskrift driver ROT-volum nasjonalt', tone: 'opp' },
-      { kat: 'Økonomi',             tekst: 'Igangsatte boliger Norge under press. ROT relativt stabilt. Renteoppgang er hovedrisiko', tone: 'flat' },
-      { kat: 'Sosialt',             tekst: 'Lokalt næringsliv-imperative, lærlingplikt, økt fokus på lokal verdiskaping', tone: 'opp' },
-      { kat: 'Teknologi',           tekst: 'Digital anbudsplatform, BIM/VDC, AI-screening senker overhead', tone: 'opp' },
-      { kat: 'Miljø',               tekst: 'Sirkulær ombruk, energi-rehab og passivhus-rehab — innkjøps­kriterium offentlig', tone: 'opp' },
-    ],
-
-    horisonter: {
-      h1: {
-        tittel: 'Konsolidering & felles verdiløfte',
-        periode: '2026',
-        fokus: 'Aktivere SA-felles tjenester (HR/læring/innkjøp). Konsolidert kvartalsrapportering. Hjelpe Braa løfte margin. Pilot­aktivering forsikrings­strøm.',
-        scenario: 'Base',
-      },
-      h2: {
-        tittel: 'Forsikring & første M&A',
-        periode: '2027–2028',
-        fokus: 'Full forsikrings­strøm-aktivering på alle tre. Første konsern-M&A (Salten + Innherred). Marginløft Braa fullført.',
-        scenario: 'Offensiv',
-      },
-      h3: {
-        tittel: 'Skalert portefølje',
-        periode: '2029+',
-        fokus: '5–7 selskaper i porteføljen. Ledende stilling Nord-/Midt-Norge ROT. Vurder Fritzøe+Areal-fusjon. Børs-/exit-vurdering.',
-        scenario: 'Bull',
-      },
-    },
-
-    initiativer: [
-      { nr: 1, navn: 'Konsolidert konsern-rapportering (kvartal)',          ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'SA-konsern',           mal_2029: 'Automatisert kvartalsrapport',  scenario: 'Base+',     fremdrift_pct: 40, status: 'pa-sporet',     siste_oppdatering: '2026-04-20', siste_kommentar: 'Dashboard-portal etablert (denne). Q1 2026 ferdig manuelt' },
-      { nr: 2, navn: 'Aktivere forsikrings­strøm alle 3 selskaper',          ansoff: 'Produktutvikling',   horisont: 'H1–H2', ansvarlig: 'SA Forsikring + DLer', mal_2029: '22 MNOK/år samlet',             scenario: 'Base+',     fremdrift_pct: 10, status: 'i-planlegging', siste_oppdatering: '2026-04-15', siste_kommentar: 'Pilot Strindveien 102 (Braa/Gjensidige) frist 2. mai. Ramp Q3 2026' },
-      { nr: 3, navn: 'SA Læring-platform full utrulling',                    ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'SA-konsern HR',         mal_2029: '100 % deltakelse 91 ansatte',   scenario: 'Base+',     fremdrift_pct: 25, status: 'pa-sporet',     siste_oppdatering: '2026-04-10', siste_kommentar: 'Onboarding ferdig Bodø. Trondheim Q3 2026' },
-      { nr: 4, navn: 'Felles innkjøps­avtaler (trelast, festemidler, maling)', ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'SA-konsern innkjøp',    mal_2029: '−4 % materialkostnad',          scenario: 'Base+',     fremdrift_pct: 60, status: 'pa-sporet',     siste_oppdatering: '2026-04-25', siste_kommentar: 'Trelast-avtale signert. Festemidler i prosess' },
-      { nr: 5, navn: 'Marginløfts-program (Braa first, deretter benchmark)', ansoff: 'Markedspenetrasjon', horisont: 'H1–H2', ansvarlig: 'SA + DL Trondheim',    mal_2029: 'Konsern-margin ≥ 7 %',          scenario: 'Base+',     fremdrift_pct: 30, status: 'pa-sporet',     siste_oppdatering: '2026-04-28', siste_kommentar: 'Kalkulasjons­program Braa startet. Q3-benchmark planlagt' },
-      { nr: 6, navn: 'M&A-screening pipeline kontinuerlig',                  ansoff: 'Diversifisering',    horisont: 'H2+',   ansvarlig: 'SA-konsern + styre',    mal_2029: '3–5 i screening, 2–4 fullført', scenario: 'Offensiv+', fremdrift_pct: 15, status: 'i-planlegging', siste_oppdatering: '2026-04-12', siste_kommentar: 'Screening Bodø+Trondheim ferdig. Aktive kandidater identifisert' },
-      { nr: 7, navn: 'Vurder Fritzøe-Areal-fusjon (review-punkt 2028)',       ansoff: 'Diversifisering',    horisont: 'H3',    ansvarlig: 'SA-konsern + styrer',   mal_2029: 'Beslutning tatt',               scenario: 'Bull+',     fremdrift_pct: 0,  status: 'ikke-startet',  siste_oppdatering: null,         siste_kommentar: 'Forutsetter modne case for synergier — vurderes 2028' },
-    ],
-
-    strategy_map: {
-      finansielt: [
-        { mal: 'Konsern-omsetning',          baseline: '175 MNOK (2024)', mal_2029: '263 / 372 / 519 MNOK (Base/Off/Bull)', status: 'pa-sporet',  trend: 'opp' },
-        { mal: 'Vektet driftsmargin',         baseline: '5,5 %',           mal_2029: '7,0 / 7,5 / 8,0 %',                    status: 'risiko',     trend: 'flat' },
-        { mal: 'Konsern-EK',                  baseline: '16,2 MNOK (2024)', mal_2029: '≥ 35 MNOK',                            status: 'pa-sporet',  trend: 'opp' },
-      ],
-      kunde: [
-        { mal: 'Vektet hit-rate',            baseline: '71 %',            mal_2029: '≥ 75 %',                               status: 'pa-sporet',    trend: 'flat' },
-        { mal: 'Forsikrings­andel av total',  baseline: '0 %',             mal_2029: '15–20 %',                              status: 'ikke-startet', trend: null  },
-        { mal: 'Antall geografier',          baseline: '2 (Bodø+Trondheim)', mal_2029: '4–6',                                status: 'ikke-startet', trend: null  },
-      ],
-      prosess: [
-        { mal: 'M&A-pipeline størrelse',      baseline: '0 aktive',         mal_2029: '3–5 i screening',                      status: 'i-planlegging', trend: 'opp' },
-        { mal: 'Konsern-rapportering tid',   baseline: 'ad hoc',           mal_2029: 'Kvartal automatisert',                 status: 'pa-sporet',     trend: 'opp' },
-        { mal: 'CoBrief dekning på tvers',   baseline: '0 %',              mal_2029: '100 %',                                status: 'ikke-startet',  trend: null  },
-      ],
-      laering: [
-        { mal: 'Total lærlinger',            baseline: '7+ (estimat)',     mal_2029: '17 (8+4+5)',                           status: 'pa-sporet',     trend: 'opp' },
-        { mal: 'SA Læring-deltakelse',       baseline: 'ad hoc',           mal_2029: '100 % av 91 ansatte',                  status: 'pa-sporet',     trend: 'opp' },
-        { mal: 'Successor identifisert (DL)', baseline: '0 av 3',           mal_2029: '3 av 3',                               status: 'ikke-startet',  trend: null  },
-      ],
-    },
-  },
+  // Merk: KONSERN-strategi (intensjon, SWOT, horisonter, initiativer på tvers
+  // av selskapene) er fjernet. Hvert selskap eier sin egen strategi.
+  // SA-metadata over forblir som referanse-info om felles tjenester og avtaler.
 };
 
 // =====================================================================
@@ -450,7 +336,7 @@ const SELSKAPER = [
         styrker: [
           'Markedsleder maler/overflate i Bodø — eneste lønnsomme aktør i segmentet 2024',
           'EBITDA 7,5 % mens Bendixen (−9,7 %), Bodø Glass (−22 %) og Snekkern (−16 %) hadde tap',
-          'Hit-rate 75 % — best i SA-porteføljen',
+          'Hit-rate 75 % — sterk i Bodø-markedet',
           'Felles DL og kontor med Fritzøe (Påls vei 1B) — lave overhead-kostnader',
           'ROT-andel 58 % gir konjunktur-buffer',
         ],
@@ -629,9 +515,9 @@ const SELSKAPER = [
       swot: {
         styrker: [
           'Sterk EK 13,46 MNOK — solid finansieringskapasitet',
-          '32 ansatte (størst i SA-porteføljen) gir prosjektkapasitet',
+          '32 ansatte — solid prosjektkapasitet',
           'Bredde: snekker + total-rehab dekker større prosjekter',
-          'Trondheim-marked større enn Bodø (oms 22 mrd vs 6 mrd ROT)',
+          'Trondheim ROT-marked ~22 mrd NOK — stort hjemmemarked',
           'Etablert med Forsvarsbygg og fylkeskommunale ramme',
         ],
         svakheter: [
@@ -687,7 +573,7 @@ const SELSKAPER = [
       },
 
       initiativer: [
-        { nr: 1, navn: 'Marginløft 0,6 → 5 % (kalkulasjons­program)',     ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + kalkulator',       mal_2029: 'Margin ≥ 7 %',            scenario: 'Base+',     fremdrift_pct: 30, status: 'pa-sporet',  siste_oppdatering: '2026-04-28', siste_kommentar: 'Kalkulasjons­program startet Q1. Første benchmarks vs Bodø Q3 2026' },
+        { nr: 1, navn: 'Marginløft 0,6 → 5 % (kalkulasjons­program)',     ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + kalkulator',       mal_2029: 'Margin ≥ 7 %',            scenario: 'Base+',     fremdrift_pct: 30, status: 'pa-sporet',  siste_oppdatering: '2026-04-28', siste_kommentar: 'Kalkulasjons­program startet Q1. Første benchmarks etablert Q3 2026' },
         { nr: 2, navn: 'Prosjekt­kontroll (timeforbruk vs plan)',          ansoff: 'Markedspenetrasjon', horisont: 'H1',    ansvarlig: 'DL + PL',               mal_2029: 'Avvik ≤ 5 %',             scenario: 'Base+',     fremdrift_pct: 25, status: 'risiko',     siste_oppdatering: '2026-04-30', siste_kommentar: 'Lade barnehage red-flagg fortsatt åpent (348 t / 25 %). Rotårsak utredes' },
         { nr: 3, navn: 'Rammeavtale Helse Midt-Norge / NTNU',            ansoff: 'Markedspenetrasjon', horisont: 'H1–H2', ansvarlig: 'DL',                     mal_2029: '3 aktive ramme',          scenario: 'Base+',     fremdrift_pct: 20, status: 'i-planlegging', siste_oppdatering: '2026-04-14', siste_kommentar: 'Doffin-anbud Helse Midt-Norge 2027–2030 (frist 14. juni). Match 100 %' },
         { nr: 4, navn: 'Forsikringsstrøm via SA',                          ansoff: 'Produktutvikling',   horisont: 'H2',    ansvarlig: 'DL + SA Forsikring',    mal_2029: '12 MNOK forsikring',      scenario: 'Offensiv+', fremdrift_pct: 5,  status: 'i-planlegging', siste_oppdatering: '2026-04-02', siste_kommentar: 'Vannskade Strindveien 102 (Gjensidige) er pilot-sak — frist 2. mai' },
@@ -833,13 +719,24 @@ const ACTIVE_KEY = 'sa-active-scope-v2';
 function getActiveScope() {
   try {
     const raw = localStorage.getItem(ACTIVE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Konsern-scope er ikke lenger gyldig — fall tilbake til Fritzøe.
+      if (parsed && parsed.type === 'konsern') {
+        return { type: 'selskap', id: 'byggmester-fritzoe' };
+      }
+      return parsed;
+    }
   } catch (e) {}
   // Default: Byggmester Fritzøe
   return { type: 'selskap', id: 'byggmester-fritzoe' };
 }
 
 function setActiveScope(scope) {
+  // Konsern-scope avvises — normaliser til Fritzøe.
+  if (scope && scope.type === 'konsern') {
+    scope = { type: 'selskap', id: 'byggmester-fritzoe' };
+  }
   localStorage.setItem(ACTIVE_KEY, JSON.stringify(scope));
   window.dispatchEvent(new CustomEvent('scope-changed', { detail: scope }));
 }
@@ -854,7 +751,6 @@ function getBy(id) {
 
 function getSelskaperInScope(scope = null) {
   scope = scope || getActiveScope();
-  if (scope.type === 'konsern') return SELSKAPER;
   if (scope.type === 'by') {
     const by = getBy(scope.id);
     return by ? SELSKAPER.filter(s => by.selskaper.includes(s.id)) : [];
@@ -868,7 +764,6 @@ function getSelskaperInScope(scope = null) {
 
 function getScopeLabel(scope = null) {
   scope = scope || getActiveScope();
-  if (scope.type === 'konsern') return { label: 'Konsern', sub: 'ServiceAlliansen Bygg', farge: '#8b95a3' };
   if (scope.type === 'by') {
     const by = getBy(scope.id);
     return by ? { label: by.label, sub: by.sub, farge: by.farge } : null;
@@ -992,12 +887,11 @@ function getRegnskap2024(scope = null) {
 // SCENARIO-AGGREGERING (per by / konsern)
 // =====================================================================
 
-// Returner strategi-objekt for valgt scope (selskap eller konsern). By-scope har
-// foreløpig ikke egen strategi — returnerer null som ber UI om å falle tilbake.
+// Returner strategi-objekt for valgt scope. Bare selskap-scope har egen strategi
+// — by-scope returnerer null (UI faller tilbake til selskap-strategi eller skjul).
 function getStrategiForScope(scope = null) {
   scope = scope || getActiveScope();
   if (scope.type === 'selskap') return getSelskap(scope.id)?.strategi || null;
-  if (scope.type === 'konsern') return KONSERN.strategi || null;
   return null;
 }
 
@@ -1051,16 +945,7 @@ function getScenarioForScope(scenario, year, scope = null) {
     const forsikring = sc[`forsikring_${year}`] || 0;
     return { rot, forsikring, total: rot + forsikring };
   }
-  // Konsern: sum over alle byer
-  let rot = 0, forsikring = 0;
-  BYER.forEach(by => {
-    const sc = by.scenarioer?.[scenario];
-    if (sc) {
-      rot += sc[`rot_${year}`] || 0;
-      forsikring += sc[`forsikring_${year}`] || 0;
-    }
-  });
-  return { rot, forsikring, total: rot + forsikring };
+  return { rot: 0, forsikring: 0, total: 0 };
 }
 
 // =====================================================================
@@ -1090,14 +975,12 @@ function _routePath(modul, scope) {
     case 'styrerapport': return 'strategi/styrerapport.html';
     case 'ma-screening': return isTrondheim ? 'strategi/ma-screening-trondheim.html' : 'strategi/ma-screening-bodo.html';
     case 'ma-kandidat': return 'strategi/ma-kandidat.html';
-    case 'ma-konsern': return 'strategi/ma-konsern.html';
     case 'forsikring': return 'm9-konsekvens.html';
     case 'm5-poweroffice': return 'm5-konsekvens.html';
     case 'epc-satsing': return 'epc-konsekvens.html';
     case 'implementering': return 'implementering.html';
     case 'bransjekart': return isTrondheim ? 'strategi/dashboard-trondheim.html' : 'strategi/bodo-rot-marked.html';
     case 'oversikt': return isTrondheim ? 'strategi/oversikt-trondheim.html' : 'strategi/oversikt.html';
-    case 'sa-rapport': return 'strategi/sa-rapport.html';
     default: return 'index.html';
   }
 }
@@ -1123,8 +1006,8 @@ function getActiveSelskapId() {
 }
 
 function setActiveSelskapId(id) {
-  // Map legacy id-er til scope
-  if (id === 'konsern') return setActiveScope({ type: 'konsern', id: 'konsern' });
+  // Map legacy id-er til scope (konsern → Fritzøe, by-aliasene → by-scope)
+  if (id === 'konsern') return setActiveScope({ type: 'selskap', id: 'byggmester-fritzoe' });
   if (id === 'fritzoe-areal-bodo') return setActiveScope({ type: 'by', id: 'bodo' });
   if (id === 'braa-sorvaag-trondheim') return setActiveScope({ type: 'selskap', id: 'braa-sorvaag-bygg' });
   if (getSelskap(id)) return setActiveScope({ type: 'selskap', id });
@@ -1136,36 +1019,6 @@ function getActiveSelskap() {
   if (scope.type === 'selskap') return getSelskap(scope.id);
   // For by/konsern: returner første selskap (legacy)
   return getSelskaperInScope(scope)[0] || null;
-}
-
-// Legacy konsern-aggregering (eldre filer kaller denne)
-function aggregateKonsern(metricKey, source = 'regnskap_2024') {
-  return SELSKAPER.reduce((sum, s) => sum + (s[source]?.[metricKey] || 0), 0);
-}
-
-function aggregateScenarioMNOK(scenario, year) {
-  let rot = 0, forsikring = 0;
-  BYER.forEach(by => {
-    const sc = by.scenarioer?.[scenario];
-    if (sc) {
-      rot += sc[`rot_${year}`] || 0;
-      forsikring += sc[`forsikring_${year}`] || 0;
-    }
-  });
-  return { rot, forsikring, total: rot + forsikring };
-}
-
-function getKonsernOversikt() {
-  const r = getRegnskap2024({ type: 'konsern', id: 'konsern' });
-  return {
-    navn: KONSERN.navn,
-    selskaper: SELSKAPER.length,
-    omsetning_2024_mnok: r.omsetning_mnok,
-    ebit_2024_mnok: r.driftsresultat_mnok,
-    ek_2024_mnok: r.ek_mnok,
-    ansatte_2024: r.ansatte,
-    snitt_margin_2024: r.driftsmargin_pct,
-  };
 }
 
 // Legacy stubs — gamle filer som bygde egen velger kan kalle disse uten å krasje.

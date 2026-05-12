@@ -252,10 +252,6 @@ function renderHeader() {
     const oms = selskaper.reduce((s, x) => s + x.regnskap_2024.omsetning_mnok, 0);
     const dlSet = [...new Set(selskaper.map(s => s.ledelse.dl_kort))];
     sub = `${by.label} · ${selskaper.length} selskap · ${ans} ansatte · ${oms.toFixed(0)} MNOK · DL ${dlSet.join(' / ')}`;
-  } else if (scope.type === 'konsern') {
-    const ans = SELSKAPER.reduce((s, x) => s + x.regnskap_2024.ansatte, 0);
-    const oms = SELSKAPER.reduce((s, x) => s + x.regnskap_2024.omsetning_mnok, 0);
-    sub = `ServiceAlliansen Bygg · ${SELSKAPER.length} selskap · ${ans} ansatte · ${oms.toFixed(0)} MNOK omsetning 2024`;
   }
   document.getElementById('ph-sub').textContent = sub;
 
