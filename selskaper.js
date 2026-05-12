@@ -236,7 +236,7 @@ const SELSKAPER = [
     },
 
     // Strategi: Base case som uavhengig fundament for Fritzøe.
-    // 5 % årlig vekst på omsetning, lønnsomhet konstant 7,7 %, bemanning uendret.
+    // 5 %, samt forventet KPI årlig vekst på omsetning, lønnsomhet konstant 7,7 %, bemanning uendret.
     // Offensiv og Bull bygger på dette ved å legge til geografi-, M&A- og
     // forsikringsstrøm-deltaer.
     base_case: {
