@@ -252,6 +252,9 @@ function init() {
     </div>
   `;
 
+  // 1a. Drivs eier-ramme — identisk kontekst per selskap
+  html += renderDrivEierRamme();
+
   // 1b. Konsern-spesifikke seksjoner: portefølje­logikk + synergier + SA-verdiløfte
   if (s.portefolje_logikk) {
     html += `

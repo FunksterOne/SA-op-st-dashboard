@@ -415,6 +415,57 @@ button { font: inherit; }
   .sa-topbar { display: none !important }
 }
 
+/* --- 14b. Drivs eier-ramme (panel på strategi-doc) -------------------- */
+.driv-eier-ramme {
+  border-left: 4px solid var(--mode-strategisk, #d29922);
+  background: var(--panel);
+}
+.driv-eier-ramme h2 { color: var(--mode-strategisk, #d29922) }
+.driv-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin: 14px 0 18px;
+}
+@media (max-width: 900px) { .driv-grid { grid-template-columns: 1fr } }
+.driv-card {
+  padding: 14px 16px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+.driv-card-lbl {
+  font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.08em; font-weight: 700;
+}
+.driv-card-val {
+  font-size: 22px; font-weight: 700; margin: 4px 0 2px;
+  color: var(--mode-strategisk, #d29922); letter-spacing: -0.02em;
+}
+.driv-card-sub { font-size: 11.5px; color: var(--muted); line-height: 1.4 }
+.driv-section { margin: 18px 0 6px }
+.driv-section h3 {
+  margin: 0 0 8px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--text);
+}
+.driv-section p { margin: 0; font-size: 13px; line-height: 1.55 }
+.driv-axer {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+@media (max-width: 900px) { .driv-axer { grid-template-columns: 1fr } }
+.driv-akse {
+  padding: 10px 12px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 6px;
+}
+.driv-akse-tema {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--mode-strategisk, #d29922); margin-bottom: 4px;
+}
+.driv-akse-tekst { font-size: 12px; line-height: 1.45; color: var(--text) }
+.driv-kriterier { margin: 6px 0 0; padding-left: 20px }
+.driv-kriterier li { font-size: 12.5px; line-height: 1.55; padding: 2px 0 }
+.driv-footnote {
+  margin-top: 18px; padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11px; color: var(--muted); font-style: italic;
+}
+
 /* --- 14. Strategi-utkast-banner --------------------------------------- */
 .strategi-draft-banner {
   display: flex; align-items: flex-start; gap: 14px;

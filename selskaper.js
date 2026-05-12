@@ -1029,6 +1029,7 @@ function _routePath(modul, scope) {
     case 'scenario': return 'strategi/scenario.html';
     case 'styrerapport': return 'strategi/styrerapport.html';
     case 'ma-screening': return isTrondheim ? 'strategi/ma-screening-trondheim.html' : 'strategi/ma-screening-bodo.html';
+    case 'sammenligning-bodo': return 'strategi/sammenligning-bodo.html';
     case 'ma-kandidat': return 'strategi/ma-kandidat.html';
     case 'forsikring': return 'm9-konsekvens.html';
     case 'm5-poweroffice': return 'm5-konsekvens.html';
@@ -1048,6 +1049,120 @@ function getRouteFor(modul, scope = null) {
     return path.substring('strategi/'.length);
   }
   return base + path;
+}
+
+// =====================================================================
+// DRIV KAPITAL — eier-ramme (kontekst som gjelder identisk per selskap)
+// =====================================================================
+// Drivs forventninger og investeringscase, hentet fra introduksjonsdecket
+// (oktober 2023) og oppfølgingsdecket «Areal-Gruppen & ServiceAlliansen»
+// (tidlig 2024). Brukes som scaffolding på strategi-doc per selskap —
+// ikke som strategi i seg selv, men som ramme strategien leveres inn til.
+const DRIV_EIER_RAMME = {
+  eier: 'Driv Kapital',
+  eierandel: '~60 % av ServiceAlliansen (gründere/nøkkelansatte ~40 %)',
+  fondets_levetid: '15 år',
+  oppkjopt: 'juni 2024',
+
+  investeringscase: {
+    base_moic: '3x MOIC',
+    minimum_moic: '2x MOIC',
+    high_moic: '4x MOIC',
+    base_beskrivelse: 'Noe oppkjøp i eierperioden, moderate operasjonelle forbedringer, noe premium for konsolidering. Driv investerer aldri uten klar vei til minst 2x.',
+    tidlig_inn_premium: 'Selskap som kommer inn tidlig i gruppen får større andel av oppsiden.',
+  },
+
+  gruppemaal_2027_2029: {
+    omsetning: '2 000 MNOK',
+    ebitda: '150 MNOK',
+    split: '~1 000 MNOK / 75 MNOK organisk + ~1 000 MNOK / 75 MNOK uorganisk',
+    kortsiktig_2024: 'Kortsiktig: 1 000 MNOK omsetning / 75 MNOK driftsresultat',
+  },
+
+  hovedprinsipp: 'Business som før — hvert selskap beholder logo, lokalitet og transportmidler. Synergier hentes via felles tjenester, ikke ved sentralisering.',
+
+  synergiakser: [
+    { tema: 'Business som før',         tekst: 'Lokal autonomi, samme logo og kontor.' },
+    { tema: 'Deling av kompetanse',     tekst: 'Mannskap, transport, lokaliteter og varer på tvers ved relevante muligheter.' },
+    { tema: 'Salg & nye kunder',         tekst: 'Jobbe i fellesskap mot nye og eksisterende kunder, tilpasse logistikk.' },
+    { tema: 'Felles innkjøpsavtaler',   tekst: 'Bedre avtaler på utstyr, drivstoff, leasing, forsikring som større aktør.' },
+    { tema: 'Samme finansiering',        tekst: 'Felles bank, optimal kontantstyring, gjeldsopptak for vekst og oppkjøp.' },
+    { tema: 'Innovasjon & utvikling',    tekst: 'Felles investering i IT, miljø og digitalisering der det blir nødvendig.' },
+  ],
+
+  ma_screening_kriterier: [
+    'Sterk lokal markedsposisjon',
+    'Gode finansielle resultater over tid',
+    'Høy andel rammeavtaler, ROT, offentlig og lange kundeforhold',
+    'Lite nybygg',
+  ],
+
+  status_per_q1_2024: {
+    omsetning_2023e: '630 MNOK',
+    ebitda_2023e: '34 MNOK',
+    omsetning_2024b: '680 MNOK',
+    ebitda_2024b: '46 MNOK',
+    cagr_2022_2023: '~28 %',
+    ma_pipeline: '15+ i dialog, 6 indikative bud, 1 signert (Haugesund-maler, februar 2023)',
+    kapitalpakke: 'SR-bank: 125 MNOK oppkjøpsfasilitet + 25 MNOK kassekreditt',
+  },
+};
+
+function renderDrivEierRamme() {
+  const d = DRIV_EIER_RAMME;
+  return `
+    <div class="panel driv-eier-ramme">
+      <h2>Eier-ramme: ${d.eier}</h2>
+      <p class="lead">Drivs investeringscase og forventninger — kontekst strategien leveres inn til. Identisk for alle tre selskaper.</p>
+
+      <div class="driv-grid">
+        <div class="driv-card">
+          <div class="driv-card-lbl">Investeringscase</div>
+          <div class="driv-card-val">${d.investeringscase.base_moic}</div>
+          <div class="driv-card-sub">Base case · minimum ${d.investeringscase.minimum_moic} · høy ${d.investeringscase.high_moic}</div>
+        </div>
+        <div class="driv-card">
+          <div class="driv-card-lbl">Gruppemål 2027–2029</div>
+          <div class="driv-card-val">${d.gruppemaal_2027_2029.omsetning}</div>
+          <div class="driv-card-sub">${d.gruppemaal_2027_2029.ebitda} EBITDA · ${d.gruppemaal_2027_2029.split}</div>
+        </div>
+        <div class="driv-card">
+          <div class="driv-card-lbl">Eierandel</div>
+          <div class="driv-card-val">~60 %</div>
+          <div class="driv-card-sub">Gründere/nøkkelansatte ~40 %. Fondets levetid ${d.fondets_levetid}.</div>
+        </div>
+      </div>
+
+      <div class="driv-section">
+        <h3>Hovedprinsipp</h3>
+        <p>${d.hovedprinsipp}</p>
+      </div>
+
+      <div class="driv-section">
+        <h3>Seks synergiakser i konsernet</h3>
+        <div class="driv-axer">
+          ${d.synergiakser.map(s => `
+            <div class="driv-akse">
+              <div class="driv-akse-tema">${s.tema}</div>
+              <div class="driv-akse-tekst">${s.tekst}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="driv-section">
+        <h3>Screening-kriterier for tilleggsoppkjøp</h3>
+        <ul class="driv-kriterier">
+          ${d.ma_screening_kriterier.map(k => `<li>${k}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="driv-footnote">
+        Kilde: «Introduksjonsmøte med ServiceAlliansen» (Driv Kapital, oktober 2023) og
+        «Oppfølgingsmøte med Areal-Gruppen» (tidlig 2024).
+      </div>
+    </div>
+  `;
 }
 
 // =====================================================================

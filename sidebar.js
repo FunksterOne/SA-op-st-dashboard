@@ -46,11 +46,12 @@
       { id: 'bruksanvisning', icon: '?', label: 'Bruksanvisning',  page: 'Bruksanvisning' },
     ]},
     { section: 'Strategisk', mode: MODE_STRATEGISK, part: 'strategi', items: [
-      { id: 'strategi-doc',    icon: '⚑', label: 'Strategi-dokument', page: 'Strategi-dokument' },
-      { id: 'strategi-status', icon: '◷', label: 'Strategi-status',   page: 'Strategi-status' },
-      { id: 'strategi',        icon: '↗', label: 'Vekst-scenarier',   page: 'Vekst-scenarier' },
-      { id: 'styrerapport',    icon: '◧', label: 'Styrerapport',      page: 'Styrerapport (kvartal)' },
-      { id: 'ma-screening',    icon: '+', label: 'M&A-screening',     page: 'M&A-screening' },
+      { id: 'strategi-doc',       icon: '⚑', label: 'Strategi-dokument',  page: 'Strategi-dokument' },
+      { id: 'strategi-status',    icon: '◷', label: 'Strategi-status',    page: 'Strategi-status' },
+      { id: 'strategi',           icon: '↗', label: 'Vekst-scenarier',    page: 'Vekst-scenarier' },
+      { id: 'sammenligning-bodo', icon: '⇉', label: 'Sammenligning Bodø', page: 'Strategi-sammenligning Bodø', onlyBodo: true },
+      { id: 'styrerapport',       icon: '◧', label: 'Styrerapport',       page: 'Styrerapport (kvartal)' },
+      { id: 'ma-screening',       icon: '+', label: 'M&A-screening',      page: 'M&A-screening' },
     ]},
     { section: 'Implementering', mode: MODE_IMPL, part: 'operativ', items: [
       { id: 'implementering',  icon: '⚙', label: 'Teknisk plan',     page: 'Teknisk implementering' },
@@ -309,11 +310,16 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
 
   function buildNav(activeId, part) {
     const sidebarActive = getActiveSidebarId(activeId);
+    const scope = getActiveScope();
+    const isBodoScope = (scope.type === 'selskap' && getSelskap(scope.id)?.by === 'bodo')
+      || (scope.type === 'by' && scope.id === 'bodo');
     let html = '';
     NAV.filter(sec => sec.part === part).forEach(sec => {
       html += `<div class="sb-section" data-mode="${sec.mode}">
         <div class="sb-section-label">${sec.section}</div>`;
       sec.items.forEach(item => {
+        // Bodø-spesifikke items vises bare når scope er Bodø
+        if (item.onlyBodo && !isBodoScope) return;
         const href = getRouteFor(item.id);
         const cls = item.id === sidebarActive ? 'sb-link active' : 'sb-link';
         html += `<a class="${cls}" href="${href}"><span class="sb-icon">${item.icon}</span>${item.label}</a>`;
