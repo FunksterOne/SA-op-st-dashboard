@@ -1166,6 +1166,40 @@ function renderDrivEierRamme() {
 }
 
 // =====================================================================
+// REDIGER-CTA — deep-link til GitHub-editor for selskapets strategi-blokk
+// =====================================================================
+// DL åpner selskaper.js direkte i GitHub-web-editoren og søker på sin
+// selskaps-id for å finne riktig sted. Linjenumre drifter etter hvert
+// som filen redigeres, så vi bruker tekstsøk i stedet for #L-anker.
+const REPO_EDIT_URL = 'https://github.com/FunksterOne/SA-op-st-dashboard/edit/main/selskaper.js';
+const REPO_DEV_URL  = 'https://github.dev/FunksterOne/SA-op-st-dashboard/blob/main/selskaper.js';
+
+function renderEditStrategiCta(selskap) {
+  if (!selskap) return '';
+  return `
+    <div class="edit-strategi-cta">
+      <div class="esc-body">
+        <div class="esc-title">Editer denne strategien</div>
+        <div class="esc-text">
+          Åpne <code>selskaper.js</code> og søk (Ctrl+F / Cmd+F) etter <code>${selskap.id}</code>.
+          Finn blokken <code>strategi: { ... }</code> og editer feltene.
+          Husk å oppdatere <code>sist_endret</code> og endre <code>utkast_status</code>
+          til <code>'validert'</code> når du står for innholdet.
+        </div>
+      </div>
+      <div class="esc-actions">
+        <a class="esc-btn esc-btn-primary" href="${REPO_EDIT_URL}" target="_blank" rel="noopener">
+          Åpne i GitHub-editor →
+        </a>
+        <a class="esc-btn esc-btn-secondary" href="${REPO_DEV_URL}" target="_blank" rel="noopener">
+          Åpne i github.dev (VS Code)
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+// =====================================================================
 // STRATEGI-UTKAST-BANNER — kalles fra strategi-sider med selskap.strategi
 // =====================================================================
 // Returnerer HTML for et banner som forteller leseren om strategien er

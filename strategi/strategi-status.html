@@ -253,6 +253,10 @@ function init() {
   // 0. Utkast-banner
   html += renderStrategiDraftBanner(s);
 
+  // 0b. Editer-CTA — deep-link til GitHub for å oppdatere initiativ-status
+  const selskap = scope.type === 'selskap' ? getSelskap(scope.id) : null;
+  if (selskap) html += renderEditStrategiCta(selskap);
+
   // 1. Sammendrag-stripe — antall per status
   const counts = countByStatus(s.initiativer);
   html += `

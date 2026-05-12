@@ -244,6 +244,9 @@ function init() {
   // 0. Utkast-banner — vises alltid mens utkast_status ≠ 'vedtatt'
   html += renderStrategiDraftBanner(s);
 
+  // 0b. Editer-CTA — deep-link til GitHub-editor for selskapets blokk
+  html += renderEditStrategiCta(selskap);
+
   // 1. Strategisk intensjon
   html += `
     <div class="intent-banner">
