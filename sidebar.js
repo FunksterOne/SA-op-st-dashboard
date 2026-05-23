@@ -45,14 +45,7 @@
       { id: 'okonomi',        icon: '$', label: 'Økonomi (live)',  page: 'Økonomi (live)' },
       { id: 'bruksanvisning', icon: '?', label: 'Bruksanvisning',  page: 'Bruksanvisning' },
     ]},
-    { section: 'Strategisk', mode: MODE_STRATEGISK, part: 'strategi', items: [
-      { id: 'strategi-doc',       icon: '⚑', label: 'Strategi-dokument',  page: 'Strategi-dokument' },
-      { id: 'strategi-status',    icon: '◷', label: 'Strategi-status',    page: 'Strategi-status' },
-      { id: 'strategi',           icon: '↗', label: 'Vekst-scenarier',    page: 'Vekst-scenarier' },
-      { id: 'sammenligning-bodo', icon: '⇉', label: 'Sammenligning Bodø', page: 'Strategi-sammenligning Bodø', onlyBodo: true },
-      { id: 'styrerapport',       icon: '◧', label: 'Styrerapport',       page: 'Styrerapport (kvartal)' },
-      { id: 'ma-screening',       icon: '+', label: 'M&A-screening',      page: 'M&A-screening' },
-    ]},
+    // Strategi: egen portal under strategi/ (ikke modus i operativ sidebar)
     { section: 'Implementering', mode: MODE_IMPL, part: 'operativ', items: [
       { id: 'implementering',  icon: '⚙', label: 'Teknisk plan',     page: 'Teknisk implementering' },
       { id: 'm5-poweroffice',  icon: '∷', label: 'M5/M6 PowerOffice', page: 'M5/M6 PowerOffice-integrasjon' },
@@ -328,8 +321,8 @@ body.has-sidebar { padding-left: 248px; min-height: 100vh }
     });
     // Bro-lenke til den andre delen
     if (part === 'operativ') {
-      html += `<div class="sb-section sb-bridge"><a class="sb-link sb-bridge-link" href="${getRouteFor('strategi')}">
-        <span class="sb-icon">↗</span>Strategi →</a></div>`;
+      html += `<div class="sb-section sb-bridge"><a class="sb-link sb-bridge-link" href="strategi/">
+        <span class="sb-icon">↗</span>Strategi-portal →</a></div>`;
     } else {
       html += `<div class="sb-section sb-bridge"><a class="sb-link sb-bridge-link" href="${getRouteFor('dashboard')}">
         <span class="sb-icon">←</span>Operativ</a></div>`;

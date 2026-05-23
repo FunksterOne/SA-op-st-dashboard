@@ -1033,20 +1033,20 @@ function _routePath(modul, scope) {
     case 'prosjekt': return 'prosjekt.html';
     case 'okonomi': return isTrondheim ? 'okonomi-trondheim.html' : 'okonomi.html';
     case 'bruksanvisning': return isTrondheim ? 'bruksanvisning-trondheim.html' : 'bruksanvisning.html';
-    case 'strategi': return 'strategi/strategi.html';
-    case 'strategi-doc': return 'strategi/strategi-doc.html';
-    case 'strategi-status': return 'strategi/strategi-status.html';
-    case 'scenario': return 'strategi/scenario.html';
-    case 'styrerapport': return 'strategi/styrerapport.html';
-    case 'ma-screening': return isTrondheim ? 'strategi/ma-screening-trondheim.html' : 'strategi/ma-screening-bodo.html';
-    case 'sammenligning-bodo': return 'strategi/sammenligning-bodo.html';
-    case 'ma-kandidat': return 'strategi/ma-kandidat.html';
+    case 'strategi': return 'strategi/index.html';
+    case 'strategi-doc': return 'strategi-v1-archive/strategi-doc.html';
+    case 'strategi-status': return 'strategi-v1-archive/strategi-status.html';
+    case 'scenario': return 'strategi-v1-archive/scenario.html';
+    case 'styrerapport': return 'strategi-v1-archive/styrerapport.html';
+    case 'ma-screening': return isTrondheim ? 'strategi-v1-archive/ma-screening-trondheim.html' : 'strategi-v1-archive/ma-screening-bodo.html';
+    case 'sammenligning-bodo': return 'strategi-v1-archive/sammenligning-bodo.html';
+    case 'ma-kandidat': return 'strategi-v1-archive/ma-kandidat.html';
     case 'forsikring': return 'm9-konsekvens.html';
     case 'm5-poweroffice': return 'm5-konsekvens.html';
     case 'epc-satsing': return 'epc-konsekvens.html';
     case 'implementering': return 'implementering.html';
-    case 'bransjekart': return isTrondheim ? 'strategi/dashboard-trondheim.html' : 'strategi/bodo-rot-marked.html';
-    case 'oversikt': return isTrondheim ? 'strategi/oversikt-trondheim.html' : 'strategi/oversikt.html';
+    case 'bransjekart': return isTrondheim ? 'strategi-v1-archive/dashboard-trondheim.html' : 'strategi-v1-archive/bodo-rot-marked.html';
+    case 'oversikt': return isTrondheim ? 'strategi-v1-archive/oversikt-trondheim.html' : 'strategi-v1-archive/oversikt.html';
     default: return 'index.html';
   }
 }

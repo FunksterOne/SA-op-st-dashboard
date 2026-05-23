@@ -26,3 +26,4 @@ node_modules/
 *-dark.png
 *-fresh.png
 .vercel
+.claude/
