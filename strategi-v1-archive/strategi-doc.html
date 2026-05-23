@@ -336,8 +336,47 @@ function init() {
     `;
   }
 
-  // 2. Analytisk grunnlag — kortversjon (full SWOT/PESTEL/Strategy Map ligger i strategi-analyse.html)
-  html += renderAnalyseTeaser(s);
+  // 2. Situasjonsanalyse — SWOT + PESTEL
+  html += `
+    <div class="panel">
+      <h2>Situasjonsanalyse</h2>
+      <p class="lead">SWOT mot konkurranse­landskap og makro­drivere. Grunnlag for strategiske valg.</p>
+      <div class="swot">
+        <div class="swot-quad q-s">
+          <h3>Styrker</h3>
+          <ul>${s.swot.styrker.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="swot-quad q-w">
+          <h3>Svakheter</h3>
+          <ul>${s.swot.svakheter.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="swot-quad q-o">
+          <h3>Muligheter</h3>
+          <ul>${s.swot.muligheter.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+        <div class="swot-quad q-t">
+          <h3>Trusler</h3>
+          <ul>${s.swot.trusler.map(x => `<li>${x}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="panel">
+      <h2>Markeds­drivere (PESTEL)</h2>
+      <p class="lead">Eksterne krefter som påvirker veksten. Pil viser om driveren trekker opp eller ned for ROT-marked i Bodø/Salten.</p>
+      <div class="pestel">
+        ${s.pestel.map(p => `
+          <div class="pestel-row">
+            <span class="kat">${p.kat}</span>
+            <span>${p.tekst}</span>
+            <span class="tone ${p.tone}">${p.tone === 'opp' ? '↑' : p.tone === 'ned' ? '↓' : '→'}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 
   // 3. Three Horizons
   html += `
@@ -395,7 +434,19 @@ function init() {
     </div>
   `;
 
-  // 5. Lenker til scenarioer — scope-aware
+  // 5. Strategy Map
+  html += `
+    <div class="panel">
+      <h2>Strategy Map — målbilde 2029</h2>
+      <p class="lead">Fire perspektiver. Finansielle mål nås gjennom kunde- og prosess-mål, som forutsetter læring og bemanning. Verdier kan styres kvartalsvis.</p>
+      ${renderSmapSection('s-fin', 'Finansielt', s.strategy_map.finansielt)}
+      ${renderSmapSection('s-kunde', 'Kunde', s.strategy_map.kunde)}
+      ${renderSmapSection('s-prosess', 'Intern prosess', s.strategy_map.prosess)}
+      ${renderSmapSection('s-laering', 'Læring & vekst', s.strategy_map.laering)}
+    </div>
+  `;
+
+  // 6. Lenker til scenarioer — scope-aware
   const scLinks = ['base', 'offensiv', 'bull'].map(name => {
     const totals = getScenarioForScope(name, 2029, scope);
     const meta = getScenarioMetaForScope(name, scope);
@@ -426,52 +477,20 @@ function init() {
   content.innerHTML = html;
 }
 
-// =====================================================================
-// Analytisk grunnlag — kortversjon i strategi-doc, med lenke til full
-// strategi-analyse (SWOT, PESTEL, Strategy Map).
-// =====================================================================
-function renderAnalyseTeaser(s) {
-  const styrkN = (s.swot?.styrker || []).length;
-  const svakN = (s.swot?.svakheter || []).length;
-  const mulN = (s.swot?.muligheter || []).length;
-  const trusN = (s.swot?.trusler || []).length;
-  const pestelN = (s.pestel || []).length;
-  const smap = s.strategy_map || {};
-  const allKpis = [].concat(smap.finansielt || [], smap.kunde || [], smap.prosess || [], smap.laering || []);
-  const risk = allKpis.filter(m => m.status === 'risiko' || m.status === 'forsinket').length;
-  const onTrack = allKpis.filter(m => m.status === 'pa-sporet' || m.status === 'oppnaadd').length;
-
+function renderSmapSection(cls, tittel, items) {
   return `
-    <a class="panel" href="strategi-analyse.html" style="text-decoration:none;color:inherit;display:block;border-left:3px solid var(--pending);transition:border-color 0.15s">
-      <h2 style="display:flex;align-items:center;gap:8px">
-        Analytisk grunnlag
-        <span style="font-size:10px;color:var(--pending);background:rgba(163,113,247,0.15);padding:2px 8px;border-radius:9px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700">SWOT · PESTEL · Strategy Map</span>
-      </h2>
-      <p class="lead">Situasjonsanalysen og målestrukturen ligger på egen side. Oppdateres typisk én gang i året.</p>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px">
-        <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">SWOT-punkter</div>
-          <div style="font-size:16px;font-weight:700;margin-top:2px">${styrkN + svakN + mulN + trusN}</div>
-          <div style="font-size:10.5px;color:var(--muted)">${styrkN} S · ${svakN} W · ${mulN} O · ${trusN} T</div>
-        </div>
-        <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">PESTEL-drivere</div>
-          <div style="font-size:16px;font-weight:700;margin-top:2px">${pestelN}</div>
-          <div style="font-size:10.5px;color:var(--muted)">Eksterne krefter</div>
-        </div>
-        <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;border-left:3px solid var(--good)">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">KPI på sporet</div>
-          <div style="font-size:16px;font-weight:700;margin-top:2px;color:var(--good)">${onTrack} <span style="font-size:11px;color:var(--muted);font-weight:500">/ ${allKpis.length}</span></div>
-          <div style="font-size:10.5px;color:var(--muted)">Balanced Scorecard</div>
-        </div>
-        <div style="padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;border-left:3px solid ${risk > 0 ? 'var(--bad)' : 'var(--muted)'}">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em">KPI i risiko</div>
-          <div style="font-size:16px;font-weight:700;margin-top:2px;color:${risk > 0 ? 'var(--bad)' : 'var(--text)'}">${risk}</div>
-          <div style="font-size:10.5px;color:var(--muted)">Risiko / forsinket</div>
-        </div>
+    <div class="smap-section ${cls}">
+      <h3>${tittel}</h3>
+      <div class="smap-grid">
+        ${items.map(i => `
+          <div class="smap-card">
+            <div class="smap-label">${i.mal}</div>
+            <div class="smap-baseline">I dag: <b>${i.baseline}</b></div>
+            <div class="smap-target">2029: <b>${i.mal_2029}</b></div>
+          </div>
+        `).join('')}
       </div>
-      <div style="margin-top:12px;font-size:12px;color:var(--accent);font-weight:600">→ Åpne full strategi-analyse</div>
-    </a>
+    </div>
   `;
 }
 

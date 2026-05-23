@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>M&amp;A-screening — Bodø</title>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<style>
+  body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+  header { padding: 22px 32px 18px; background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%); border-bottom: 1px solid var(--line) }
+  header .crumb { font-size: 12px; color: var(--muted); margin-bottom: 6px }
+  header .crumb a { color: var(--accent); text-decoration: none }
+  header .city-tag { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); background: rgba(79,157,166,0.10); border: 1px solid var(--accent); padding: 3px 10px; border-radius: 10px; margin-bottom: 6px }
+  header h1 { margin: 4px 0 6px; font-size: 22px; font-weight: 600; letter-spacing: -0.015em }
+  header .sub { color: var(--muted); font-size: 13px; max-width: 920px }
+  main { padding: 28px 36px 80px; max-width: 1400px; margin: 0 auto }
+  h2.sec { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin: 28px 0 12px; padding-left: 10px; border-left: 3px solid var(--accent) }
+  .lead { color: var(--muted); font-size: 13px; max-width: 920px; line-height: 1.7; margin-bottom: 14px }
+  .lead b { color: var(--text) }
+
+  .candidates { display: grid; grid-template-columns: 1fr; gap: 14px }
+  .cand {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 22px 26px; border-left: 4px solid var(--accent);
+  }
+  .cand.high { border-left-color: var(--good) }
+  .cand.med { border-left-color: var(--warn) }
+  .cand.low { border-left-color: var(--bad) }
+  .cand.opp { border-left-color: var(--hi) }
+  .cand .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 10px; flex-wrap: wrap }
+  .cand .head .left h3 { margin: 0; font-size: 16px; font-weight: 600 }
+  .cand .head .left .meta { color: var(--muted); font-size: 11px; margin-top: 2px; font-variant-numeric: tabular-nums }
+  .cand .priority {
+    background: var(--panel-2); border: 1px solid var(--line); padding: 4px 12px;
+    border-radius: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .cand.high .priority { background: rgba(63,185,80,0.18); color: var(--good); border-color: var(--good) }
+  .cand.med .priority { background: rgba(210,153,34,0.18); color: var(--warn); border-color: var(--warn) }
+  .cand.low .priority { background: rgba(248,81,73,0.18); color: var(--bad); border-color: var(--bad) }
+  .cand.opp .priority { background: rgba(88,166,255,0.18); color: var(--hi); border-color: var(--hi) }
+  .cand .strap { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; font-style: italic }
+  .cand-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px }
+  .cand-section h4 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600 }
+  .cand-section ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6 }
+  .cand-section ul li { margin-bottom: 3px }
+  .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px }
+  .metric { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px }
+  .metric .l { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em }
+  .metric .v { font-size: 14px; font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums }
+  .metric .v.pos { color: var(--good) }
+  .metric .v.neg { color: var(--bad) }
+
+  table.score { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+  table.score th { background: var(--panel-2); padding: 9px 12px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600 }
+  table.score th.num, table.score td.num { text-align: right; font-variant-numeric: tabular-nums }
+  table.score td { padding: 8px 12px; border-bottom: 1px solid var(--line) }
+  table.score tbody tr:last-child td { border-bottom: 0 }
+  table.score .pill { display: inline-block; padding: 2px 8px; border-radius: 9px; font-size: 11px; font-weight: 600 }
+  table.score .pill.h { background: rgba(63,185,80,0.18); color: var(--good) }
+  table.score .pill.m { background: rgba(210,153,34,0.18); color: var(--warn) }
+  table.score .pill.l { background: rgba(248,81,73,0.18); color: var(--bad) }
+  table.score .pill.o { background: rgba(88,166,255,0.18); color: var(--hi) }
+
+  .seq-card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px; margin-top: 8px }
+  .seq-card h3 { margin: 0 0 8px; font-size: 14px }
+  .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px }
+  .phase { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; border-top: 3px solid var(--accent) }
+  .phase.p1 { border-top-color: var(--good) }
+  .phase.p2 { border-top-color: var(--warn) }
+  .phase.p3 { border-top-color: var(--bad) }
+  .phase h4 { margin: 0 0 4px; font-size: 12px }
+  .phase .when { font-size: 10px; color: var(--muted); margin-bottom: 8px }
+  .phase ul { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6 }
+  .phase .total { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 11px; color: var(--accent-2); font-weight: 600 }
+
+  .footnote { color: var(--muted); font-size: 11px; margin-top: 24px; line-height: 1.6 }
+  .footnote a { color: var(--accent); text-decoration: none }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="ma-screening" data-section="strategi"></div>
+
+<header>
+  <div class="crumb" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;text-transform:uppercase;letter-spacing:0.12em;font-weight:600">
+    <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+    <span>M&amp;A-screening — Bodø</span>
+  </div>
+  <h1>M&amp;A-screening — kandidater for Byggmester Fritzøe</h1>
+  <div class="sub">
+    Strukturert vurdering av oppkjøpsmål i Bodø-bygg basert på 2024-regnskap fra Brreg. Fem kandidater rangert etter strategisk verdi for konsernet, tilpasset offensiv-banen i strategiplanen. Kapitalbehov holdes innenfor SAs 25–40 MNOK kapitalramme for Bodø-utvidelse.
+  </div>
+</header>
+
+<main>
+
+<h2 class="sec">Metodologi</h2>
+<div class="lead">
+  Hver kandidat scores på fire dimensjoner. Strategisk fit = treffer den vår NACE-kjerne (43.320 snekker / 41.000 bygg) og marked (offentlig ROT)? Kjøpspris-attraktivitet = jo mer distressed, jo lavere pris (men høyere integrasjonsrisiko). Integrasjonskompleksitet = hvor lett er det å absorbere virksomheten? Synergi-potensial = hva gir konsolideringen i nye anbud-vinninger eller kostnadsbesparelser?
+  <br><br>
+  Vi viser ikke detaljerte balansetall for kandidatene fordi disse er sterkt påvirket av leasing og konsernbidrag-disposisjoner — kjøpspris-vurdering må gjøres i due diligence, ikke fra Brreg-tall alene.
+</div>
+
+<h2 class="sec">Top kandidater — Bodø</h2>
+<div class="candidates">
+
+  <!-- 1. Snekkern AS -->
+  <div class="cand high" onclick="location.href='ma-kandidat.html?id=snekkern'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>1 · Snekkern AS</h3>
+        <div class="meta">Orgnr 923401083 · NACE 43.320 Snekkerarbeid · 14 ansatte · stiftet 2019</div>
+      </div>
+      <span class="priority">Høy prioritet · Drill →</span>
+    </div>
+    <div class="strap">Direkte konkurrent til Areal Byggservice i NACE 43.320 — eneste rene snekker-aktør i Bodø &gt;5 ansatte utenom oss selv som er distressed.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">16,5 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−16,1 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−2,7 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Distressed</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Symbolsk + 1–3M earnout</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Direkte konsolidering av snekker-segmentet i Bodø — vi går fra 2 (Areal + Snekkern-overtagelse) til 1 dominant aktør</li>
+          <li>14 ansatte med snekker-kompetanse — direkte påfyll til Areal-kapasitet</li>
+          <li>Eliminerer en konkurrent på Bodø kommunes snekker-anbud</li>
+          <li>Etablert kunde-portefølje innen private og borettslag</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Negativ EK krever balanseringsjobb før integrasjon — krever DD</li>
+          <li>2 år med tap (om mønsteret holder) → kulturen er sannsynligvis preget av kuttkultur, ikke vekst</li>
+          <li>Crew-overgang kan møte motstand — Areal-ledere må håndtere relasjon</li>
+          <li>Forpliktelser til pågående prosjekter må kartlegges</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. NBT Bygg -->
+  <div class="cand high" onclick="location.href='ma-kandidat.html?id=nbt-bygg'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>2 · NBT Bygg AS</h3>
+        <div class="meta">Orgnr 927315963 · NACE 41.000 Oppføring · 7 ansatte · stiftet 2021</div>
+      </div>
+      <span class="priority">Høy prioritet · Drill →</span>
+    </div>
+    <div class="strap">Liten oppstart i NACE 41 (oppføring av bygninger) med 6,8 % margin men tunn kapital — billig påfyll til Fritzøe-kapasiteten.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">3,8 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v pos">6,8 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v pos">0,3 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Marginalt levedyktig</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Symbolsk + 0,5–1M</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Nystiftet selskap med driftsmessig sunn kjerne — bare 7 ansatte å integrere</li>
+          <li>NACE 41-pluss-fagansatte gir direkte påfyll til Fritzøe</li>
+          <li>Ingen rammeavtale-kompliserte forpliktelser i porteføljen</li>
+          <li>Liten størrelse betyr lav integrasjonsrisiko og rask synergi-realisering</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Kapitalpåfyll kreves uansett — ikke selvfinansierende</li>
+          <li>Liten skala betyr begrenset synergi-effekt — symbolsk verdi mer enn transformerende</li>
+          <li>Kanskje bedre å la dem dø av seg selv og rekruttere fagfolk individuelt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Byggmester Erling Skipnes -->
+  <div class="cand med" onclick="location.href='ma-kandidat.html?id=skipnes'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>3 · Byggmester Erling Skipnes AS</h3>
+        <div class="meta">Orgnr 877044122 · NACE 41.000 Oppføring · 21 ansatte · stiftet 1996</div>
+      </div>
+      <span class="priority">Middels prioritet · Drill →</span>
+    </div>
+    <div class="strap">Etablert, godt kapitalisert byggmester (EK 18 %) som hadde tapsår 2024. Kandidat for vennlig overtagelse hvis 2025 ikke snur.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">49,0 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−3,4 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−1,7 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Stresset, ikke kritisk</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">5–12 MNOK</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Stor skala (21 ansatte, 49M omsetning) — fordobler Fritzøe på relevant NACE</li>
+          <li>30 års drift i Bodø-marked → etablerte kunderelasjoner og rammeavtaler</li>
+          <li>Sunn balanse (EK 18 %) — drift må snus, ikke restrukturering</li>
+          <li>Integrasjon kan utløse betydelige rammeavtale-overtakelser</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Eier kan ikke ønske å selge — krever vennlig henvendelse</li>
+          <li>Pris reflekterer normal multipler (4–6× snittEBIT) — krever konsernkapital</li>
+          <li>Skipnes-merkevaren kan ikke beholdes hvis intigrert under Fritzøe</li>
+          <li>Større integrasjon = lengre integrasjonstid (12–18 mnd)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Grunn og Betong Bodø -->
+  <div class="cand low" onclick="location.href='ma-kandidat.html?id=grunn-betong'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>4 · Grunn og Betong Bodø AS</h3>
+        <div class="meta">Orgnr 986312161 · NACE 43.120 Grunnarbeid · 8 ansatte · stiftet 2003</div>
+      </div>
+      <span class="priority">Lav prioritet · Drill →</span>
+    </div>
+    <div class="strap">Grunnarbeid er ikke vår NACE-kjerne — kun strategisk verdi hvis vi skal utvide til total-rehab med egen grunn-kapasitet.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">10,7 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−8,2 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−0,9 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Distressed</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Symbolsk + 0,5–1M</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Vil tillate Fritzøe å levere total-rehab med integrert grunn-arbeid</li>
+          <li>Distressed pris — billig oppkjøp</li>
+          <li>Geografisk nær — Bodø-basert</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>NACE 43.120 grunn er utenfor vår strategiske kjerne — skaper ikke sterk synergi</li>
+          <li>Krever egen kompetansebase som vi ikke har</li>
+          <li>Bedre å bruke etablert UE som dagens praksis</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5b. Arvid Bendixen — fra ROT-markedsmodellen (Affectum mars 2026) -->
+  <div class="cand med" style="cursor:default" title="Tilleggskandidat fra ROT-modellen — relevant for Areal">
+    <div class="head">
+      <div class="left">
+        <h3>5b · Arvid Bendixen AS</h3>
+        <div class="meta">NACE 43.34 Maler · 22 ansatte · stiftet 1998 · kilde: <a href="bodo-rot-marked.html">ROT-modellen mars 2026</a></div>
+      </div>
+      <span class="priority">Middels prioritet · Areal-relevant</span>
+    </div>
+    <div class="strap">Etablert maler-konkurrent til Areal — gikk fra +5,3 MNOK EBITDA i 2023 til −2,9 MNOK i 2024 (−9,7 %). Hvis 2025 ikke snur, blir dette en distressed M&amp;A-mulighet for Areal-konsolidering av Bodø-malermarkedet.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">32,0 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−9,7 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−3,0 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Stresset, ferskt tap</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">3–8 MNOK (avh. 2025)</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi (for Areal)</h4>
+        <ul>
+          <li>Konsolidering av maler-segmentet i Bodø — Areal blir dominerende</li>
+          <li>22 fag-malere — fordobler Arealkapasiteten</li>
+          <li>Kunde-overlapp med Areal i borettslags- og kommune-segmentet</li>
+          <li>27 års markedsposisjon i Bodø — etablert merkenavn</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Bare ett tapsår — kan snu i 2025 og bli for dyr</li>
+          <li>Kulturkollisjon mellom etablert tradisjonsbedrift og SA-praksiser</li>
+          <li>Eier-overgang — generasjonsskifte må sannsynligvis håndteres</li>
+          <li>Krever overvåkning av 2025 H1-tall før beslutning</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5c. Bodø Glass og Ramme — fra ROT-markedsmodellen -->
+  <div class="cand opp" style="cursor:default" title="Opportunistisk kandidat — utenfor kjerne men distressed">
+    <div class="head">
+      <div class="left">
+        <h3>5c · Bodø Glass og Ramme AS</h3>
+        <div class="meta">Glass · 16 ansatte · stiftet 1995 · kilde: <a href="bodo-rot-marked.html">ROT-modellen mars 2026</a></div>
+      </div>
+      <span class="priority">Opportunistisk · ikke kjernefag</span>
+    </div>
+    <div class="strap">Markant tap 2024 (−22 % EBITDA, −8 MNOK driftsresultat). Glass er ikke vår NACE-kjerne, men distressed nivå gjør dette interessant hvis vi vil utvide ROT-tilbudet med totalentreprise-element.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">36,7 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v neg">−22,1 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−8,0 MNOK</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Distressed</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">Symbolsk + earnout</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>Glass er en kritisk komponent i totalentreprise — internalisering reduserer UE-avhengighet</li>
+          <li>Distressed pris — minimal kapitalbinding</li>
+          <li>30 års markedsposisjon med kjente kunder</li>
+          <li>Glassproffen (lønnsom konkurrent) er alternativet — forhandlingsposisjon</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Glass er ikke vår kompetanse — krever ledelse vi ikke har</li>
+          <li>Å beholde fagansatte i en akutt tapssituasjon er utfordrende</li>
+          <li>Bedre å bruke Glassproffen som UE enn å bli operatør selv</li>
+          <li>Lavprioritet — vurder kun hvis Glassproffen ikke er tilgjengelig som UE-partner</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Byggproffen -->
+  <div class="cand opp" onclick="location.href='ma-kandidat.html?id=byggproffen'" style="cursor:pointer" title="Klikk for full vurdering">
+    <div class="head">
+      <div class="left">
+        <h3>5 · Byggproffen Bodø AS</h3>
+        <div class="meta">Orgnr 922068852 · NACE 41.000 Oppføring · 26 ansatte · stiftet 2019</div>
+      </div>
+      <span class="priority">Opportunistisk · Drill →</span>
+    </div>
+    <div class="strap">Stor aktør (47,8M oms, 26 ansatte) men kun 1,3 % EK-andel. Hvis 2025 svekker dem ytterligere, er dette en transformativ mulighet.</div>
+    <div class="metrics">
+      <div class="metric"><div class="l">Omsetning 2024</div><div class="v">47,8 MNOK</div></div>
+      <div class="metric"><div class="l">Driftsmargin</div><div class="v pos">2,3 %</div></div>
+      <div class="metric"><div class="l">Driftsresultat</div><div class="v neg">−0,9 MNOK årsresultat</div></div>
+      <div class="metric"><div class="l">Tilstand</div><div class="v">Sårbar</div></div>
+      <div class="metric"><div class="l">Estimert kjøpspris</div><div class="v">8–15 MNOK</div></div>
+    </div>
+    <div class="cand-grid">
+      <div class="cand-section">
+        <h4>Hvorfor strategisk verdi</h4>
+        <ul>
+          <li>26 ansatte — nesten dobler Fritzøe-bemanningen</li>
+          <li>NACE 41 oppføring — direkte i strategisk kjerne</li>
+          <li>Hvis distressed kan bli rimelig oppkjøp</li>
+          <li>Konsolidert ville vi være ledende byggmester i Bodø sammen med Gunvald Johansen Bygg</li>
+        </ul>
+      </div>
+      <div class="cand-section">
+        <h4>Risikoer og forutsetninger</h4>
+        <ul>
+          <li>Ikke distressed nok ennå — krever overvåkning av 2025-tall</li>
+          <li>Større integrasjon = mer kompleks (kultur, prosesser, IT)</li>
+          <li>Skala betyr at integrasjon kan ta 18–24 mnd og distrahere kjernevirksomheten</li>
+          <li>Kapitalbehov vil presse SA-konsernet ut over 25–40 MNOK rammen</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2 class="sec">Scoring-matrise</h2>
+<table class="score">
+  <thead>
+    <tr>
+      <th>Kandidat</th>
+      <th>Strategisk fit</th>
+      <th>Pris-attraktivitet</th>
+      <th>Integrasjonsletthet</th>
+      <th>Synergi-potensial</th>
+      <th>Samlet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>Snekkern AS</b></td><td><span class="pill h">5/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill h">18/20</span></td></tr>
+    <tr><td><b>NBT Bygg</b></td><td><span class="pill h">4/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill h">17/20</span></td></tr>
+    <tr><td><b>Byggmester Erling Skipnes</b></td><td><span class="pill h">4/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill m">15/20</span></td></tr>
+    <tr><td><b>Grunn og Betong Bodø</b></td><td><span class="pill l">2/5</span></td><td><span class="pill h">4/5</span></td><td><span class="pill m">3/5</span></td><td><span class="pill l">2/5</span></td><td><span class="pill l">11/20</span></td></tr>
+    <tr><td><b>Byggproffen Bodø</b></td><td><span class="pill h">4/5</span></td><td><span class="pill o">3/5*</span></td><td><span class="pill l">2/5</span></td><td><span class="pill h">5/5</span></td><td><span class="pill o">14/20*</span></td></tr>
+  </tbody>
+</table>
+<div class="footnote" style="margin-top:8px">* Byggproffen-scoren forutsetter at de blir mer distressed i 2025–2026. I dagens tilstand er de for dyre.</div>
+
+<h2 class="sec">Anbefalt sekvensering</h2>
+<div class="seq-card">
+  <h3>Tre-fase plan over 18 måneder</h3>
+  <div class="lead" style="margin-bottom:0">
+    Sekvensering valgt for å holde integrasjonsrisiko parallel-håndterbar — maks ett pågående større oppkjøp om gangen.
+  </div>
+  <div class="phase-grid">
+    <div class="phase p1">
+      <h4>Fase 1 · Q3 2026</h4>
+      <div class="when">Quick wins, lav risiko</div>
+      <ul>
+        <li><b>NBT Bygg</b> (~1 MNOK)</li>
+        <li><b>Snekkern AS</b> (symbolsk + 1–3M earnout)</li>
+      </ul>
+      <div class="total">Kapital: ~ 2–4 MNOK + earnouts</div>
+    </div>
+    <div class="phase p2">
+      <h4>Fase 2 · Q1–Q2 2027</h4>
+      <div class="when">Strategisk hovedoppkjøp</div>
+      <ul>
+        <li><b>Byggmester Erling Skipnes</b> (5–12 MNOK)</li>
+        <li>Forutsetning: Skipnes-eier åpen for vennlig samtale</li>
+      </ul>
+      <div class="total">Kapital: 5–12 MNOK</div>
+    </div>
+    <div class="phase p3">
+      <h4>Fase 3 · Q4 2027+</h4>
+      <div class="when">Opportunistisk, kun hvis utløst</div>
+      <ul>
+        <li><b>Byggproffen Bodø</b> (8–15 MNOK)</li>
+        <li>Kun hvis 2025/2026 viser ytterligere svakhet</li>
+      </ul>
+      <div class="total">Kapital: 8–15 MNOK · betinget</div>
+    </div>
+  </div>
+</div>
+
+<div class="footnote">
+  <b>Total kapital:</b> 7–16 MNOK ved fase 1–2, opptil 31 MNOK inkludert opportunistisk fase 3. Innenfor SA-konsernets ramme på 25–40 MNOK for Bodø-utvidelse i offensiv-banen.
+  <br><b>Kandidatkilde:</b> <a href="bodo-rot-marked.html">Bransjedashboard Bodø 2024</a> — alle kandidater er bekreftet aktive AS via Brreg.
+  <br><b>Tilkoblede sider:</b>
+  <a href="bodo-rot-marked.html">Bransjekart Bodø</a>
+</div>
+
+</main>
+<script src="../sidebar.js"></script>
+</body>
+</html>

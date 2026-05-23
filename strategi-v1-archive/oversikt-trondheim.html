@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Selskapsoversikt — Braa og Sørvåg Bygg · Trondheim</title>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<style>
+  body { font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif }
+
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .page { padding: 22px 32px; max-width: 1400px; margin: 0 auto }
+
+  :root {
+    --bg-soft: var(--panel);
+    --bg-soft-2: var(--panel-2);
+    --accent: var(--warn);
+    --accent-light: var(--warn-soft);
+    --good-bg: var(--good-soft);
+    --warn-bg: var(--warn-soft);
+    --bad-bg: var(--bad-soft);
+    --hi-bg: var(--hi-soft);
+    --fg: var(--text);
+    --base: var(--hi);
+    --offensive: var(--warn);
+    --bull: var(--good);
+  }
+
+  .mockup-banner {
+    background: var(--warn-soft); border-left: 3px solid var(--warn);
+    padding: 9px 14px; margin-bottom: 14px; font-size: 11.5px; color: var(--text); border-radius: 0 4px 4px 0;
+  }
+
+  /* Quad — fri layout, ikke A4-bundet */
+  .quad {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px;
+  }
+  @media (max-width: 900px) { .quad { grid-template-columns: 1fr } }
+  .q {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; display: flex; flex-direction: column;
+  }
+  .q .qhead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px }
+  .q h2 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); font-weight: 700 }
+  .q .who { color: var(--muted); font-size: 9px; font-weight: 500 }
+  .q .body { flex: 1; display: flex; flex-direction: column; gap: 8px }
+
+  .mini-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px }
+  .mini-kpi { background: white; border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px }
+  .mini-kpi .l { color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600 }
+  .mini-kpi .v { font-size: 17px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; color: var(--fg); line-height: 1.1 }
+  .mini-kpi .v small { font-size: 11px; font-weight: 500; color: var(--muted) }
+  .mini-kpi .d { color: var(--muted); font-size: 9px; margin-top: 1px }
+  .mini-kpi.good { border-left: 3px solid var(--good); background: var(--good-bg) }
+  .mini-kpi.warn { border-left: 3px solid var(--warn); background: var(--warn-bg) }
+  .mini-kpi.bad  { border-left: 3px solid var(--bad);  background: var(--bad-bg) }
+  .mini-kpi.hi   { border-left: 3px solid var(--hi);   background: var(--hi-bg) }
+  .mini-kpi.acc  { border-left: 3px solid var(--accent); background: var(--accent-light) }
+
+  .narr { color: var(--fg); font-size: 10.5px; line-height: 1.55; margin-top: 8px }
+  .narr b { color: var(--accent) }
+  .narr ul { margin: 4px 0 0 0; padding-left: 16px }
+  .narr ul li { margin-bottom: 2px }
+
+  .scen-bar { background: white; border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; position: relative }
+  .scen-bar h4 { margin: 0 0 6px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600 }
+  .scen-track { position: relative; height: 36px; padding: 0 4px }
+  .scen-track .axis {
+    position: absolute; left: 6%; right: 6%; top: 50%; height: 6px;
+    background: linear-gradient(90deg, var(--base), #b89e7a, var(--bull));
+    border-radius: 3px; transform: translateY(-50%);
+  }
+  .scen-track .marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: white; border: 3px solid var(--fg) }
+  .scen-track .label-current { position: absolute; top: -2px; transform: translateX(-50%); background: var(--fg); color: white; font-size: 8px; padding: 1px 5px; border-radius: 3px; font-weight: 600 }
+  .scen-track .label-current::after { content: ""; position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); border: 3px solid transparent; border-top-color: var(--fg) }
+  .scen-points { display: grid; grid-template-columns: 1fr 1fr 1fr; font-size: 9px; color: var(--muted); margin-top: 4px }
+  .scen-points div { text-align: center }
+  .scen-points b { display: block; color: var(--fg); font-size: 11px; font-weight: 700 }
+
+  .impl-track { display: grid; grid-template-columns: repeat(14, 1fr); gap: 1px; background: var(--line); padding: 1px; border-radius: 3px }
+  .impl-track .w { background: var(--bg-soft-2); height: 18px; position: relative; font-size: 7px; color: var(--muted); display: flex; align-items: center; justify-content: center }
+  .impl-track .w.done { background: var(--good); color: white; font-weight: 700 }
+  .impl-track .w.now { background: var(--warn); color: white; font-weight: 700 }
+  .impl-mods { font-size: 9.5px; line-height: 1.55; margin-top: 6px }
+  .impl-mods .row { display: grid; grid-template-columns: 14px 1fr auto; gap: 4px; align-items: center; padding: 1px 0 }
+  .impl-mods .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .impl-mods .dot.done { background: var(--good) }
+  .impl-mods .dot.now { background: var(--warn) }
+  .impl-mods .dot.next { background: var(--line); border: 1px solid var(--muted) }
+  .impl-mods .pct { color: var(--muted); font-size: 9px; font-variant-numeric: tabular-nums }
+
+  .foot { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: var(--muted) }
+  .foot .links a { color: var(--accent); text-decoration: none; margin-right: 10px }
+
+  .mini-trend { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5px; align-items: end; height: 32px; background: white; padding: 4px; border-radius: 3px; border: 1px solid var(--line) }
+  .mini-trend .b { background: var(--accent); border-radius: 1px; min-height: 2px }
+  .mini-trend-lbl { display: grid; grid-template-columns: repeat(12, 1fr); font-size: 7px; color: var(--muted); margin-top: 2px; text-align: center }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="oversikt" data-section="strategi"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="referanse">Referanse</span>
+      <span>Selskapsoversikt — Trondheim</span>
+    </div>
+    <h1>Braa og Sørvåg Bygg AS — én-side øyeblikksbilde</h1>
+    <div class="ph-meta-row">
+      <span>Periode: <b>April 2026 (hittil i år)</b></span>
+      <span>Versjon: <b>v1.0</b> · 30. april 2026</span>
+      <span>DL: <b>Øyvind Berggren</b></span>
+      <span>Adresse: <b>Tillerbruvegen 76, 7092 Tiller</b></span>
+      <span>Datakilde: <b>PowerOffice Go</b></span>
+    </div>
+  </header>
+
+<div class="page">
+
+  <div class="mockup-banner">
+    <b>Mockup:</b> Tallene i operativt og økonomi-kvadrantene er eksempeldata. Strukturen er klar for reelle data fra DL Berggren.
+  </div>
+
+  <div class="quad">
+
+    <!-- KVADRANT 1: OPERATIVT -->
+    <div class="q">
+      <div class="qhead">
+        <h2>① Operativt — pipeline &amp; anbud</h2>
+        <span class="who">Daglig leder · Berggren</span>
+      </div>
+      <div class="body">
+        <div class="mini-kpis">
+          <div class="mini-kpi hi">
+            <div class="l">Innkommende i pipeline</div>
+            <div class="v">14 <small>· siste 7 d</small></div>
+            <div class="d">Mercell · TendSign · Doffin · CoBrief · SA Forsikring</div>
+          </div>
+          <div class="mini-kpi good">
+            <div class="l">Hit-rate (90 d)</div>
+            <div class="v">67 %</div>
+            <div class="d">16 vunnet av 24 avgjorte</div>
+          </div>
+          <div class="mini-kpi acc">
+            <div class="l">Verdi i pipeline</div>
+            <div class="v">5,9 <small>MNOK</small></div>
+            <div class="d">2 anbud avventer beslutning</div>
+          </div>
+          <div class="mini-kpi warn">
+            <div class="l">Frist neste 14 d</div>
+            <div class="v">5</div>
+            <div class="d">På tvers av anbud og forsikringsoppdrag</div>
+          </div>
+        </div>
+        <div class="narr">
+          <b>Status:</b> Pipeline tar seg opp — Trondheim-anbud-apparatet etablert i Q1 etter SA-konsolidering. Hit-rate 67 % er svakere enn Bodø (73 %), reflekterer modenhetsforskjell.
+          <ul>
+            <li>Vunnet uke: Olavshallen foaje (2,4 MNOK), Brundalen omsorgsboliger (1,1 MNOK)</li>
+            <li>Tap uke: Heimdal vgs fasade (Trønder Fasade vant) — vurder priskalkulasjon på fasadejobber</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- KVADRANT 2: ØKONOMI -->
+    <div class="q">
+      <div class="qhead">
+        <h2>② Økonomi — drift hittil 2026</h2>
+        <span class="who">DL → SA-COO · ukentlig</span>
+      </div>
+      <div class="body">
+        <div class="mini-kpis">
+          <div class="mini-kpi acc">
+            <div class="l">Omsetning hittil</div>
+            <div class="v">18,5 <small>MNOK</small></div>
+            <div class="d">+9 % vs samme periode 2025</div>
+          </div>
+          <div class="mini-kpi good">
+            <div class="l">EBIT-margin hittil</div>
+            <div class="v">7,5 %</div>
+            <div class="d">2024 helår 0,6 % · markant marginløft</div>
+          </div>
+          <div class="mini-kpi hi">
+            <div class="l">Lønn / omsetning</div>
+            <div class="v">47,6 %</div>
+            <div class="d">8,8 MNOK · 32 ansatte</div>
+          </div>
+          <div class="mini-kpi warn">
+            <div class="l">Materialkost / omsetning</div>
+            <div class="v">27,6 %</div>
+            <div class="d">+2,1 %p vs plan</div>
+          </div>
+        </div>
+        <div style="margin-top:6px">
+          <div class="mini-trend">
+            <div class="b" style="height:42%"></div>
+            <div class="b" style="height:46%"></div>
+            <div class="b" style="height:38%"></div>
+            <div class="b" style="height:49%"></div>
+            <div class="b" style="height:51%"></div>
+            <div class="b" style="height:54%"></div>
+            <div class="b" style="height:52%"></div>
+            <div class="b" style="height:46%"></div>
+            <div class="b" style="height:43%"></div>
+            <div class="b" style="height:46%"></div>
+            <div class="b" style="height:49%"></div>
+            <div class="b" style="height:48%"></div>
+          </div>
+          <div class="mini-trend-lbl">
+            <span>m</span><span>j</span><span>j</span><span>a</span><span>s</span><span>o</span><span>n</span><span>d</span><span>j</span><span>f</span><span>m</span><span>a</span>
+          </div>
+        </div>
+        <div class="narr">
+          <b>Driftshelse:</b> Marginløft fra 0,6 % (2024 helår) til 7,5 % YTD. Drevet av strammere kalkulasjons-disiplin. Lade barnehage er flagget for tett oppfølging — fremdrift bak plan. <b>Note:</b> Balansestørrelser tolkes ikke direkte (leasing + konsernbidrag-disposisjoner).
+        </div>
+      </div>
+    </div>
+
+    <!-- KVADRANT 3: STRATEGISK -->
+    <div class="q">
+      <div class="qhead">
+        <h2>③ Strategisk — scenario-status</h2>
+        <span class="who">Styret · halvårlig</span>
+      </div>
+      <div class="body">
+        <div class="scen-bar">
+          <h4>Hvor er vi på scenariobanene?</h4>
+          <div class="scen-track">
+            <div class="axis"></div>
+            <div class="label-current" style="left:35%">Hittil 2026: 18,5 MNOK · YTD-bane mot 60 MNOK helår</div>
+            <div class="marker" style="left:35%"></div>
+          </div>
+          <div class="scen-points">
+            <div><b>Base</b>77 MNOK 2029</div>
+            <div><b>Offensiv</b>102 MNOK 2029</div>
+            <div><b>Bull</b>137 MNOK 2029</div>
+          </div>
+        </div>
+        <div class="mini-kpis" style="margin-top:6px">
+          <div class="mini-kpi hi">
+            <div class="l">Aktive rammeavtaler</div>
+            <div class="v">4</div>
+            <div class="d">Trondheim k. · Trøndelag fylke · Helse Midt · Forsvarsbygg</div>
+          </div>
+          <div class="mini-kpi good">
+            <div class="l">Geografisk dekning</div>
+            <div class="v">Trondheim</div>
+            <div class="d">Trøndelag-utvidelse Q3 2027</div>
+          </div>
+          <div class="mini-kpi warn">
+            <div class="l">M&amp;A-leads identifisert</div>
+            <div class="v">1</div>
+            <div class="d">Innherred-segment · screening pågår</div>
+          </div>
+          <div class="mini-kpi acc">
+            <div class="l">EPC-portefølje</div>
+            <div class="v">0</div>
+            <div class="d">Pilot Trondheim år 2 (etter Bodø)</div>
+          </div>
+        </div>
+        <div class="narr">
+          <b>Vurdering:</b> Hovedfokus er marginkonsolidering — vi er i base-banen, og må demonstrere stabil 6 %+ EBIT i 2026 før eskalering vurderes. <b>Triggere for offensiv-bane:</b> hit-rate stabilt &gt;65 %, vunnet ny rammeavtale Helse Midt 2027–2030.
+        </div>
+      </div>
+    </div>
+
+    <!-- KVADRANT 4: IMPLEMENTERING -->
+    <div class="q">
+      <div class="qhead">
+        <h2>④ Implementering — 14-ukers stack</h2>
+        <span class="who">DL → Styret → SA-konsern</span>
+      </div>
+      <div class="body">
+        <div class="impl-track">
+          <div class="w done">1</div><div class="w done">2</div><div class="w done">3</div>
+          <div class="w done">4</div><div class="w done">5</div>
+          <div class="w now">6</div>
+          <div class="w">7</div><div class="w">8</div><div class="w">9</div><div class="w">10</div>
+          <div class="w">11</div><div class="w">12</div><div class="w">13</div><div class="w">14</div>
+        </div>
+        <div class="impl-mods">
+          <div class="row"><div class="dot done"></div><div>M1 Pipeline-portal i drift</div><div class="pct">100 %</div></div>
+          <div class="row"><div class="dot done"></div><div>M2 Doffin-monitor</div><div class="pct">100 %</div></div>
+          <div class="row"><div class="dot done"></div><div>M3 CoBrief Pro abonnement</div><div class="pct">100 %</div></div>
+          <div class="row"><div class="dot done"></div><div>M4 Mercell e-post-bro</div><div class="pct">100 %</div></div>
+          <div class="row"><div class="dot now"></div><div>M5 HoltePortalen ↔ PowerOffice Go</div><div class="pct">55 %</div></div>
+          <div class="row"><div class="dot next"></div><div>M6 PowerOffice REST → margin live</div><div class="pct">starter U6</div></div>
+          <div class="row"><div class="dot next"></div><div>M7 Mercell Supplier API</div><div class="pct">forhandling</div></div>
+          <div class="row"><div class="dot next"></div><div>M8 ServiceAlliansen-rapportering</div><div class="pct">U10</div></div>
+          <div class="row"><div class="dot next"></div><div>M9 SA Forsikringsstrøm-onboarding</div><div class="pct">parallelt</div></div>
+        </div>
+        <div class="narr">
+          <b>Status:</b> Felles SA-konsernprosjekt — Trondheim drar nytte av samme M5/M6/M9-eksekvering som Bodø. <b>Trondheim-spesifikt:</b> Etablering av rutinene rundt margin live-varsel er kritisk — det er marginstabiliteten dashboardet skal hjelpe Berggren med å beskytte.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot" style="margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px">
+    <div>Kilder: PowerOffice Go · Brønnøysund Regnskapsregisteret · Mercell/Doffin · CoBrief · SSB</div>
+    <div class="links">
+      <a href="../index.html" style="color:var(--accent-2);margin-right:10px">Dashboard</a>
+      <a href="../okonomi-trondheim.html" style="color:var(--accent-2);margin-right:10px">Økonomi</a>
+      <a href="../anbud-trondheim.html" style="color:var(--accent-2);margin-right:10px">Anbud</a>
+      <a href="../implementering.html" style="color:var(--accent-2)">Teknisk plan</a>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<script src="../sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+// Auto-generert
+window.STRATEGI_PAYLOAD = {
+  "schema": "1.0",
+  "selskap_id": "byggmester-fritzoe",
+  "meta": {
+    "status": "utkast",
+    "sist_endret": "2026-04-30",
+    "sist_endret_av": "Halvard Nordang (portal-eier)"
+  },
+  "retning": {
+    "kort": "Saltens foretrukne ROT-partner",
+    "lang": "Bli Saltens foretrukne ROT-partner for offentlig sektor, forsikringsskader og borettslag — gjennom fagdyktig håndverk, leveringssikkerhet og SA-konsernsynergier."
+  },
+  "fokus": [
+    {
+      "id": "f1",
+      "tekst": "Helse Nord RHF — rammeavtale (frist juni)",
+      "rekkefolge": 1,
+      "aktiv": true
+    },
+    {
+      "id": "f2",
+      "tekst": "CoBrief i produksjon Q3",
+      "rekkefolge": 2,
+      "aktiv": true
+    },
+    {
+      "id": "f3",
+      "tekst": "Lærlingprogram mot 8",
+      "rekkefolge": 3,
+      "aktiv": true
+    }
+  ],
+  "maal": [
+    {
+      "id": "m1",
+      "navn": "Hit-rate anbud",
+      "naa": "72 %",
+      "mal": "75 %",
+      "frist": "2026-12-31",
+      "status": "pa-sporet"
+    },
+    {
+      "id": "m2",
+      "navn": "Driftsmargin",
+      "naa": "7,7 %",
+      "mal": "7,8 %",
+      "frist": "2026-12-31",
+      "status": "pa-sporet"
+    },
+    {
+      "id": "m3",
+      "navn": "Lærlinger",
+      "naa": "5",
+      "mal": "8",
+      "frist": "2029-12-31",
+      "status": "pa-sporet"
+    },
+    {
+      "id": "m4",
+      "navn": "Andel rammeavtaler",
+      "naa": "< 25 %",
+      "mal": "≥ 40 %",
+      "frist": "2029-12-31",
+      "status": "pa-sporet"
+    }
+  ],
+  "tiltak": [
+    {
+      "id": "t1",
+      "navn": "Anbudsdisiplin + AI-screening (CoBrief)",
+      "ansvarlig": "DL",
+      "status": "i-planlegging",
+      "fremdrift_pct": 15,
+      "neste_steg": "CoBrief-implementering avklart, utrulling planlagt Q3 2026",
+      "frist": "2026-09-30",
+      "kommentar": "CoBrief-implementering avklart, utrulling planlagt Q3 2026",
+      "kommentar_dato": "2026-04-15"
+    },
+    {
+      "id": "t2",
+      "navn": "Rammeavtaler offentlig sektor",
+      "ansvarlig": "DL + kalkulator",
+      "status": "pa-sporet",
+      "fremdrift_pct": 35,
+      "neste_steg": "Send tilbud Helse Nord innen 12. juni",
+      "frist": "2026-06-12",
+      "kommentar": "Forsvarsbygg-rammen aktiv. Helse Nord RHF i pipeline",
+      "kommentar_dato": "2026-04-22"
+    },
+    {
+      "id": "t3",
+      "navn": "Lærlingprogram 5 → 8",
+      "ansvarlig": "DL + SA Læring",
+      "status": "pa-sporet",
+      "fremdrift_pct": 50,
+      "neste_steg": "2 nye lærlinger — oppstart Q3 2026",
+      "frist": "2026-12-31",
+      "kommentar": "5 av 8 på plass",
+      "kommentar_dato": "2026-04-10"
+    },
+    {
+      "id": "t4",
+      "navn": "Forsikringsstrøm via SA",
+      "ansvarlig": "DL + SA Forsikring",
+      "status": "ikke-startet",
+      "fremdrift_pct": 0,
+      "neste_steg": "Avklar med SA når Offensiv-scenario aktiveres",
+      "frist": "2027-06-30",
+      "kommentar": "",
+      "kommentar_dato": null
+    },
+    {
+      "id": "t5",
+      "navn": "Energi-rehab pakke (TEK17/EPBD)",
+      "ansvarlig": "DL + kalkulator",
+      "status": "ikke-startet",
+      "fremdrift_pct": 0,
+      "neste_steg": "Konsept-utvikling Q4 2026",
+      "frist": "2026-12-31",
+      "kommentar": "",
+      "kommentar_dato": null
+    }
+  ],
+  "kvartal": {
+    "periode": "2026-Q2",
+    "notat": "",
+    "endringer": ""
+  },
+  "bakgrunn": {
+    "swot": {
+      "styrker": [
+        "Markedsrang #2 i Bodø ROT (Fritzøe+Areal samlet)",
+        "EBITDA 8,2 % — over bransjesnitt",
+        "ROT-andel 65 % — beskyttet mot konjunktur",
+        "5 lærlinger av 31"
+      ],
+      "svakheter": [
+        "Lav egenkapital",
+        "Konsentrert i Bodø",
+        "Forsikringsstrøm ikke aktivert",
+        "Manuell anbudsprosess før CoBrief"
+      ],
+      "muligheter": [
+        "Bodø ROT-marked 2 346 MNOK — rom for vekst",
+        "SA forsikringsstrøm",
+        "Energi-rehab etter TEK17/EPBD"
+      ],
+      "trusler": [
+        "Rentepress på kommunale ROT-budsjetter",
+        "Fagarbeidermangel",
+        "Volatile materialpriser"
+      ]
+    }
+  },
+  "okonomi": {
+    "kilde": {
+      "leverandor": "brreg_regnskapsregisteret",
+      "vises_som": "Brønnøysundregistrene (Proff.no)",
+      "orgnr": "984343442",
+      "sist_hentet": "2026-05-22"
+    },
+    "regnskap": [
+      {
+        "ar": 2024,
+        "periode_fra": "2024-01-01",
+        "periode_til": "2024-12-31",
+        "driftsinntekter_kr": 72040277,
+        "driftsresultat_kr": 5557410,
+        "resultat_foer_skatt_kr": 5655335,
+        "arsresultat_kr": 4408450,
+        "sum_eiendeler_kr": 16094624,
+        "sum_egenkapital_kr": 1480339,
+        "driftsmargin_pct": 7.7,
+        "valuta": "NOK",
+        "fra_brreg": true,
+        "redigerbar": true
+      }
+    ],
+    "budsjett": {
+      "2027": {
+        "driftsinntekter_kr": 77803499,
+        "driftsresultat_kr": 5990869,
+        "driftsmargin_pct": 7.7,
+        "arsresultat_kr": null,
+        "kommentar": "Utkast — +8 % omsetning fra 2024-regnskap",
+        "redigerbar": true
+      }
+    }
+  }
+};

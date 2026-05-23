@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rediger strategi</title>
+<link rel="stylesheet" href="app.css">
+<script src="config.js"></script>
+<script src="data-loader.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+<style>
+  /* save bar — DL name + password */
+  .save-bar .auth {
+    display: flex; gap: 10px; flex: 1; align-items: flex-end;
+    max-width: 460px;
+  }
+  .save-bar .auth .field { margin: 0; flex: 1; }
+  .save-bar .auth .field-label {
+    font-size: 9.5px; letter-spacing: 0.12em; margin-bottom: 4px;
+  }
+  .save-bar .auth .input {
+    background: #fff; padding: 7px 11px; font-size: 13px;
+  }
+  .save-msg {
+    font-family: "Geist Mono", monospace;
+    font-size: 11.5px;
+    padding: 6px 12px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+    display: none;
+  }
+  .save-msg.show { display: inline-flex; align-items: center; gap: 8px; }
+  .save-msg.ok { background: var(--strat-soft); color: var(--strat); }
+  .save-msg.err { background: var(--bad-soft); color: var(--bad); }
+  .save-msg.info { background: var(--paper-2); color: var(--ink-2); }
+  .save-msg a {
+    color: inherit; text-decoration: underline;
+  }
+  .editor-section.disabled {
+    opacity: 0.5; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="app-mount"></div>
+
+<script>
+// ============================================================
+// EDITOR STATE
+// ============================================================
+const STATE = {
+  selskapId: null,
+  selskap: null,
+  doc: null,
+  dirty: false,
+  autosaveTimer: null,
+};
+
+function markDirty() {
+  STATE.dirty = true;
+  const dot = document.getElementById('dirty-dot');
+  if (dot) {
+    dot.classList.add('dirty');
+    dot.textContent = 'Ulagrede endringer';
+  }
+  clearTimeout(STATE.autosaveTimer);
+  STATE.autosaveTimer = setTimeout(() => {
+    window.DATA.saveDraft(STATE.selskapId, STATE.doc);
+    const t = document.getElementById('local-time');
+    if (t) t.textContent = fmtTimeShort(new Date());
+  }, 600);
+}
+
+function fmtTimeShort(d) {
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+}
+
+function showMsg(kind, text, html) {
+  const el = document.getElementById('save-msg');
+  if (!el) return;
+  el.className = 'save-msg show ' + kind;
+  if (html) el.innerHTML = html;
+  else el.textContent = text;
+}
+
+function hideMsg() {
+  const el = document.getElementById('save-msg');
+  if (el) el.className = 'save-msg';
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  const m = document.getElementById('toast-msg');
+  if (m) m.textContent = msg;
+  el?.classList.add('show');
+  setTimeout(() => el?.classList.remove('show'), 2400);
+}
+
+// ============================================================
+// FORM rendering — fra STATE.doc til DOM
+// ============================================================
+function buildForm() {
+  const doc = STATE.doc;
+  const selskap = STATE.selskap;
+  const statusLabel = window.SA_CONFIG.statusLabels.meta[doc.meta?.status] || 'Utkast';
+
+  return `
+    <div class="page-hd">
+      <div>
+        <div class="crumb">
+          <span class="pill" style="background:#f4ead4;color:#a87f2e">Rediger</span>
+          <span>${selskap.label} · Strategi 2026–2029</span>
+        </div>
+        <h1>Rediger strategien</h1>
+      </div>
+      <div class="doc-status">
+        <div class="row"><span class="lab">Endret av</span><span class="val">${window.RENDER.esc(doc.meta?.sist_endret_av || '—')}</span></div>
+        <div class="row"><span class="lab">Lokalt utkast</span><span class="val" id="local-time">—</span></div>
+        <div class="row"><span class="lab">Publisert</span><span class="val">${window.RENDER.fmtDate(doc.meta?.sist_endret)}</span></div>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <div class="editor-intro">
+        <p class="lead-text">
+          Du redigerer strategien for <b>${selskap.label}</b>. Endringer lagres
+          lokalt mens du skriver, og publiseres til GitHub når du trykker
+          <b>Lagre + publiser</b>. <i>«Send til validering»</i> sender
+          dokumentet til styreleder.
+        </p>
+        <div class="info-box">
+          <b>Lagring</b> går via <code>${window.RENDER.esc(window.DATA.getPushUrl())}</code>.
+          DL-passord trengs for å publisere — sett som <code>DL_SECRET_*</code> i Vercel.
+        </div>
+      </div>
+
+      ${renderStepper(doc.meta?.status)}
+
+      ${renderRetningEditor(doc)}
+      ${renderFokusEditor(doc)}
+      ${renderMaalEditor(doc)}
+      ${renderTiltakEditor(doc)}
+      ${renderBudsjettEditor(doc)}
+      ${renderKvartalEditor(doc)}
+
+    </div>
+
+    <div class="save-bar">
+      <div class="status-line">
+        <span class="saved-dot" id="dirty-dot">Lagret lokalt</span>
+        <span class="save-msg" id="save-msg"></span>
+      </div>
+      <div class="auth">
+        <div class="field">
+          <label class="field-label" for="dl-navn">Ditt navn</label>
+          <input class="input" type="text" id="dl-navn" placeholder="${window.RENDER.esc(selskap.dl)}">
+        </div>
+        <div class="field">
+          <label class="field-label" for="dl-pass">Passord</label>
+          <input class="input" type="password" id="dl-pass" placeholder="DL_SECRET_*">
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="index.html">Avbryt</a>
+        <button class="btn" onclick="saveDraftOnly()">Lagre lokalt</button>
+        <button class="btn" onclick="publish('utkast')">Lagre + publiser</button>
+        <button class="btn primary" onclick="publish('validert')">Send til validering →</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"><span class="ic">✓</span><span id="toast-msg">Lagret</span></div>
+  `;
+}
+
+function renderStepper(status) {
+  const steps = [
+    { key: 'utkast', lab: 'Steg 1', nm: 'Utkast', sub: 'DL eier' },
+    { key: 'validert', lab: 'Steg 2', nm: 'Validert', sub: 'Styreleder' },
+    { key: 'vedtatt', lab: 'Steg 3', nm: 'Vedtatt', sub: 'Styremøte' },
+  ];
+  const idx = steps.findIndex(s => s.key === status);
+  const cur = idx >= 0 ? idx : 0;
+  const rows = steps.map((s, i) => {
+    const cls = i < cur ? 'done' : (i === cur ? 'active' : '');
+    return { ...s, cls };
+  });
+  return `
+    <div class="status-stepper">
+      <div class="step ${rows[0].cls}">
+        <div class="circle">${rows[0].cls === 'done' ? '✓' : '●'}</div>
+        <div class="info">
+          <span class="lab">${rows[0].lab}${cur === 0 ? ' · nå' : ''}</span>
+          <span class="nm">${rows[0].nm}</span>
+          <span class="sub">${rows[0].sub}</span>
+        </div>
+      </div>
+      <div class="connector ${rows[0].cls === 'done' ? 'done' : ''}"></div>
+      <div class="step ${rows[1].cls}">
+        <div class="circle">${rows[1].cls === 'done' ? '✓' : '2'}</div>
+        <div class="info">
+          <span class="lab">${rows[1].lab}${cur === 1 ? ' · nå' : ''}</span>
+          <span class="nm">${rows[1].nm}</span>
+          <span class="sub">${rows[1].sub}</span>
+        </div>
+      </div>
+      <div class="connector ${rows[1].cls === 'done' ? 'done' : ''}"></div>
+      <div class="step ${rows[2].cls}">
+        <div class="circle">${rows[2].cls === 'done' ? '✓' : '3'}</div>
+        <div class="info">
+          <span class="lab">${rows[2].lab}${cur === 2 ? ' · nå' : ''}</span>
+          <span class="nm">${rows[2].nm}</span>
+          <span class="sub">${rows[2].sub}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRetningEditor(doc) {
+  return `
+    <div class="editor-section" data-sec="retning">
+      <div class="sec-head">
+        <h2>Retning</h2>
+        <span class="hint">Den ene setningen som er hele strategien</span>
+      </div>
+      <div class="field">
+        <label class="field-label">Kort form <span class="req">·</span></label>
+        <div class="field-help">3–6 ord. Brukes som display-tittel.</div>
+        <input class="input display" type="text" data-bind="retning.kort"
+               value="${window.RENDER.esc(doc.retning?.kort || '')}">
+      </div>
+      <div class="field">
+        <label class="field-label">Lang form</label>
+        <div class="field-help">Én setning, ca. 30 ord. Forklarer hva og hvordan.</div>
+        <textarea class="textarea large" data-bind="retning.lang">${window.RENDER.esc(doc.retning?.lang || '')}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderFokusEditor(doc) {
+  const list = (doc.fokus || []).slice().sort((a,b) => (a.rekkefolge||0) - (b.rekkefolge||0));
+  const rows = list.map((f, i) => `
+    <div class="fokus-edit-row" data-fokus-idx="${i}" data-id="${window.RENDER.esc(f.id || ('f' + (i+1)))}">
+      <span class="handle" title="Sorter">⋮⋮</span>
+      <input class="input" type="text" data-fbind="tekst"
+             value="${window.RENDER.esc(f.tekst || '')}" placeholder="Fokuspunkt…">
+      <input class="input" type="text" data-fbind="meta"
+             value="${window.RENDER.esc(f.meta || f.kommentar || '')}" placeholder="Frist / ansvarlig">
+      <button class="icon-btn remove" title="Fjern" data-fokus-remove>×</button>
+    </div>
+  `).join('');
+  return `
+    <div class="editor-section" data-sec="fokus">
+      <div class="sec-head">
+        <h2>Mitt fokus nå</h2>
+        <span class="hint">Maks 5 aktive punkter</span>
+      </div>
+      <div class="fokus-editor" id="fokus-editor">${rows}</div>
+      <button class="icon-btn add" data-fokus-add>＋ Legg til fokuspunkt</button>
+    </div>
+  `;
+}
+
+function renderMaalEditor(doc) {
+  const list = doc.maal || [];
+  const statusOpts = Object.entries(window.SA_CONFIG.statusLabels.maal)
+    .map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  const rows = list.map((m, i) => `
+    <div class="goal-edit-row" data-maal-idx="${i}">
+      <div class="field">
+        <label class="field-label">Mål</label>
+        <input class="input" type="text" data-mbind="navn" value="${window.RENDER.esc(m.navn || '')}">
+      </div>
+      <div class="field">
+        <label class="field-label">Nå</label>
+        <input class="input mono" type="text" data-mbind="naa" value="${window.RENDER.esc(m.naa || '')}">
+      </div>
+      <div class="field">
+        <label class="field-label">Mål</label>
+        <input class="input mono" type="text" data-mbind="mal" value="${window.RENDER.esc(m.mal || '')}">
+      </div>
+      <div class="field">
+        <label class="field-label">Frist</label>
+        <input class="input mono" type="date" data-mbind="frist" value="${window.RENDER.esc(m.frist || '')}">
+      </div>
+      <div class="field">
+        <label class="field-label">Status</label>
+        <div class="select-wrap">
+          <select data-mbind="status">${statusOpts.replace(`value="${m.status}"`, `value="${m.status}" selected`)}</select>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  return `
+    <div class="editor-section" data-sec="maal">
+      <div class="sec-head">
+        <h2>Årsmål</h2>
+        <span class="hint">Maks 4 mål</span>
+      </div>
+      <div class="goal-editor" id="maal-editor">${rows}</div>
+    </div>
+  `;
+}
+
+function renderTiltakEditor(doc) {
+  const list = doc.tiltak || [];
+  const tStatusOpts = Object.entries(window.SA_CONFIG.statusLabels.tiltak)
+    .map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  const cards = list.map((t, i) => {
+    const cls = window.SA_CONFIG.tiltakStatusClass[t.status] || 'ikke';
+    const pct = Math.max(0, Math.min(100, t.fremdrift_pct || 0));
+    return `
+      <div class="init-edit-card" data-status="${cls}" data-tiltak-idx="${i}" data-id="${window.RENDER.esc(t.id || ('t' + (i+1)))}">
+        <div class="top">
+          <span class="nrc">${i + 1}</span>
+          <input class="input" type="text" data-tbind="navn" value="${window.RENDER.esc(t.navn || '')}">
+          <div class="select-wrap">
+            <select data-tbind="status" data-status-select>${tStatusOpts.replace(`value="${t.status}"`, `value="${t.status}" selected`)}</select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label class="field-label">Ansvarlig</label>
+            <input class="input" type="text" data-tbind="ansvarlig" value="${window.RENDER.esc(t.ansvarlig || '')}">
+          </div>
+          <div class="field">
+            <label class="field-label">Frist</label>
+            <input class="input mono" type="date" data-tbind="frist" value="${window.RENDER.esc(t.frist || '')}">
+          </div>
+          <div class="field">
+            <label class="field-label">Kommentar</label>
+            <input class="input" type="text" data-tbind="kommentar" value="${window.RENDER.esc(t.kommentar || '')}">
+          </div>
+          <div class="field">
+            <label class="field-label">Fremdrift</label>
+            <div class="range-row">
+              <input type="range" min="0" max="100" data-tbind="fremdrift_pct" value="${pct}">
+              <span class="pct-val">${pct} %</span>
+            </div>
+          </div>
+        </div>
+        <div class="field neste-field">
+          <label class="field-label">Neste steg</label>
+          <textarea class="textarea" data-tbind="neste_steg">${window.RENDER.esc(t.neste_steg || '')}</textarea>
+        </div>
+        <div style="margin-top:10px;text-align:right">
+          <button class="icon-btn" data-tiltak-remove style="width:auto;padding:4px 10px;font-size:11px;color:var(--bad);border-color:var(--bad)">Fjern tiltak</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="editor-section" data-sec="tiltak">
+      <div class="sec-head">
+        <h2>Initiativer / tiltak</h2>
+        <span class="hint">Maks 7 stk · oppdater status og fremdrift kvartalsvis</span>
+      </div>
+      <div class="init-editor" id="tiltak-editor">${cards}</div>
+      <button class="icon-btn add" data-tiltak-add>＋ Legg til initiativ</button>
+    </div>
+  `;
+}
+
+function renderBudsjettEditor(doc) {
+  const bud = doc.okonomi?.budsjett || {};
+  const year = Object.keys(bud)[0] || '2027';
+  const b = bud[year] || {};
+  return `
+    <div class="editor-section" data-sec="budsjett">
+      <div class="sec-head">
+        <h2>Budsjett ${year}</h2>
+        <span class="hint">Plan-tall · 2024-regnskap fra Brreg er låst</span>
+      </div>
+      <div class="budget-row">
+        <div class="field">
+          <label class="field-label">Driftsinntekter (kr)</label>
+          <input class="input mono num" id="b-oms" type="number" data-bbind="driftsinntekter_kr"
+                 value="${b.driftsinntekter_kr || 0}">
+        </div>
+        <div class="field">
+          <label class="field-label">Driftsresultat (kr)</label>
+          <input class="input mono num" id="b-res" type="number" data-bbind="driftsresultat_kr"
+                 value="${b.driftsresultat_kr || 0}">
+        </div>
+        <div class="field">
+          <label class="field-label">Driftsmargin <span class="calc" id="b-margin">${(b.driftsmargin_pct ?? 0).toFixed(1).replace('.', ',')} %</span></label>
+          <input class="input mono num" type="text" value="Beregnet automatisk" disabled
+                 style="background:#f1eee5;color:var(--muted)">
+        </div>
+      </div>
+      <div class="field" style="margin-top:18px">
+        <label class="field-label">Kommentar</label>
+        <textarea class="textarea" data-bbind="kommentar">${window.RENDER.esc(b.kommentar || '')}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderKvartalEditor(doc) {
+  const k = doc.kvartal || {};
+  return `
+    <div class="editor-section" data-sec="kvartal">
+      <div class="sec-head">
+        <h2>Kvartalsnotat — ${window.RENDER.esc(k.periode || '2026-Q2')}</h2>
+        <span class="hint">Hva har skjedd · hva ser annerledes ut</span>
+      </div>
+      <div class="field">
+        <label class="field-label">Periode</label>
+        <input class="input mono" type="text" data-kbind="periode" value="${window.RENDER.esc(k.periode || '')}" placeholder="YYYY-QN">
+      </div>
+      <div class="field">
+        <label class="field-label">Notat</label>
+        <textarea class="textarea large" data-kbind="notat" placeholder="Skriv et kvartalsnotat — viktige hendelser, statusendringer, signaler styret bør merke seg.">${window.RENDER.esc(k.notat || '')}</textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Endringer fra forrige periode</label>
+        <textarea class="textarea" data-kbind="endringer">${window.RENDER.esc(k.endringer || '')}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// WIRING — bind inputs to STATE.doc
+// ============================================================
+function wireForm() {
+  // simple data-bind="path.to.field"
+  document.querySelectorAll('[data-bind]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      setPath(STATE.doc, e.target.dataset.bind, e.target.value);
+      markDirty();
+    });
+  });
+
+  // fokus
+  function wireFokus() {
+    document.querySelectorAll('#fokus-editor .fokus-edit-row').forEach(row => {
+      const idx = +row.dataset.fokusIdx;
+      row.querySelectorAll('[data-fbind]').forEach(inp => {
+        inp.oninput = e => {
+          const k = e.target.dataset.fbind;
+          if (!STATE.doc.fokus[idx]) return;
+          if (k === 'meta') {
+            // We stash 'meta' field on kommentar for simplicity
+            STATE.doc.fokus[idx].kommentar = e.target.value;
+          } else {
+            STATE.doc.fokus[idx][k] = e.target.value;
+          }
+          markDirty();
+        };
+      });
+      const rm = row.querySelector('[data-fokus-remove]');
+      if (rm) rm.onclick = () => {
+        STATE.doc.fokus.splice(idx, 1);
+        reindexFokus();
+        rebuildFokus();
+        markDirty();
+      };
+    });
+    const add = document.querySelector('[data-fokus-add]');
+    if (add) add.onclick = () => {
+      if ((STATE.doc.fokus || []).length >= 5) {
+        showMsg('err', 'Maks 5 fokuspunkter.');
+        return;
+      }
+      STATE.doc.fokus = STATE.doc.fokus || [];
+      STATE.doc.fokus.push({
+        id: 'f' + Date.now(),
+        tekst: '',
+        rekkefolge: STATE.doc.fokus.length + 1,
+        aktiv: true,
+      });
+      rebuildFokus();
+      markDirty();
+    };
+  }
+  function rebuildFokus() {
+    const editor = document.getElementById('fokus-editor');
+    if (!editor) return;
+    const list = STATE.doc.fokus || [];
+    editor.innerHTML = list.map((f, i) => `
+      <div class="fokus-edit-row" data-fokus-idx="${i}" data-id="${window.RENDER.esc(f.id || ('f'+(i+1)))}">
+        <span class="handle">⋮⋮</span>
+        <input class="input" type="text" data-fbind="tekst"
+               value="${window.RENDER.esc(f.tekst || '')}" placeholder="Fokuspunkt…">
+        <input class="input" type="text" data-fbind="meta"
+               value="${window.RENDER.esc(f.meta || f.kommentar || '')}" placeholder="Frist / ansvarlig">
+        <button class="icon-btn remove" data-fokus-remove>×</button>
+      </div>
+    `).join('');
+    wireFokus();
+  }
+  function reindexFokus() {
+    (STATE.doc.fokus || []).forEach((f, i) => { f.rekkefolge = i + 1; });
+  }
+  wireFokus();
+
+  // maal
+  document.querySelectorAll('#maal-editor .goal-edit-row').forEach(row => {
+    const idx = +row.dataset.maalIdx;
+    row.querySelectorAll('[data-mbind]').forEach(inp => {
+      const update = e => {
+        const k = e.target.dataset.mbind;
+        if (STATE.doc.maal[idx]) STATE.doc.maal[idx][k] = e.target.value;
+        markDirty();
+      };
+      inp.oninput = update;
+      inp.onchange = update;
+    });
+  });
+
+  // tiltak
+  function wireTiltak() {
+    document.querySelectorAll('#tiltak-editor .init-edit-card').forEach(card => {
+      const idx = +card.dataset.tiltakIdx;
+      card.querySelectorAll('[data-tbind]').forEach(inp => {
+        const update = e => {
+          const k = e.target.dataset.tbind;
+          if (!STATE.doc.tiltak[idx]) return;
+          let v = e.target.value;
+          if (k === 'fremdrift_pct') v = Number(v);
+          STATE.doc.tiltak[idx][k] = v;
+          if (k === 'status') {
+            const cls = window.SA_CONFIG.tiltakStatusClass[v] || 'ikke';
+            card.dataset.status = cls;
+          }
+          if (k === 'fremdrift_pct') {
+            const pctEl = card.querySelector('.pct-val');
+            if (pctEl) pctEl.textContent = v + ' %';
+          }
+          markDirty();
+        };
+        inp.oninput = update;
+        inp.onchange = update;
+      });
+      const rm = card.querySelector('[data-tiltak-remove]');
+      if (rm) rm.onclick = () => {
+        if (!confirm('Fjerne dette tiltaket?')) return;
+        STATE.doc.tiltak.splice(idx, 1);
+        rebuildTiltak();
+        markDirty();
+      };
+    });
+    const add = document.querySelector('[data-tiltak-add]');
+    if (add) add.onclick = () => {
+      if ((STATE.doc.tiltak || []).length >= 7) {
+        showMsg('err', 'Maks 7 tiltak.');
+        return;
+      }
+      STATE.doc.tiltak = STATE.doc.tiltak || [];
+      STATE.doc.tiltak.push({
+        id: 't' + Date.now(),
+        navn: '',
+        ansvarlig: STATE.selskap.dl,
+        status: 'ikke-startet',
+        fremdrift_pct: 0,
+        neste_steg: '',
+        frist: '',
+        kommentar: '',
+        kommentar_dato: null,
+      });
+      rebuildTiltak();
+      markDirty();
+    };
+  }
+  function rebuildTiltak() {
+    const editor = document.getElementById('tiltak-editor');
+    if (!editor) return;
+    editor.innerHTML = renderTiltakInner();
+    wireTiltak();
+  }
+  function renderTiltakInner() {
+    const list = STATE.doc.tiltak || [];
+    const tStatusOpts = Object.entries(window.SA_CONFIG.statusLabels.tiltak)
+      .map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    return list.map((t, i) => {
+      const cls = window.SA_CONFIG.tiltakStatusClass[t.status] || 'ikke';
+      const pct = Math.max(0, Math.min(100, t.fremdrift_pct || 0));
+      return `
+        <div class="init-edit-card" data-status="${cls}" data-tiltak-idx="${i}" data-id="${window.RENDER.esc(t.id || ('t'+(i+1)))}">
+          <div class="top">
+            <span class="nrc">${i + 1}</span>
+            <input class="input" type="text" data-tbind="navn" value="${window.RENDER.esc(t.navn || '')}">
+            <div class="select-wrap">
+              <select data-tbind="status">${tStatusOpts.replace(`value="${t.status}"`, `value="${t.status}" selected`)}</select>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label class="field-label">Ansvarlig</label>
+              <input class="input" type="text" data-tbind="ansvarlig" value="${window.RENDER.esc(t.ansvarlig || '')}">
+            </div>
+            <div class="field">
+              <label class="field-label">Frist</label>
+              <input class="input mono" type="date" data-tbind="frist" value="${window.RENDER.esc(t.frist || '')}">
+            </div>
+            <div class="field">
+              <label class="field-label">Kommentar</label>
+              <input class="input" type="text" data-tbind="kommentar" value="${window.RENDER.esc(t.kommentar || '')}">
+            </div>
+            <div class="field">
+              <label class="field-label">Fremdrift</label>
+              <div class="range-row">
+                <input type="range" min="0" max="100" data-tbind="fremdrift_pct" value="${pct}">
+                <span class="pct-val">${pct} %</span>
+              </div>
+            </div>
+          </div>
+          <div class="field neste-field">
+            <label class="field-label">Neste steg</label>
+            <textarea class="textarea" data-tbind="neste_steg">${window.RENDER.esc(t.neste_steg || '')}</textarea>
+          </div>
+          <div style="margin-top:10px;text-align:right">
+            <button class="icon-btn" data-tiltak-remove style="width:auto;padding:4px 10px;font-size:11px;color:var(--bad);border-color:var(--bad)">Fjern tiltak</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  wireTiltak();
+
+  // budsjett — auto-calculate margin
+  function recalcMargin() {
+    const oms = parseFloat(document.getElementById('b-oms')?.value) || 0;
+    const res = parseFloat(document.getElementById('b-res')?.value) || 0;
+    const margin = oms > 0 ? (res / oms * 100) : 0;
+    const el = document.getElementById('b-margin');
+    if (el) el.textContent = margin.toFixed(1).replace('.', ',') + ' %';
+    // Update STATE
+    const bud = STATE.doc.okonomi?.budsjett;
+    if (bud) {
+      const year = Object.keys(bud)[0] || '2027';
+      bud[year] = bud[year] || {};
+      bud[year].driftsinntekter_kr = oms;
+      bud[year].driftsresultat_kr = res;
+      bud[year].driftsmargin_pct = Math.round(margin * 10) / 10;
+    }
+  }
+  document.querySelectorAll('[data-bbind]').forEach(inp => {
+    inp.oninput = e => {
+      const k = e.target.dataset.bbind;
+      const bud = STATE.doc.okonomi?.budsjett;
+      if (!bud) return;
+      const year = Object.keys(bud)[0] || '2027';
+      bud[year] = bud[year] || {};
+      bud[year][k] = e.target.type === 'number' ? Number(e.target.value) : e.target.value;
+      if (k === 'driftsinntekter_kr' || k === 'driftsresultat_kr') recalcMargin();
+      markDirty();
+    };
+  });
+
+  // kvartal
+  document.querySelectorAll('[data-kbind]').forEach(inp => {
+    inp.oninput = e => {
+      const k = e.target.dataset.kbind;
+      STATE.doc.kvartal = STATE.doc.kvartal || {};
+      STATE.doc.kvartal[k] = e.target.value;
+      markDirty();
+    };
+  });
+
+  // session-persist DL navn
+  const dlNavn = document.getElementById('dl-navn');
+  if (dlNavn) {
+    try {
+      const saved = sessionStorage.getItem('strategi_dl_navn');
+      if (saved) dlNavn.value = saved;
+    } catch (e) {}
+    dlNavn.oninput = () => {
+      try { sessionStorage.setItem('strategi_dl_navn', dlNavn.value); } catch (e) {}
+    };
+  }
+}
+
+// helpers
+function setPath(obj, path, value) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (cur[parts[i]] == null) cur[parts[i]] = {};
+    cur = cur[parts[i]];
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+
+// ============================================================
+// SAVE FLOWS
+// ============================================================
+window.saveDraftOnly = function () {
+  window.DATA.saveDraft(STATE.selskapId, STATE.doc);
+  STATE.dirty = false;
+  const dot = document.getElementById('dirty-dot');
+  if (dot) { dot.classList.remove('dirty'); dot.textContent = 'Lagret lokalt'; }
+  showMsg('info', '', 'Lagret lokalt i nettleseren — ikke publisert til Git.');
+  toast('Lagret lokalt');
+};
+
+window.publish = async function (newStatus) {
+  hideMsg();
+  const dlNavn = document.getElementById('dl-navn')?.value?.trim();
+  const passord = document.getElementById('dl-pass')?.value;
+  if (!dlNavn) {
+    showMsg('err', 'Skriv inn ditt navn først.');
+    document.getElementById('dl-navn')?.focus();
+    return;
+  }
+  if (!passord) {
+    showMsg('err', 'Passord kreves for å publisere.');
+    document.getElementById('dl-pass')?.focus();
+    return;
+  }
+
+  // Update status
+  STATE.doc.meta = STATE.doc.meta || {};
+  STATE.doc.meta.status = newStatus;
+  STATE.doc.meta.sist_endret_av = dlNavn;
+
+  // Save local first
+  window.DATA.saveDraft(STATE.selskapId, STATE.doc);
+
+  showMsg('info', 'Publiserer til GitHub…');
+
+  try {
+    const result = await window.DATA.pushStrategi({
+      selskap_id: STATE.selskapId,
+      passord,
+      dl_navn: dlNavn,
+      strategi: STATE.doc,
+    });
+
+    // Success
+    window.DATA.clearDraft(STATE.selskapId);
+    STATE.dirty = false;
+    const dot = document.getElementById('dirty-dot');
+    if (dot) { dot.classList.remove('dirty'); dot.textContent = 'Publisert'; dot.style.color = 'var(--strat)'; }
+
+    const cm = result.commit_url
+      ? `<a href="${result.commit_url}" target="_blank">commit</a>`
+      : (result.no_change ? 'ingen endringer' : 'OK');
+    showMsg('ok', '', `Publisert ${newStatus === 'validert' ? '+ sendt til validering' : ''} — ${cm}`);
+    toast(newStatus === 'validert' ? 'Sendt til styreleder for validering' : 'Publisert til GitHub');
+
+    // Clear password
+    const p = document.getElementById('dl-pass');
+    if (p) p.value = '';
+
+  } catch (err) {
+    showMsg('err', 'Feil: ' + err.message);
+    toast('Publisering feilet');
+  }
+};
+
+// ============================================================
+// INIT
+// ============================================================
+(async function init() {
+  STATE.selskapId = window.getAktivtSelskapId();
+  STATE.selskap = window.getSelskap(STATE.selskapId);
+
+  // Loading state
+  window.SA.mount({
+    active: 'rediger',
+    content: '<div class="page-body"><div style="padding:80px;text-align:center;color:var(--muted);font-family:Geist,sans-serif">Laster strategi for redigering…</div></div>',
+  });
+
+  let docResult;
+  try {
+    docResult = await window.DATA.loadStrategi(STATE.selskapId);
+  } catch (e) {
+    window.SA.mount({
+      active: 'rediger',
+      content: `<div class="page-body"><div style="padding:40px;background:#fbe9e9;border-left:3px solid #a83232;color:#a83232;border-radius:4px">Kunne ikke laste strategi: ${e.message}</div></div>`,
+    });
+    return;
+  }
+
+  STATE.doc = JSON.parse(JSON.stringify(docResult.doc)); // deep-copy so edits don't mutate cache
+
+  // Build form
+  window.SA.mount({
+    active: 'rediger',
+    src: docResult.source === 'draft' ? 'Lokalt utkast — ikke publisert' : 'Klar til redigering',
+    content: buildForm(),
+  });
+
+  // Wire after DOM
+  setTimeout(() => {
+    wireForm();
+    // initial local-time
+    const t = document.getElementById('local-time');
+    if (t) {
+      const d = new Date();
+      t.textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+  }, 0);
+
+  // beforeunload guard
+  window.addEventListener('beforeunload', e => {
+    if (STATE.dirty) {
+      e.preventDefault();
+      e.returnValue = 'Du har ulagrede endringer.';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

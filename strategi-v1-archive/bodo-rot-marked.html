@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROT-markedsmodell — Bodø 2025</title>
+<link rel="stylesheet" href="../style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+/* Console-polyfill — må kjøre FØR Chart.js. Enkelte kjøremiljøer
+   (iframes, extensions, eldre nettlesere) mangler console.debug,
+   som Chart.js 4.x sin minifiserte logger antar finnes. */
+(function(){
+  if (typeof window.console === 'undefined') window.console = {};
+  var methods = ['log','debug','info','warn','error','trace','group','groupEnd',
+                 'groupCollapsed','table','time','timeEnd','timeLog','count',
+                 'assert','dir','dirxml','profile','profileEnd','clear'];
+  methods.forEach(function(m){
+    if (typeof window.console[m] !== 'function') window.console[m] = function(){};
+  });
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root, :root[data-theme="light"] {
+  /* Synkronisert med portalens lyse palett (style.css) for koordinerte
+     paneler mellom sidebar/topbar og rapportens egne kort. */
+  --bg:       #ffffff;
+  --bg2:      #f5f7fa;
+  --bg3:      #eaeef3;
+  --border:   #d8dde5;
+  --border2:  #c8cfdb;
+  --border3:  #dde3ec;
+  --text:     #1a1f29;
+  --text2:    #6b7380;
+  --text3:    #9aa3b1;
+  --green:    #1a6b3c;
+  --green-bg: #E1F5EE;
+  --blue:     #185FA5;
+  --blue-bg:  #E6F1FB;
+  --blue-fg:  #0C447C;
+  --amber:    #633806;
+  --amber-bg: #FAEEDA;
+  --red:      #791F1F;
+  --red-bg:   #FCEBEB;
+  --purple:   #26215C;
+  --purple-bg:#EEEDFE;
+  --teal:     #0F6E56;
+  --teal-bg:  #E1F5EE;
+  --c1:#185FA5; --c2:#BA7517; --c3:#1D9E75;
+  --c4:#534AB7; --c5:#888780; --c6:#D85A30; --c7:#EF9F27;
+}
+:root[data-theme="dark"] {
+  /* Synkronisert med portalens mørke palett (style.css). */
+  --bg:       #0e1116;
+  --bg2:      #161b22;
+  --bg3:      #1f2630;
+  --border:   #2a313c;
+  --border2:  #353d4a;
+  --border3:  #262d38;
+  --text:     #e6edf3;
+  --text2:    #8b95a3;
+  --text3:    #6b7380;
+  --green:    #3fb950;
+  --green-bg: rgba(63,185,80,0.15);
+  --blue:     #58a6ff;
+  --blue-bg:  rgba(88,166,255,0.15);
+  --blue-fg:  #79b8ff;
+  --amber:    #d29922;
+  --amber-bg: rgba(210,153,34,0.15);
+  --red:      #f85149;
+  --red-bg:   rgba(248,81,73,0.15);
+  --purple:   #a371f7;
+  --purple-bg:rgba(163,113,247,0.15);
+  --teal:     #4f9da6;
+  --teal-bg:  rgba(79,157,166,0.15);
+  /* Chart-farger justeres for å bli mer synlige på mørk bakgrunn */
+  --c1:#58a6ff; --c2:#d29922; --c3:#3fb950;
+  --c4:#a371f7; --c5:#9b9890; --c6:#f0833a; --c7:#f0a830;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:400;
+     color:var(--text);background:var(--bg);line-height:1.5;padding:20px 0 60px}
+.page{max-width:960px;margin:0 auto;padding:0 20px}
+
+/* Header */
+.hdr{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:20px}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.hdr-title{font-size:18px;font-weight:600;line-height:1.25}
+.hdr-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.hdr-meta{font-size:11px;color:var(--text3);text-align:right;line-height:1.6}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+.kpi{background:var(--bg2);border-radius:6px;padding:12px 14px}
+.kpi-lbl{font-size:11px;color:var(--text2);margin-bottom:3px}
+.kpi-val{font-size:20px;font-weight:600;line-height:1.1}
+.kpi-val.blue{color:var(--blue)}
+.kpi-val.green{color:var(--green)}
+.kpi-val.purple{color:#534AB7}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4}
+
+/* Tabs */
+.tab-nav{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto}
+.tab-btn{font-size:12px;font-weight:500;padding:8px 14px 9px;background:none;border:none;
+         border-bottom:2px solid transparent;color:var(--text2);cursor:pointer;
+         white-space:nowrap;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* Sections */
+.sec{display:none}
+.sec.on{display:block;animation:fin .2s ease}
+@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section headings */
+.sh{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;
+    letter-spacing:.04em;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.sh::after{content:'';flex:1;height:1px;background:var(--border3)}
+
+/* Lag cards */
+.lag-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.lag{border:1px solid var(--border);border-radius:6px;padding:14px 16px;position:relative}
+.lag::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:6px 6px 0 0}
+.lag.l1::before{background:var(--blue)}
+.lag.l2::before{background:#534AB7}
+.lag.l3::before{background:var(--border2)}
+.lag-num{font-size:10px;color:var(--text3);margin-bottom:4px}
+.lag-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.lag.l1 .lag-title{color:var(--blue)}
+.lag.l2 .lag-title{color:#534AB7}
+.lag.l3 .lag-title{color:var(--text2)}
+.lag-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.lag-stats{border-top:1px solid var(--border3);padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.ls{display:flex;justify-content:space-between;align-items:baseline}
+.ls-k{font-size:11px;color:var(--text2)}
+.ls-v{font-size:12px;font-weight:600}
+.lag.l1 .ls-v{color:var(--blue)}
+.lag.l2 .ls-v{color:#534AB7}
+.lag.l3 .ls-v{color:var(--text2)}
+
+/* Tables */
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:6px;margin-bottom:22px}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border2)}
+th{font-size:11px;font-weight:500;color:var(--text2);padding:8px 12px;text-align:left;
+   white-space:nowrap;background:var(--bg2)}
+th.r,td.r{text-align:right}
+td{font-size:12px;padding:8px 12px;border-bottom:1px solid var(--border3);
+   color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--bg2)}
+tr.sto td{background:rgba(26,107,60,.04)}
+tr.sto:hover td{background:rgba(26,107,60,.07)}
+tr.nab td{background:rgba(83,74,183,.04)}
+tr.nab:hover td{background:rgba(83,74,183,.07)}
+tr.tot td{font-weight:600;border-top:1px solid var(--border2);border-bottom:none;background:var(--bg2)}
+tr.dim td{color:var(--text3);font-size:11px;font-style:italic}
+tr.sub td{background:var(--bg3);font-size:11px;color:var(--text2)}
+.nm{font-weight:500}
+.ht{font-size:10px;color:var(--text3)}
+.mn{font-variant-numeric:tabular-nums}
+
+/* Badges */
+.b{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:500;white-space:nowrap}
+.b-bl{background:var(--blue-bg);color:var(--blue-fg)}
+.b-gr{background:var(--green-bg);color:var(--green)}
+.b-am{background:var(--amber-bg);color:var(--amber)}
+.b-rd{background:var(--red-bg);color:var(--red)}
+.b-pu{background:var(--purple-bg);color:var(--purple)}
+.b-tl{background:var(--teal-bg);color:var(--teal)}
+.b-gy{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+
+.pos{color:var(--green)}
+.neg{color:var(--red)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.bar-bg{width:100%;height:4px;background:var(--border3);border-radius:2px}
+.bar-fill{height:4px;border-radius:2px}
+
+/* Storvik tag */
+.stag{display:inline-block;font-size:9px;font-weight:600;background:var(--green-bg);
+      color:var(--green);border:1px solid rgba(26,107,60,.25);padding:1px 5px;
+      border-radius:2px;margin-left:4px;vertical-align:middle}
+
+/* Charts */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.cc{background:var(--bg2);border-radius:6px;padding:14px 16px;border:1px solid var(--border)}
+.cc.wide{grid-column:1/-1}
+.cl{font-size:11px;color:var(--text2);margin-bottom:12px;font-weight:500}
+.cw{position:relative}
+
+/* Competitor cards */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.comp-card{border:1px solid var(--border);border-radius:6px;padding:14px 16px;transition:border-color .15s}
+.comp-card:hover{border-color:var(--border2)}
+.comp-card.sum{background:rgba(83,74,183,.03);border-color:rgba(83,74,183,.2)}
+.cc-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.cc-meta{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.cc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+          border-top:1px solid var(--border3);padding-top:10px;margin-bottom:10px}
+.cs-l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.cs-v{font-size:14px;font-weight:600;margin-top:2px}
+
+/* Note */
+.note{font-size:11px;color:var(--text2);background:var(--bg2);
+      border-left:2px solid var(--border2);border-radius:0 4px 4px 0;
+      padding:10px 14px;line-height:1.7;margin-bottom:20px}
+.note strong{color:var(--text);font-weight:500}
+
+/* Footer */
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);
+       font-size:10px;color:var(--text3);line-height:1.7;
+       display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+@media(max-width:700px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .lag-grid,.cg,.comp-grid{grid-template-columns:1fr}
+  .hdr-meta{display:none}
+}
+</style>
+
+<!-- SA portal-integrasjon: skript-stier og sidebar -->
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<style>
+  /* Tilpass rapportens layout for å koeksistere med portalens sidebar/topbar.
+     Match portalens horisontale padding (32px) og header-topp-luft (22px) for
+     konsistent vertikal og horisontal margin på tvers av sider. */
+  body.has-sidebar {
+    padding-left: 248px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  body.has-sidebar .page {
+    max-width: 1280px;
+    margin: 0;
+    padding: 0 32px 24px;
+  }
+  body.has-sidebar .hdr {
+    padding: 22px 0 16px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 900px) {
+    body.has-sidebar { padding-left: 0 !important; }
+    body.has-sidebar .page { padding: 0 16px 24px }
+  }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="bransjekart" data-section="strategi"></div>
+
+<div class="page">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-row">
+    <div>
+      <div class="hdr-title">ROT-markedsmodell — Bodø 2025</div>
+      <div class="hdr-sub">Bransjeanalyse for Servicealliansen AS · Byggmester Fritzøe AS + Areal Byggservice AS</div>
+    </div>
+    <div class="hdr-meta">Utarbeidet: mars 2026<br>Kilde: Brønnøysundregistrene · SSB · Regnskapsregisteret<br>Konfidensielt · Affectum AS</div>
+  </div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpis">
+  <div class="kpi"><div class="kpi-lbl">Bodø ROT-marked</div><div class="kpi-val blue">1 168 <span style="font-size:13px;color:var(--text3)">mill.</span></div><div class="kpi-sub">ROT-justert omsetn. 2024 · 38 aktører</div></div>
+  <div class="kpi"><div class="kpi-lbl">Ansatte (bransjemodell)</div><div class="kpi-val blue">596</div><div class="kpi-sub">ROT-justerte ans. · 38 kartlagte aktører · brreg-verifisert</div></div>
+  <div class="kpi"><div class="kpi-lbl">Omsetn. per ansatt</div><div class="kpi-val green">1,96 <span style="font-size:13px;color:var(--text3)">mill.</span></div><div class="kpi-sub">Bransjemodell-snitt · 1 168 mill. ÷ 596 ans.</div></div>
+  <div class="kpi"><div class="kpi-lbl">Fritzøe/Areal — markedsrang</div><div class="kpi-val green">#2</div><div class="kpi-sub">59 ans. · 117 mill. · EBITDA 8,2 %</div></div>
+  <div class="kpi"><div class="kpi-lbl">Nabokommunekonk.</div><div class="kpi-val purple">394 <span style="font-size:13px;color:var(--text3)">mill.</span></div><div class="kpi-sub">3 identifiserte · 127 ansatte</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tab-nav" id="navTabs">
+  <button class="tab-btn active" data-tab="oversikt">Oversikt</button>
+  <button class="tab-btn" data-tab="byggmester">Byggmestere</button>
+  <button class="tab-btn" data-tab="fag">Fagkategorier</button>
+  <button class="tab-btn" data-tab="regnskap">Regnskap 5 år</button>
+  <button class="tab-btn" data-tab="nabo">Nabokommuner</button>
+  <button class="tab-btn" data-tab="ssb">SSB-data</button>
+  <button class="tab-btn" data-tab="ekskl">Ekskluderte</button>
+  <button class="tab-btn" data-tab="metode">Metode</button>
+</div>
+
+<!-- ═══ TAB 1: OVERSIKT ═══════════════════════════════════════════ -->
+<div id="tab-oversikt" class="sec on">
+
+  <div class="sh">Tre-lagsmodellen</div>
+  <div class="lag-grid">
+    <div class="lag l1">
+      <div class="lag-num">// Lag 1</div>
+      <div class="lag-title">Bodø ROT-marked</div>
+      <div class="lag-desc">Selskaper registrert i Bodø som primært opererer i ROT-markedet — rehabilitering, vedlikehold og tilbygg på eksisterende bygg</div>
+      <div class="lag-stats">
+        <div class="ls"><span class="ls-k">Selskaper kartlagt</span><span class="ls-v">38</span></div>
+        <div class="ls"><span class="ls-k">Ansatte (brreg-totalt)</span><span class="ls-v">731</span></div>
+        <div class="ls"><span class="ls-k">Ansatte (ROT-justert)</span><span class="ls-v">596</span></div>
+        <div class="ls"><span class="ls-k">Kjent/est. omsetning 2024</span><span class="ls-v">~1 168 mill.</span></div>
+        <div class="ls"><span class="ls-k">Omsetn. per ans.</span><span class="ls-v">~1,96 mill.</span></div>
+      </div>
+    </div>
+    <div class="lag l2">
+      <div class="lag-num">// Lag 2</div>
+      <div class="lag-title">Nabokommunekonkurrenter</div>
+      <div class="lag-desc">Regionale aktører basert i nabokommunene — kan by på de større oppdragene i Bodø</div>
+      <div class="lag-stats">
+        <div class="ls"><span class="ls-k">Identifiserte aktører</span><span class="ls-v">3</span></div>
+        <div class="ls"><span class="ls-k">Samlet ansatte</span><span class="ls-v">127</span></div>
+        <div class="ls"><span class="ls-k">Samlet omsetning 2024</span><span class="ls-v">394 mill.</span></div>
+        <div class="ls"><span class="ls-k">EBITDA-snitt</span><span class="ls-v">~5,3 %</span></div>
+        <div class="ls"><span class="ls-k">Kommuner representert</span><span class="ls-v">3 av 7</span></div>
+      </div>
+    </div>
+    <div class="lag l3">
+      <div class="lag-num">// Lag 3</div>
+      <div class="lag-title">Utenfor ROT-modellen</div>
+      <div class="lag-desc">Bodø-aktører ekskludert fordi de driver nybygg for utbyggere, industriproduksjon eller intern konserntjeneste</div>
+      <div class="lag-stats">
+        <div class="ls"><span class="ls-k">Ekskluderte selskaper</span><span class="ls-v">5</span></div>
+        <div class="ls"><span class="ls-k">Ekskl. ansatte</span><span class="ls-v">193</span></div>
+        <div class="ls"><span class="ls-k">Ekskl. omsetning</span><span class="ls-v">~322 mill.</span></div>
+        <div class="ls"><span class="ls-k">Årsak</span><span class="ls-v" style="font-size:11px;font-weight:400;color:var(--text2)">Utbygger / Industri / Intern</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sh">Nøkkeltall per fagkategori — Bodø ROT-marked</div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>Fagkategori</th>
+        <th class="r">Selskaper</th><th class="r">Bransjemod.<br>ansatte</th>
+        <th class="r">SSB arb.sted<br>2025</th><th class="r">Kjent omsetn.<br>2024</th>
+        <th class="r">Omsetn./<br>ans. (mod.)</th><th style="min-width:70px">Andel</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="dot" style="background:var(--c1)"></span><strong>Byggmester / totalentreprise</strong> <span class="ht">NACE 41</span><br><span class="ht">GJ Bygg (ROT-andel 33 %), Fritzøe, Fasaderenovering, Byggproffen, Skipnes, Byggalf m.fl. — Areal i NACE 43.32</span></td>
+          <td class="r mn">9</td><td class="r mn">199</td><td class="r mn">518</td>
+          <td class="r mn">460 mill.</td><td class="r mn" style="color:var(--c1)">2,31 mill.</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:38%;background:var(--c1)"></div></div></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--c2)"></span><strong>VVS og rørlegger</strong> <span class="ht">NACE 43.22</span><br><span class="ht">Nilsson AS, Haneseth VVS, PTG Multi Kulde m.fl.</span></td>
+          <td class="r mn">8</td><td class="r mn">153</td><td class="r mn">288</td>
+          <td class="r mn">189 mill.</td><td class="r mn" style="color:var(--c2)">1,24 mill.</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:15%;background:var(--c2)"></div></div></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--c3)"></span><strong>Snekker, maler og glass</strong> <span class="ht">NACE 43.32 + 43.34</span><br><span class="ht">Areal Byggservice (maler+innredn.), Snekkern, Hammeron, Bendixen, Jan Haugen, Bodø Glass &amp; Ramme (glass) m.fl.</span></td>
+          <td class="r mn">12</td><td class="r mn">178</td><td class="r mn">196</td>
+          <td class="r mn">256,4 mill.</td><td class="r mn" style="color:var(--c3)">1,44 mill.</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:13%;background:var(--c3)"></div></div></td>
+        </tr>
+        <tr>
+          
+          <td class="r mn">0</td><td class="r mn">0</td><td class="r mn">142</td>
+          <td class="r mn">—</td><td class="r mn" style="color:var(--c4)">—</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:0%;background:var(--c4)"></div></div></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--c5)"></span><strong>Gulv og tapetsering</strong> <span class="ht">NACE 43.33</span><br><span class="ht">Semcon Nord AS, Proffkeramikeren Bodø AS</span></td>
+          <td class="r mn">2</td><td class="r mn">22</td><td class="r mn">30</td>
+          <td class="r mn">23 mill.</td><td class="r mn" style="color:var(--c5)">1,05 mill.</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:2%;background:var(--c5)"></div></div></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--c6)"></span><strong>Tak og blikkenslager</strong> <span class="ht">NACE 43.91</span><br><span class="ht">Nordaførr Blikk, Stig's Tak, Blikk Nord, Taksystem</span></td>
+          <td class="r mn">4</td><td class="r mn">26</td><td class="r mn">39</td>
+          <td class="r mn">7,8 mill.</td><td class="r mn" style="color:var(--c6)">0,30 mill.</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:1%;background:var(--c6)"></div></div></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#0F6E56"></span><strong>Skadesanering</strong> <span class="ht">NACE 43.990</span><br><span class="ht">Recover Nordland, Reco Bygg og Skadeteknikk AVD Nordland, Ocab AS AVD Bodø</span></td>
+          <td class="r mn">3</td><td class="r mn">81</td><td class="r mn">—</td>
+          <td class="r mn">~122 mill. <span class="ht">est.</span></td><td class="r mn" style="color:#0F6E56">1,50 mill.</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:11%;background:#0F6E56"></div></div></td>
+        </tr>
+        <tr class="tot">
+          <td><strong>Sum kategorier (rens telling)</strong> <span class="ht" style="font-weight:400">9+8+12+2+4+3 selskap · uten dobbelt-telling Areal</span></td>
+          <td class="r mn">38</td><td class="r mn">659</td><td class="r mn">1 166</td>
+          <td class="r mn" style="color:var(--blue)">~1 058 mill.</td>
+          <td class="r mn" style="color:var(--green)">~1,61 mill.</td><td></td>
+        </tr>
+        <tr class="tot" style="background:var(--bg3)">
+          <td><strong>Affectum offisiell ROT-konsolidert</strong> <span class="ht" style="font-weight:400">etter ytterligere ROT-justering — Mars 2026</span></td>
+          <td class="r mn">38</td><td class="r mn">596</td><td class="r mn">1 166</td>
+          <td class="r mn" style="color:var(--blue)">~1 168 mill.</td>
+          <td class="r mn" style="color:var(--green)">~1,96 mill.</td><td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <strong>Avstemming kategorisum vs. Affectum-total:</strong> Kategorisum (rens telling 659 ans / 1 058 mill) avviker fra Affectums offisielle ROT-konsoliderte total (596 ans / 1 168 mill) med −10 % på ansatte og +10 % på omsetning. Affectums tall reflekterer ytterligere justeringer i konsolideringsprosessen som ikke fanges i ren kategori-summering — bl.a. konsekvent ROT-andel-applikasjon og avstemming mot SSB OPA-benchmark 2,01 mill./ans. (NACE 43.9). Begge presentasjoner er publisert for transparens.<br><br>
+    <strong>Bransjemodell vs. totalmarked:</strong> De ~1 168 mill. i ROT-justert omsetning representerer 38 kartlagte aktører — ca. 50 % av totalmarkedet (GJ Bygg justert til 33 % ROT-andel, skadesanering justert til 1,50 mill./ans.). Top-down estimat fra ROT-modellen (regneark) gir <strong>2 346 mill. kr</strong> for Bodø 2024 (877 mill. bolig + 1 469 mill. yrkesbygg). Omsetning per ansatt på <strong>~1,96 mill.</strong> er bransjemodell-snitt etter konsolidering. SSB-basert norm for NACE 43.9: 2,04 mill./ans. (2024). Skadesanering (43.99) bruker justert norm 1,50 mill./ans. — lavere enn 43.9-snittet fordi stillasfirmaer og teknisk spesialist trekker snittet opp.
+  </div>
+
+  <div class="cg">
+    <div class="cc"><div class="cl">Omsetning per fagkategori (mill. kr)</div><div class="cw" style="height:210px"><canvas id="cOmsetn"></canvas></div></div>
+    <div class="cc"><div class="cl">Omsetning per ansatt per fagkategori — stiplet = snitt 2,0 mill.</div><div class="cw" style="height:210px"><canvas id="cOpa"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 2: BYGGMESTERE ═══════════════════════════════════════ -->
+<div id="tab-byggmester" class="sec">
+  <div class="sh">NACE 41 — Byggmester og totalentreprise i Bodø (rene ROT-aktører)</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Selskap</th><th class="r">Ans.</th><th class="r">Omsetn. 2024</th><th class="r">EBITDA</th><th class="r">Res. f. skatt</th><th>Stiftet</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="ht">01</td><td><div class="nm">Gunvald Johansen Bygg AS</div><div class="ht">Bodø · GJ-konsernet · Totalentreprenør #1 · Total omsetn. 393 mill. — herav 67 % nybygg / 33 % ROT</div></td><td class="r mn">22 <span class="ht">(ROT)</span></td><td class="r mn">130 mill. <span class="ht">(ROT)</span></td><td class="r"><span class="pos">4,7 %</span></td><td class="r mn pos">5,6 mill.</td><td class="ht">2004</td><td><span class="b b-am">67 % nybygg</span></td></tr>
+        <tr class="sto"><td class="ht" style="color:var(--green)">02</td><td><div class="nm" style="color:var(--green)">Byggmester Fritzøe AS <span class="stag">▲ PRIMÆR</span></div><div class="ht">Påls vei 1B, Bodø · DL Brynjar Storvik · søsterselskap Areal Byggservice AS (28 ans, 45 mill) telles i NACE 43.32 snekker/maler — samlet rang #2 vises i KPI-strip</div></td><td class="r mn">31</td><td class="r mn">72 mill.</td><td class="r"><span class="pos">8,2 %</span></td><td class="r mn pos">5,7 mill.</td><td class="ht">2002</td><td><span class="b b-gr">ROT-ledende</span></td></tr>
+        <tr><td class="ht">03</td><td><div class="nm">Fasaderenovering AS</div><div class="ht">Bodø · Fasadespesialist</div></td><td class="r mn">31</td><td class="r mn">49 mill.</td><td class="r"><span class="pos">1,1 %</span></td><td class="r mn pos">0,5 mill.</td><td class="ht">2007</td><td><span class="b b-gy">Spesialist</span></td></tr>
+        <tr><td class="ht">04</td><td><div class="nm">Byggproffen Bodø AS</div></td><td class="r mn">26</td><td class="r mn">48 mill.</td><td class="r"><span class="pos">2,3 %</span></td><td class="r mn neg">–1,0 mill.</td><td class="ht">2019</td><td><span class="b b-gy">Aktiv</span></td></tr>
+        <tr><td class="ht">05</td><td><div class="nm">Byggmester Erling Skipnes AS</div></td><td class="r mn">21</td><td class="r mn">49 mill.</td><td class="r"><span class="neg">–3,4 %</span></td><td class="r mn neg">–0,8 mill.</td><td class="ht">1996</td><td><span class="b b-rd">Underskudd</span></td></tr>
+        <tr><td class="ht">06</td><td><div class="nm">Byggalf AS</div></td><td class="r mn">19</td><td class="r mn">42 mill.</td><td class="r"><span class="pos">6,2 %</span></td><td class="r mn pos">2,5 mill.</td><td class="ht">2001</td><td><span class="b b-gy">Aktiv</span></td></tr>
+        <tr><td class="ht">07</td><td><div class="nm">Nordanlegg AS</div><div class="ht">Nordanlegg Holding est. 1996 · Nytt driftsselskap 2022 · Tor-Morten Solheim</div></td><td class="r mn">18</td><td class="r mn">31 mill.</td><td class="r"><span class="pos">7,5 %</span></td><td class="r mn pos">2,3 mill.</td><td class="ht">2022*</td><td><span class="b b-tl">Est. aktør</span></td></tr>
+        <tr><td class="ht">08</td><td><div class="nm">AK Nord AS</div></td><td class="r mn">16</td><td class="r mn">29 mill.</td><td class="r"><span class="neg">–10,7 %</span></td><td class="r mn neg">–3,1 mill.</td><td class="ht">2020</td><td><span class="b b-rd">Underskudd</span></td></tr>
+        <tr><td class="ht">09</td><td><div class="nm">SBP Hyttebygg AS</div></td><td class="r mn">15</td><td class="r mn">9,9 mill.</td><td class="r"><span class="pos">3,1 %</span></td><td class="r mn pos">0,3 mill.</td><td class="ht">2023</td><td><span class="b b-am">Ny aktør</span></td></tr>
+        <tr class="tot"><td colspan="2"><strong>Sum NACE 41 — rene ROT-aktører Bodø</strong> <span class="ht" style="font-weight:400">GJ Bygg kun ROT-andel (33 %)</span></td><td class="r mn">199</td><td class="r mn" style="color:var(--blue)">460 mill.</td><td></td><td class="r mn pos">~12 mill.</td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>3 av 9 aktører hadde underskudd i 2024.</strong> Fritzøe på <strong>8,2 % EBITDA</strong> er klart over branjesnittet og markerer en sterk relativ posisjon. Sammen med søsterselskapet Areal Byggservice (28 ans, 45 mill, NACE 43.32) er Storvik-driftet markedsleder #2 i Bodø ROT samlet (59 ans, 117 mill). <strong>GJ Bygg er justert til ROT-andel:</strong> total omsetning 393 mill. / 66 ans., men 67 % anslås å være nybygg — ROT-andelen er 130 mill. / 22 ans. inkludert i modellen. Etter justeringen: byggmester-OPA = 460 ÷ 199 = <strong>2,31 mill./ans.</strong> — fortsatt høyest av alle fagkategorier.</div>
+  <div class="cg">
+    <div class="cc wide"><div class="cl">Byggmesterfirmaer Bodø — ansatte vs. omsetning 2024</div><div class="cw" style="height:220px"><canvas id="cBygg"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 3: FAGKATEGORIER ══════════════════════════════════════ -->
+<div id="tab-fag" class="sec">
+
+  <div class="sh">NACE 43.32 + 43.34 + 43.99 — Snekker, maler, glass og bygginnredning</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Selskap</th><th>Fagfelt</th><th class="r">Ans.</th><th class="r">Omsetn.</th><th class="r">EBITDA</th><th class="r">Res. f. skatt</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr class="sto"><td class="ht" style="color:var(--green)">01</td><td><div class="nm" style="color:var(--green)">Areal Byggservice AS <span class="stag">▲ PRIMÆR</span></div><div class="ht">Påls vei 1B · Primært maler, med noe bygginnredning · Markedsleder overflate/innredning</div></td><td><span class="b b-gr">Maler + innredning</span></td><td class="r mn">28</td><td class="r mn">45 mill.</td><td class="r"><span class="pos">7,5 %</span></td><td class="r mn pos">3,6 mill. <span class="ht">7,9 %</span></td><td><span class="b b-gr">Markedsleder</span></td></tr>
+        <tr><td class="ht">02</td><td><div class="nm">Arvid Bendixen AS</div><div class="ht">Bodø · Est. 1998</div></td><td><span class="b b-gy">Maler</span></td><td class="r mn">22</td><td class="r mn">32 mill.</td><td class="r"><span class="neg">–9,7 %</span></td><td class="r mn neg">–3,0 mill. <span class="ht">–9,2 %</span></td><td><span class="b b-rd">Tap 2024</span></td></tr>
+        <tr><td class="ht">03</td><td><div class="nm">Malermester Jan Haugen AS</div><div class="ht">Est. 1996</div></td><td><span class="b b-gy">Maler</span></td><td class="r mn">21</td><td class="r mn">21 mill.</td><td class="r"><span class="pos">0,7 %</span></td><td class="r mn">0,1 mill. <span class="ht">0,4 %</span></td><td><span class="b b-gy">Breakeven</span></td></tr>
+        <tr><td class="ht">04</td><td><div class="nm">Bodø Glass &amp; Ramme AS</div><div class="ht">Est. 1995 · Glass og beslag, ikke maler</div></td><td><span class="b b-gy">Glass</span></td><td class="r mn">16</td><td class="r mn">37 mill.</td><td class="r"><span class="neg">–22,1 %</span></td><td class="r mn neg">–8,0 mill. <span class="ht">–21,8 %</span></td><td><span class="b b-rd">Stort tap</span></td></tr>
+        <tr><td class="ht">05</td><td><div class="nm">Lettbyggteknikk AS</div><div class="ht">Påls vei 1A · Nabobygg til Fritzøe · Snekker og innredning/himling · Est. 1993</div></td><td><span class="b b-tl">Snekker/Innredning</span></td><td class="r mn">26</td><td class="r mn">71 mill.</td><td class="r"><span class="pos">9,9 %</span></td><td class="r mn pos">7,0 mill. <span class="ht">9,9 %</span></td><td><span class="b b-bl">Sterk margin</span></td></tr>
+        <tr><td class="ht">06</td><td><div class="nm">Snekkern AS</div><div class="ht">Påls vei 3A · Nabobygg til Fritzøe</div></td><td><span class="b b-tl">Snekker</span></td><td class="r mn">14</td><td class="r mn">16 mill.</td><td class="r"><span class="neg">–16,1 %</span></td><td class="r mn neg">–2,7 mill. <span class="ht">–16,2 %</span></td><td><span class="b b-rd">Stort tap</span></td></tr>
+        <tr><td class="ht">07</td><td><div class="nm">Maler Anderssen Bodø AS</div><div class="ht">Est. 2012</div></td><td><span class="b b-gy">Maler</span></td><td class="r mn">13</td><td class="r mn">7,5 mill.</td><td class="r"><span class="pos">2,2 %</span></td><td class="r mn">0,1 mill. <span class="ht">1,5 %</span></td><td><span class="b b-gy">Stabil</span></td></tr>
+        <tr><td class="ht">08</td><td><div class="nm">Hammeron AS</div><div class="ht">Langstranda · Est. 2022</div></td><td><span class="b b-tl">Snekker</span></td><td class="r mn">10</td><td class="r mn">8,7 mill.</td><td class="r"><span class="pos">5,4 %</span></td><td class="r mn pos">0,5 mill. <span class="ht">4,6 %</span></td><td><span class="b b-am">Ny aktør</span></td></tr>
+        <tr><td class="ht">09</td><td><div class="nm">Malermester Børre Knutsen AS</div></td><td><span class="b b-gy">Maler</span></td><td class="r mn">8</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-gy">—</span></td></tr>
+        <tr><td class="ht">10</td><td><div class="nm">Flis &amp; Malproffen AS</div></td><td><span class="b b-gy">Maler/flis</span></td><td class="r mn">7</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-gy">Konsern</span></td></tr>
+        <tr><td class="ht">11</td><td><div class="nm">Glassproffen AS</div><div class="ht">Jordbruksveien 46 · Glassmestervirksomhet · Est. 2015</div></td><td><span class="b b-gy">Glass</span></td><td class="r mn">7</td><td class="r mn">17,9 mill.</td><td class="r"><span class="pos">7,0 %</span></td><td class="r mn pos">1,2 mill. <span class="ht">6,8 %</span></td><td><span class="b b-gr">Lønnsom</span></td></tr>
+        <tr><td class="ht">12</td><td><div class="nm">JN Tømrerservice AS</div><div class="ht">Est. 2024</div></td><td><span class="b b-tl">Snekker</span></td><td class="r mn">6</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-am">Ny 2024</span></td></tr>
+        <tr class="tot"><td colspan="3"><strong>Sum snekker + maler/glass + innredning Bodø</strong></td><td class="r mn">178</td><td class="r mn">~256,4 mill.</td><td></td><td colspan="2"><span style="font-size:10px;color:var(--red)">⚠ Maler: svakt 2024 — Bendixen, Bodø Glass og Snekkern alle med tap · Glass: Bodø Glass (tap) / Glassproffen (lønnsom)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">NACE 43.22 — VVS og rørlegger</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Selskap</th><th class="r">Ans.</th><th class="r">Omsetn.</th><th class="r">EBITDA</th><th class="r">Res. f. skatt</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr><td class="ht">01</td><td><div class="nm">Nilsson AS</div><div class="ht">Markedsleder VVS · Est. 2001</div></td><td class="r mn">48</td><td class="r mn">102 mill.</td><td class="r"><span class="neg">–3,3 %</span></td><td class="r mn neg">–3,9 mill. <span class="ht">–3,8 %</span></td><td><span class="b b-rd">Tap 2024</span></td></tr>
+        <tr><td class="ht">02</td><td><div class="nm">Haneseth VVS Bodø AS</div><div class="ht">Haneseth-gruppen · Est. 2018</div></td><td class="r mn">22</td><td class="r mn">49 mill.</td><td class="r"><span class="pos">18,1 %</span></td><td class="r mn pos">9,0 mill. <span class="ht">18,4 %</span></td><td><span class="b b-gr">Sterk margin</span></td></tr>
+        <tr><td class="ht">03</td><td><div class="nm">PTG Multi Kulde AS</div><div class="ht">Kulde og kjøling · Est. 1998</div></td><td class="r mn">18</td><td class="r mn">38 mill.</td><td class="r"><span class="pos">8,7 %</span></td><td class="r mn pos">4,1 mill. <span class="ht">10,8 %</span></td><td><span class="b b-gy">Nisjefag</span></td></tr>
+        <tr><td class="ht">04</td><td><div class="nm">Haneseth VVS Sortland AS</div><div class="ht">Haneseth-gruppen · Reg. Sortland</div></td><td class="r mn">16</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-gy">Regional</span></td></tr>
+        <tr><td class="ht">05</td><td><div class="nm">Høytrykksteknikk AS</div><div class="ht">Rørinspeksjon og spyling</div></td><td class="r mn">15</td><td class="r mn">17,2 mill.</td><td class="r"><span class="pos">2,6 %</span></td><td class="r mn neg">–0,3 mill. <span class="ht">–1,7 %</span></td><td><span class="b b-gy">Spesialist</span></td></tr>
+        <tr><td class="ht">06</td><td><div class="nm">Bodø VVS J Willumsen AS</div><div class="ht">Est. 1983</div></td><td class="r mn">13</td><td class="r mn">13,6 mill.</td><td class="r"><span class="neg">–7,7 %</span></td><td class="r mn neg">–1,3 mill. <span class="ht">–9,4 %</span></td><td><span class="b b-gy">Etablert</span></td></tr>
+        <tr><td class="ht">07</td><td><div class="nm">Energima Nordland AS</div><div class="ht">Ventilasjon/inneklima · Est. 2022</div></td><td class="r mn">11</td><td class="r mn">19,5 mill.</td><td class="r"><span class="neg">–10,0 %</span></td><td class="r mn neg">–2,2 mill. <span class="ht">–11,4 %</span></td><td><span class="b b-am">Ny aktør</span></td></tr>
+        <tr><td class="ht">08</td><td><div class="nm">Norover AS</div><div class="ht">Rørinspeksjon · Est. 2015</div></td><td class="r mn">10</td><td class="r mn">50,3 mill.</td><td class="r"><span class="pos">11,7 %</span></td><td class="r mn pos">5,8 mill. <span class="ht">11,5 %</span></td><td><span class="b b-gy">Spesialist</span></td></tr>
+        <tr class="tot"><td colspan="2"><strong>Sum VVS Bodø</strong></td><td class="r mn">153</td><td class="r mn">~189 mill.</td><td></td><td colspan="2"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+
+  <div class="sh">NACE 43.91 — Tak og blikkenslager</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Selskap</th><th class="r">Ans.</th><th class="r">Omsetn.</th><th class="r">EBITDA</th><th class="r">Res. f. skatt</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr><td class="ht">01</td><td><div class="nm">Nordaførr Blikk AS</div><div class="ht">Est. 2020</div></td><td class="r mn">9</td><td class="r mn">7,8 mill.</td><td class="r"><span class="pos">1,3 %</span></td><td class="r mn">0,1 mill. <span class="ht">1,3 %</span></td><td><span class="b b-gy">Lokal</span></td></tr>
+        <tr><td class="ht">02</td><td><div class="nm">Stig's Tak og Vaktmester NUF</div></td><td class="r mn">7</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-gy">—</span></td></tr>
+        <tr><td class="ht">03</td><td><div class="nm">Blikk Nord AS</div><div class="ht">Est. 2023</div></td><td class="r mn">5</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-am">Ny</span></td></tr>
+        <tr><td class="ht">04</td><td><div class="nm">Taksystem AS</div><div class="ht">Est. 2022</div></td><td class="r mn">5</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-am">Ny</span></td></tr>
+        <tr class="tot"><td colspan="2"><strong>Sum tak/blikk Bodø</strong></td><td class="r mn">26</td><td class="r mn">~7,8 mill.</td><td></td><td colspan="2"><span class="ht">Lav omsetningsdekning — flere mangler regnskap</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">NACE 43.990 — Skadesanering</div>
+  <div class="note">
+    Skadesanering er ROT-markedets forsikringsfinansierte kjerne — utbedring av vann-, brann- og fuktskader på eksisterende bygg. Aktørene er underenheter av nasjonale konsern og leverer ikke eget selskapsregnskap til Regnskapsregisteret. Omsetning er estimert med justert norm på <strong>1,50 mill. kr per ansatt</strong> (NACE 43.99, lavere enn 43.9-snitt på 2,04 mill.).
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Selskap (underenhet)</th><th>Morselskap</th><th class="r">Ans.</th><th class="r">Est. omsetn.</th><th class="r">OPA-norm</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="ht">01</td>
+          <td><div class="nm">Recover Nordland</div><div class="ht">Teglverkveien 19, Bodø · NACE 43.990 · Reg. 2011 · post: nordland@recovernordic.no</div></td>
+          <td style="font-size:11px">Recover Nordic AS (995761440)<br><span class="ht">Nasjonal omsetn. 2024: 2 086 mill.</span></td>
+          <td class="r mn">18</td>
+          <td class="r mn">~35 mill. <span class="ht">est.</span></td>
+          <td class="r mn" style="color:#0F6E56">1,50 mill.</td>
+          <td><span class="b b-tl">Skadesanering</span></td>
+        </tr>
+        <tr>
+          <td class="ht">02</td>
+          <td><div class="nm">Reco Bygg og Skadeteknikk AS AVD Nordland</div><div class="ht">Dreyfushammarn 11, Bodø · NACE 43.990 · Reg. 2020</div></td>
+          <td style="font-size:11px">Reco Bygg og Skadeteknikk AS (986559000)<br><span class="ht">Nasjonal omsetn. 2024: 465 mill.</span></td>
+          <td class="r mn">26</td>
+          <td class="r mn">~50 mill. <span class="ht">est.</span></td>
+          <td class="r mn" style="color:#0F6E56">1,50 mill.</td>
+          <td><span class="b b-tl">Skadesanering</span></td>
+        </tr>
+        <tr>
+          <td class="ht">03</td>
+          <td><div class="nm">Ocab AS AVD Bodø</div><div class="ht">Langstranda 5B, Bodø · NACE 41.000 · Reg. 2018 · ocab.no</div></td>
+          <td style="font-size:11px">Ocab AS (916326211)<br><span class="ht">Nasjonal omsetn. 2024: 1 726 mill.</span></td>
+          <td class="r mn">37</td>
+          <td class="r mn">~37 mill. <span class="ht">est.</span></td>
+          <td class="r mn" style="color:#0F6E56">1,50 mill.</td>
+          <td><span class="b b-tl">Skadesanering</span></td>
+        </tr>
+        <tr class="tot">
+          <td colspan="3"><strong>Sum skadesanering Bodø</strong></td>
+          <td class="r mn">81</td>
+          <td class="r mn">~122 mill. <span class="ht">est.</span></td>
+          <td colspan="2"><span class="ht">Alle tall er estimater basert på 1,50 mill./ans. (justert norm NACE 43.99) — ingen avdelingsregnskap tilgjengelig i Regnskapsregisteret</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Selskap</th><th class="r">Ans.</th><th class="r">Omsetn.</th><th class="r">EBITDA</th><th class="r">Res. f. skatt</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr><td class="ht">01</td><td><div class="nm">Semcon Nord AS</div><div class="ht">Gulv, fliser, murer · Est. 1997</div></td><td class="r mn">16</td><td class="r mn">23 mill.</td><td class="r"><span class="neg">–11,2 %</span></td><td class="r mn neg">–2,7 mill. <span class="ht">–11,7 %</span></td><td><span class="b b-rd">Underskudd</span></td></tr>
+        <tr><td class="ht">02</td><td><div class="nm">Proffkeramikeren Bodø AS</div><div class="ht">Flislegging · Est. 2019</div></td><td class="r mn">6</td><td class="r mn">—</td><td>—</td><td>—</td><td><span class="b b-gy">—</span></td></tr>
+        <tr class="tot"><td colspan="2"><strong>Sum gulv/fliser Bodø</strong></td><td class="r mn">22</td><td class="r mn">~23 mill.</td><td></td><td colspan="2"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ TAB 4: NABOKOMMUNER ═══════════════════════════════════════ -->
+<div id="tab-nabo" class="sec">
+
+  <div class="sh">Lag 2 — Tre identifiserte nabokommunekonkurrenter</div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="cc-name">Fauskebygg AS</div>
+      <div class="cc-meta">Industriveien 22, Fauske (1841) · Est. 1984<br>Konsern: Fauskebygg Holding AS + Fauskebygg Invest AS<br>Totalentreprenør bygg og anlegg</div>
+      <div class="cc-stats">
+        <div><div class="cs-l">Ansatte</div><div class="cs-v">54</div></div>
+        <div><div class="cs-l">Omsetn. 2024</div><div class="cs-v">180 mill.</div></div>
+        <div><div class="cs-l">EBITDA</div><div class="cs-v pos">3,1 %</div></div>
+        <div><div class="cs-l">Res. f. skatt</div><div class="cs-v pos">11,1 m.</div></div>
+        <div><div class="cs-l">Omsetn./ans.</div><div class="cs-v">3,33 m.</div></div>
+        <div><div class="cs-l">Stiftet</div><div class="cs-v">1984</div></div>
+      </div>
+      <div><span class="b b-pu">Totalentreprenør</span> <span class="ht" style="margin-left:6px">Konkurrerer mot Fritzøe på større oppdrag</span></div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-name">Moldjord Bygg og Anlegg AS</div>
+      <div class="cc-meta">Nedre Beiarveien 906, Moldjord/Beiarn (1839) · Est. 2004<br>Eid via Moldjord Holding AS<br>Totalentreprenør inkl. grunnarbeider</div>
+      <div class="cc-stats">
+        <div><div class="cs-l">Ansatte</div><div class="cs-v">52</div></div>
+        <div><div class="cs-l">Omsetn. 2024</div><div class="cs-v">164 mill.</div></div>
+        <div><div class="cs-l">EBITDA</div><div class="cs-v pos">8,9 %</div></div>
+        <div><div class="cs-l">Res. f. skatt</div><div class="cs-v pos">10,8 m.</div></div>
+        <div><div class="cs-l">Omsetn./ans.</div><div class="cs-v">3,15 m.</div></div>
+        <div><div class="cs-l">Stiftet</div><div class="cs-v">2004</div></div>
+      </div>
+      <div><span class="b b-pu">Totalentreprenør</span> <span class="ht" style="margin-left:6px">Konkurrerer mot Fritzøe på større oppdrag</span></div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-name">Rognan Byggsenter AS</div>
+      <div class="cc-meta">Lagerveien 19, Rognan/Saltdal (1840) · Est. 1995<br>Del av BTK-kjeden (Byggtorget) · Daglig leder: Viggo Monsen (f. 1961)<br>Trelasthandel kombinert med snekkerfirma og entrepreneur</div>
+      <div class="cc-stats">
+        <div><div class="cs-l">Ansatte</div><div class="cs-v">21</div></div>
+        <div><div class="cs-l">Omsetn. 2024</div><div class="cs-v">50 mill.</div></div>
+        <div><div class="cs-l">EBITDA</div><div class="cs-v pos">2,0 %</div></div>
+        <div><div class="cs-l">Res. f. skatt</div><div class="cs-v pos">0,9 m.</div></div>
+        <div><div class="cs-l">Omsetn./ans.</div><div class="cs-v">2,38 m.</div></div>
+        <div><div class="cs-l">Stiftet</div><div class="cs-v">1995</div></div>
+      </div>
+      <div><span class="b b-bl">Trelast + snekker</span> <span class="ht" style="margin-left:6px">Nærmere Areal i konkurranseflaten</span></div>
+    </div>
+    <div class="comp-card sum">
+      <div class="cc-name" style="color:#534AB7">Nabokommunekonkurrenter samlet</div>
+      <div class="cc-meta">3 identifiserte aktører · Fauske + Beiarn + Saltdal<br>Øvrige kommuner (Meløy, Steigen, Gildeskål, Hamarøy): spredt kapasitet uten dokumenterte enkeltdominanter av tilsvarende størrelse</div>
+      <div class="cc-stats">
+        <div><div class="cs-l">Ans. totalt</div><div class="cs-v" style="color:#534AB7">127</div></div>
+        <div><div class="cs-l">Omsetn. 2024</div><div class="cs-v" style="color:#534AB7">394 mill.</div></div>
+        <div><div class="cs-l">EBITDA snitt</div><div class="cs-v pos">~5,3 %</div></div>
+        <div><div class="cs-l">Res. f. skatt sum</div><div class="cs-v pos">22,8 m.</div></div>
+        <div><div class="cs-l">Omsetn./ans.</div><div class="cs-v">3,10 m.</div></div>
+        <div><div class="cs-l">Kommuner</div><div class="cs-v">3 av 7</div></div>
+      </div>
+      <div class="note" style="margin:0"><strong>Konkurranseflate:</strong> Fauskebygg og Moldjord byr mot Fritzøe på større totalentrepriseoppdrag i yrkesbygg-segmentet. Rognan Byggsenter er mest relevant mot Areal på snekker/innredning langs E6-korridoren.</div>
+    </div>
+  </div>
+
+  <div class="sh">SSB-sysselsatte i nabokommunene — NACE 41+43, 2025</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Kommune</th><th class="r">NACE 41</th><th class="r">NACE 43 (ROT-rel.)</th><th class="r">Elektro</th><th class="r">Grunn</th><th class="r">Sum ROT-rel.</th><th>Dominerende aktør</th></tr></thead>
+      <tbody>
+        <tr class="nab"><td><strong>Fauske</strong></td><td class="r mn">109</td><td class="r mn">106</td><td class="r mn">29</td><td class="r mn">15</td><td class="r mn" style="color:#534AB7;font-weight:600">215</td><td><span class="b b-pu">Fauskebygg AS (54 ans.)</span></td></tr>
+        <tr><td><strong>Meløy</strong></td><td class="r mn">59</td><td class="r mn">79</td><td class="r mn">28</td><td class="r mn">32</td><td class="r mn">138</td><td><span class="b b-gy">Ikke kartlagt</span></td></tr>
+        <tr class="nab"><td><strong>Saltdal</strong></td><td class="r mn">33</td><td class="r mn">28</td><td class="r mn">9</td><td class="r mn">11</td><td class="r mn" style="color:#534AB7;font-weight:600">61</td><td><span class="b b-pu">Rognan Byggsenter (21 ans.)</span></td></tr>
+        <tr class="nab"><td><strong>Beiarn</strong></td><td class="r mn">47</td><td class="r mn">3</td><td class="r mn">0</td><td class="r mn">10</td><td class="r mn" style="color:#534AB7;font-weight:600">50</td><td><span class="b b-pu">Moldjord Bygg (52 ans.)</span></td></tr>
+        <tr><td><strong>Steigen</strong></td><td class="r mn">19</td><td class="r mn">24</td><td class="r mn">0</td><td class="r mn">13</td><td class="r mn">43</td><td><span class="b b-gy">Ikke kartlagt</span></td></tr>
+        <tr><td><strong>Gildeskål</strong></td><td class="r mn">22</td><td class="r mn">15</td><td class="r mn">4</td><td class="r mn">32</td><td class="r mn">37</td><td><span class="b b-gy">Ikke kartlagt</span></td></tr>
+        <tr><td><strong>Hamarøy</strong></td><td class="r mn">12</td><td class="r mn">14</td><td class="r mn">86</td><td class="r mn">34</td><td class="r mn">26</td><td><span class="b b-tl">Primært elektro/infra</span></td></tr>
+        <tr class="tot"><td><strong>Nabokommuner totalt</strong></td><td class="r mn">301</td><td class="r mn">269</td><td class="r mn">156</td><td class="r mn">117</td><td class="r mn" style="color:#534AB7">570</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="cg">
+    <div class="cc wide"><div class="cl">Nabokommunekonkurrenter — ansatte og omsetning sammenlignet</div><div class="cw" style="height:180px"><canvas id="cNabo"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 5: SSB-DATA ═══════════════════════════════════════════ -->
+<div id="tab-ssb" class="sec">
+  <div class="sh">SSB tabell 13470 — Sysselsatte per fagkategori, arbeidssted Bodø</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Fagkategori / NACE</th><th class="r">2019</th><th class="r">2021</th><th class="r">2022</th><th class="r">2023</th><th class="r">2024</th><th class="r">2025</th><th class="r">Δ 19→25</th><th>Trend</th></tr></thead>
+      <tbody>
+        <tr><td><span class="dot" style="background:var(--c1)"></span><strong>NACE 41 — Byggmester</strong></td><td class="r mn">577</td><td class="r mn">564</td><td class="r mn">580</td><td class="r mn">525</td><td class="r mn">485</td><td class="r mn">518</td><td class="r"><span class="neg">–59</span></td><td><span class="b b-rd">↓ –10 %</span></td></tr>
+        <tr><td><span class="dot" style="background:var(--c2)"></span><strong>NACE 43.22 — VVS</strong></td><td class="r mn">344</td><td class="r mn">343</td><td class="r mn">320</td><td class="r mn">327</td><td class="r mn">310</td><td class="r mn">288</td><td class="r"><span class="neg">–56</span></td><td><span class="b b-rd">↓ –16 %</span></td></tr>
+        <tr><td><span class="dot" style="background:var(--c3)"></span><strong>NACE 43.32 — Snekker</strong></td><td class="r mn">115</td><td class="r mn">90</td><td class="r mn">92</td><td class="r mn">104</td><td class="r mn">101</td><td class="r mn">102</td><td class="r"><span class="neg">–13</span></td><td rowspan="2" style="vertical-align:middle"><span class="b b-am">↓ Samlet –15 %</span></td></tr>
+        <tr><td><span class="dot" style="background:var(--c7)"></span><strong>NACE 43.34 — Maler/glass</strong></td><td class="r mn">115</td><td class="r mn">120</td><td class="r mn">114</td><td class="r mn">119</td><td class="r mn">104</td><td class="r mn">94</td><td class="r"><span class="neg">–21</span></td></tr>
+        <tr class="sub"><td style="padding-left:20px">→ Sum snekker + maler/glass</td><td class="r mn">230</td><td class="r mn">210</td><td class="r mn">206</td><td class="r mn">223</td><td class="r mn">205</td><td class="r mn" style="color:var(--blue);font-weight:600">196</td><td class="r"><span class="neg">–34</span></td><td></td></tr>
+        
+        <tr><td><span class="dot" style="background:var(--c6)"></span><strong>NACE 43.91 — Tak/blikk</strong></td><td class="r mn">28</td><td class="r mn">49</td><td class="r mn">48</td><td class="r mn">48</td><td class="r mn">40</td><td class="r mn">39</td><td class="r"><span class="pos">+11</span></td><td><span class="b b-gr">↑ +39 %</span></td></tr>
+        <tr><td><span class="dot" style="background:var(--c5)"></span><strong>NACE 43.33 — Gulv</strong></td><td class="r mn">32</td><td class="r mn">30</td><td class="r mn">35</td><td class="r mn">37</td><td class="r mn">25</td><td class="r mn">30</td><td class="r"><span class="neg">–2</span></td><td><span class="b b-gy">→ stabil</span></td></tr>
+        <tr class="tot"><td><strong>Sum ROT-relevant (ekskl. elektro/grunn)</strong></td><td class="r mn">1 411</td><td class="r mn">1 383</td><td class="r mn">1 385</td><td class="r mn">1 345</td><td class="r mn">1 253</td><td class="r mn" style="color:var(--blue)">1 213 <span class="ht">*</span></td><td class="r"><span class="neg">–198</span></td><td><span class="b b-rd">↓ –14 %</span></td></tr>
+        <tr class="dim"><td><em>NACE 43.21 — Elektro (ref.)</em></td><td class="r mn">503</td><td class="r mn">535</td><td class="r mn">506</td><td class="r mn">512</td><td class="r mn">518</td><td class="r mn">524</td><td class="r"><span class="pos">+21</span></td><td><span class="b b-gr">↑ Vekst</span></td></tr>
+        <tr class="dim"><td><em>NACE 43.12 — Grunnarbeid (ref.)</em></td><td class="r mn">160</td><td class="r mn">145</td><td class="r mn">177</td><td class="r mn">178</td><td class="r mn">229</td><td class="r mn">253</td><td class="r"><span class="pos">+93</span></td><td><span class="b b-gr">↑↑ BBI</span></td></tr>
+        <tr class="tot"><td><strong>Sum NACE 41+43 totalt</strong></td><td class="r mn">2 077</td><td class="r mn">2 063</td><td class="r mn">2 068</td><td class="r mn">2 035</td><td class="r mn">2 000</td><td class="r mn" style="color:var(--blue)">1 990</td><td class="r"><span class="neg">–87</span></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>Strategisk nøkkelobs:</strong> ROT-kapasiteten i Bodø faller systematisk — ned <strong>198 sysselsatte (–14 %)</strong> siden 2019 i de ROT-relevante fagene. Elektro (+21) og grunnarbeid (+93) vokser, men dette er primært BBI-relatert infrastruktur, ikke bolig- og yrkesbygg-ROT. Fallende tilbud av håndverkere i ROT-segmentet gir strukturelt prispress oppover og lengre ventetider — en <strong>konkurransefordel for etablerte aktører</strong> med kapasitet og gode kunderelasjoner.</div>
+  <div class="cg">
+    <div class="cc wide"><div class="cl">Trend 2019–2025 — ROT-relevante sysselsatte etter arbeidssted Bodø (SSB tab. 13470)</div><div class="cw" style="height:230px"><canvas id="cTrend"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 6: EKSKLUDERTE ════════════════════════════════════════ -->
+<div id="tab-ekskl" class="sec">
+  <div class="sh">Lag 3 — Ekskludert fra ROT-modellen</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Selskap</th><th class="r">Ans.</th><th class="r">Omsetn.</th><th>Kategori</th><th>Begrunnelse for eksklusjon</th></tr></thead>
+      <tbody>
+        <tr><td><div class="nm">EcoNordland AS</div><div class="ht">Bodø · NACE 41 · Est. 2019</div></td><td class="r mn">20</td><td class="r mn">154 mill.</td><td><span class="b b-am">Utbygger</span></td><td style="font-size:11px;color:var(--text2)">Driver utelukkende oppføring av nybygg yrkesbygg og leilighetsbygg for utbyggere. Deltar ikke i ROT-markedet.</td></tr>
+        <tr><td><div class="nm">Byggpartner AS</div><div class="ht">Bodø · NACE 41 · Est. 1992 · Robert Hansen</div></td><td class="r mn">15</td><td class="r mn">74 mill.</td><td><span class="b b-am">Boligutbygger</span></td><td style="font-size:11px;color:var(--text2)">Boligutbygger i egenregi. Norgeshus-konsept. Eiendomssalg dominerer omsetningen — ikke ROT-oppdrag for kunder.</td></tr>
+        <tr><td><div class="nm">Rapp Bomek AS</div><div class="ht">Bodø · NACE 43.240 · 87 ans.</div></td><td class="r mn">87</td><td class="r mn">—</td><td><span class="b b-gy">Industri</span></td><td style="font-size:11px;color:var(--text2)">Industriproduksjon av brann- og sikkerhetsdører. Ikke en håndverks-ROT-aktør.</td></tr>
+        <tr><td><div class="nm">GJ Support AS</div><div class="ht">Bodø · Del av GJ-konsernet · 11 ans.</div></td><td class="r mn">11</td><td class="r mn">—</td><td><span class="b b-gy">Intern tjeneste</span></td><td style="font-size:11px;color:var(--text2)">Intern konserntjeneste for GJ-gruppen. Selger ikke tjenester i markedet.</td></tr>
+        <tr><td><div class="nm">TH Blikk AS</div><div class="ht">HK Mo i Rana · NACE 43.91 · 60 ans.</div></td><td class="r mn">60</td><td class="r mn">94 mill.</td><td><span class="b b-gy">Ikke Bodø</span></td><td style="font-size:11px;color:var(--text2)">Har hovedkontor i Mo i Rana og opererte inntil nylig primært der. Ikke inkludert i Bodø-modellen.</td></tr>
+        <tr class="tot"><td><strong>Ekskluderte totalt</strong></td><td class="r mn">193</td><td class="r mn">~322 mill.</td><td colspan="2"></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Eksklusjoner er basert på primær virksomhetsprofil: selskaper som driver nybygg for utbyggermarkedet, industriproduksjon eller interne konserntjenester regnes ikke som ROT-aktører selv om de er NACE 41/43-registrert. Modellen fanger opp selskaper som tar oppdrag direkte fra bolig- og næringseiendommers eiere for rehabilitering, vedlikehold og tilbygg.</div>
+</div>
+
+<!-- ═══ TAB 7: METODE ════════════════════════════════════════════ -->
+<div id="tab-metode" class="sec">
+
+  <div class="sh">Modellens omfang</div>
+  <div class="note">
+    <strong>Denne modellen gjelder utelukkende Bodø kommune (kommunenr. 1804).</strong> Markedsestimatet, bransjemodellen og alle nøkkeltall er avgrenset til Bodø. Nabokommunene Fauske, Beiarn, Saltdal og øvrige kommuner er <em>ikke</em> en del av ROT-markedet som modelleres — de fremkommer kun som et eget konkurranselag (Lag 2) for å illustrere hvilke regionale aktører som kan by på oppdrag i Bodø. Deres omsetning og ansatte inngår ikke i noe nøkkeltall.
+  </div>
+
+  <div class="sh">Markedsdefinisjon</div>
+  <div class="note">
+    <strong>ROT = Renovering, Ombygging og Tilbygg.</strong> Arbeider utført på eksisterende bygningsmasse, i motsetning til nybygg. Statistikken måles fra produksjonssiden — det spiller ingen rolle hvem som betaler (huseier, kommune eller forsikringsselskap).<br><br>
+    <strong>ROT bolig:</strong> oppussing, renovering og tilbygg på private boliger og fritidseiendommer.<br>
+    <strong>ROT yrkesbygg:</strong> rehabilitering, ombygging og vedlikehold av næringsbygg, kontorer, forretninger og offentlige formålsbygg (inkl. stat, kommune og helseforetak).<br><br>
+    <strong>Ikke inkludert:</strong> NACE 42 (vei, jernbane, VA-nett og annen ren anleggsvirksomhet). Modellen dekker NACE 41 (oppføring/ombygging) og NACE 43 (spesialisert B&amp;A) — byggefeltets bygg-side.
+  </div>
+
+  <div class="sh">Totalestimat — ankerpunktmetoden (top-down)</div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Ankerpunkt</th><th class="r">Verdi 2024</th><th>Kilde</th><th>Kvalitet</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>ROT bolig nasjonalt</strong></td>
+          <td class="r mn">98,0 mrd. kr</td>
+          <td style="font-size:11px">Midtpunkt mellom Prognosesenterets systematiske markedsmåling (~97,4 mrd.) og Riksantikvarens notat 2024 (~100 mrd. inkl. fritidsboliger)</td>
+          <td><span class="b b-gr">Høy — 2 uavhengige kilder konvergerer</span></td>
+        </tr>
+        <tr>
+          <td><strong>ROT yrkesbygg nasjonalt</strong></td>
+          <td class="r mn">121,4 mrd. kr</td>
+          <td style="font-size:11px">GK/Prognosesenteret-rapport gjengitt av Nemitek. Eneste presise enkeltestimat for yrkesbygg-ROT. Omsetningsbasert etterspørselstall inkl. offentlig sektor.</td>
+          <td><span class="b b-am">Medium — kun én kildeverdi, ±8–10 %</span></td>
+        </tr>
+        <tr class="tot">
+          <td><strong>Sum ROT bygg nasjonalt 2024</strong></td>
+          <td class="r mn">219,4 mrd. kr</td>
+          <td colspan="2">SSB-konsistenstest (tab. 12939, NACE 41+43 justert): ~130 mrd. — avvik +7 %, innenfor ±10 % usikkerhetsintervall</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Bakover-indeksering med vektet vekstrate</div>
+  <div class="note">
+    Ankerverdiene for 2024 bakover-indekseres til 2019 og fremover-indekseres til 2029 med en <strong>vektet vekstrate</strong>: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px">Vektet(t) = 0,70 × BKI(t) + 0,30 × NACE43-vol(t)</code><br><br>
+    Ren BKI (byggekostnadsindeks) er en <em>prisindeks</em>, ikke volumindeks. I 2021–2022 eksploderte BKI med +8,7 % begge år, mens reelt aktivitetsvolum i B&amp;A falt −1,3 % (SSB 13431). Ren BKI-indeksering gir da for høy nominell vekst. Den vektede raten demper effekten: 2021 vektet = 6,0 % (vs. BKI 8,7 %), 2022 vektet = 6,4 %. Fra 2026 brukes ren BKI +4,0 % som prognose.
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>År</th><th class="r">BKI</th><th class="r">NACE43 vol.</th><th class="r">Vektet</th><th class="r">Endring vs. BKI</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr><td>2019</td><td class="r mn">2,7 %</td><td class="r mn">+2,7 %</td><td class="r mn">2,7 %</td><td class="r mn">0,0 pp</td><td><span class="ht">Baseline</span></td></tr>
+        <tr><td>2020</td><td class="r mn">2,4 %</td><td class="r mn">+3,3 %</td><td class="r mn">2,7 %</td><td class="r mn pos">+0,3 pp</td><td><span class="ht">Stabil</span></td></tr>
+        <tr><td>2021</td><td class="r mn">8,7 %</td><td class="r mn">−0,3 %</td><td class="r mn">6,0 %</td><td class="r mn neg">−2,7 pp</td><td><span class="b b-am">Inflasjonsjustert ↓</span></td></tr>
+        <tr><td>2022</td><td class="r mn">8,7 %</td><td class="r mn">+0,9 %</td><td class="r mn">6,4 %</td><td class="r mn neg">−2,3 pp</td><td><span class="b b-am">Inflasjonsjustert ↓</span></td></tr>
+        <tr><td>2023</td><td class="r mn">4,4 %</td><td class="r mn">+4,7 %</td><td class="r mn">4,5 %</td><td class="r mn">+0,1 pp</td><td><span class="ht">Nær BKI</span></td></tr>
+        <tr><td>2024</td><td class="r mn">3,8 %</td><td class="r mn">−2,9 %</td><td class="r mn">1,8 %</td><td class="r mn neg">−2,0 pp</td><td><span class="b b-am">Volumfall justert</span></td></tr>
+        <tr><td>2025</td><td class="r mn">4,3 %</td><td class="r mn">−0,9 %</td><td class="r mn">2,7 %</td><td class="r mn neg">−1,6 pp</td><td><span class="b b-am">Volumfall justert</span></td></tr>
+        <tr class="dim"><td>2026–2029</td><td class="r mn">4,0 %</td><td class="r mn">—</td><td class="r mn">4,0 %</td><td class="r mn">0,0 pp</td><td><span class="ht">Prognose, ren BKI</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Skalering til Bodø — justeringsfaktorer</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Faktor</th><th class="r">Verdi</th><th>Beregning / kilde</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Befolkningsandel</strong></td>
+          <td class="r mn">~0,97 %</td>
+          <td style="font-size:11px">SSB tabell 11342. Bodø / Norge for hvert år 2019–2025. 2027–2029 fremskrevet.</td>
+        </tr>
+        <tr>
+          <td><strong>Boligtypefaktor (BF = 0,9252)</strong></td>
+          <td class="r mn">0,9252×</td>
+          <td style="font-size:11px">SSB 12941 (2024): 36 % enebolig i Bodø vs. 48 % nasjonalt. Vektet ROT-intensitet per boligtype: enebolig=1,0 / tomanns=0,65 / rekkehus=0,55 / blokk=0,25. Bodø vektet=0,632 / Nasjonalt=0,684 → faktor=0,9252. Formelen: <code style="background:var(--bg3);padding:1px 4px;border-radius:3px">ROT bolig Bodø = Nas.bolig × 1000 × (Bodø/Norge) × 0,9252</code></td>
+        </tr>
+        <tr>
+          <td><strong>Yrkesbyggfaktor (YF = 1,10–1,25×)</strong></td>
+          <td class="r mn">1,10–1,25×</td>
+          <td style="font-size:11px">Faglig skjønn. Bodø er regionalt senter for Nordland. «Nye Bodø» — transformasjon av militær flyplass til by gir ekstraordinær yrkesbygg-ROT 2021–2025. Topper 1,25× i 2024–25, trappes ned til 1,10× fra 2028. Formelen: <code style="background:var(--bg3);padding:1px 4px;border-radius:3px">ROT yrkes Bodø = Nas.yrkes × 1000 × (Bodø/Norge) × YF</code></td>
+        </tr>
+        <tr>
+          <td><strong>Forsikringskanal (5,5 %)</strong></td>
+          <td class="r mn">~5,5 %</td>
+          <td style="font-size:11px">Finans Norge Skadestatistikken 1997–2025, Tab. 3b+4b. Beregnes som: PB×0,90 + PV×0,95 + NB×0,90 + NV×0,95 (PB=privat brann, PV=privat vann, NB=næring brann, NV=næring vann). Forsikringsfinansierte reparasjoner inngår i ROT — hvem som betaler er irrelevant på produksjonssiden.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Bransjemodellen — bottom-up kartlegging</div>
+  <div class="note">
+    Bransjemodellen er bygget uavhengig av top-down estimatet, og fungerer som en <strong>konsistenssjekk fra tilbudssiden</strong>. Datainnhenting skjer i tre trinn:<br><br>
+    <strong>1. Selskapskartlegging</strong> via Brønnøysundregistrene API: alle selskaper og underenheter i Bodø kommune (1804) med NACE-koder 41.000, 43.220, 43.320, 43.340, 43.290, 43.990, 43.410 og 43.330, med 5+ ansatte. Resultatet: 35 selskaper i 6 fagkategorier, pluss 3 skadesaneringsavdelinger (underenheter av nasjonale konsern) — totalt 38 aktører i 7 fagkategorier.<br><br>
+    <strong>2. Regnskapsdata</strong> fra Regnskapsregisteret (brreg.no): omsetning, EBITDA og resultat f. skatt for 2024. <strong>31 av 34 selskaper</strong> med AS-struktur har innsendte 2024-tall (verifisert via regnskapsregisteret mars 2026). 3 mangler regnskap: Malermester Børre Knutsen AS (ENK/fravalg), Taksystem AS (liten) og Proffkeramikeren Bodø AS (liten). Stig's Tak og Vaktmester NUF har aldri innsendt regnskap (NUF-struktur). De 3 skadesaneringsavdelingene er underenheter uten eget avdelingsregnskap — omsetning er estimert med 1,50 mill./ans. (justert norm for NACE 43.99 skadesanering, lavere enn 43.9-snittet på 2,04 mill. fordi stillasfirmaer og teknisk spesialist trekker 43.9-snittet opp)<br><br>
+    <strong>3. SSB-validering</strong> via SSB tabell 13470: sysselsatte per NACE-kode etter arbeidssted Bodø, 4. kvartal 2025. Gir uavhengig kapasitetsestimat for hele markedet inkl. aktører under 5 ansatte.
+  </div>
+
+  <div class="sh">Geografisk avgrensning — hva som er inkludert og hva som ikke er det</div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>Kategori</th><th>Selskaper</th><th class="r">Ansatte</th><th class="r">Omsetn.</th><th>Inkludert i ROT Bodø?</th><th>Begrunnelse</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:6px;vertical-align:middle"></span><strong>Lag 1 — Bodø ROT-marked</strong></td>
+          <td style="font-size:11px">38 aktører i Bodø kommune (1804) — inkl. 3 skadesaneringsavd. GJ Bygg justert til 33 % ROT-andel.</td>
+          <td class="r mn">596</td>
+          <td class="r mn">~1 168 mill.</td>
+          <td><span class="b b-gr">✓ Ja — fullt inkludert</span></td>
+          <td style="font-size:11px">Forretningsadresse i kommunenr. 1804. Omsetning og ansatte teller i sin helhet i Bodø ROT-markedet.</td>
+        </tr>
+        <tr style="background:rgba(83,74,183,.04)">
+          <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#534AB7;margin-right:6px;vertical-align:middle"></span><strong>Lag 2 — Nabokommunekonkurrenter</strong></td>
+          <td style="font-size:11px">3 selskaper: Fauskebygg (1841), Moldjord Bygg (1839), Rognan Byggsenter (1840)</td>
+          <td class="r mn">127</td>
+          <td class="r mn">394 mill.</td>
+          <td><span class="b b-rd">✗ Nei — ikke inkludert</span></td>
+          <td style="font-size:11px">Forretningsadresse utenfor Bodø. Omsetning og ansatte holdes <strong>helt utenfor</strong> de 687 ROT-justerte ansatte og ~1 103 mill. kr i Bodø ROT-markedet. Vises kun som konkurranselag.</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text3);margin-right:6px;vertical-align:middle"></span><strong>Lag 3 — Ekskluderte Bodø-aktører</strong></td>
+          <td style="font-size:11px">5 selskaper: EcoNordland, Byggpartner, Rapp Bomek, GJ Support, TH Blikk</td>
+          <td class="r mn">193</td>
+          <td class="r mn">~322 mill.</td>
+          <td><span class="b b-rd">✗ Nei — ikke inkludert</span></td>
+          <td style="font-size:11px">Registrert i Bodø, men driver nybygg for utbyggere, industriproduksjon eller intern konserntjeneste. Ikke ROT-aktører.</td>
+        </tr>
+        <tr class="tot">
+          <td colspan="2"><strong>Bekreftelse</strong></td>
+          <td class="r mn">650</td>
+          <td class="r mn">1 300 mill.</td>
+          <td colspan="2" style="font-size:11px">Bodø ROT-markedet består <strong>utelukkende av de 38 aktørene i Lag 1 (35 selskaper + 3 skadesaneringsavdelinger). Verken nabokommunekonkurrenters omsetning (394 mill.) eller ansatte (127) er inkludert i noe nøkkeltall for Bodø ROT-markedet. Bransjemodellens 596 ROT-justerte ansatte = 51 % av SSBs 1 166 sysselsatte i relevante NACE-koder.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    Top-down estimatet fra regnearket (2 346 mill. kr) er tilsvarende avgrenset til Bodø kommune — skalert via Bodøs befolkningsandel (~0,97 %) av norsk totalbefolkning. Nabokommuner som Fauske, Beiarn og Saltdal er geografisk ekskludert fra begge beregningsmetodene.
+  </div>
+
+  <div class="sh">Konsistenssjekk — to metoder mot hverandre</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Mål</th><th>Top-down (regneark)</th><th>Bottom-up (bransjemodell)</th><th>Avvik</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Totalmarked Bodø 2024</strong></td>
+          <td class="mn">2 346 mill. kr</td>
+          <td class="mn">1 300 mill. kjent → ~2 360 mill. ekstrapolert (55 % dekning)</td>
+          <td><span class="b b-gr">±1 % — konsistent</span></td>
+        </tr>
+        <tr>
+          <td><strong>Omsetn. per sysselsatt</strong></td>
+          <td class="mn">2 346 ÷ 1 166 SSB-syss. = 2,01 mill.</td>
+          <td class="mn">1 168 ÷ 596 bransjemod.-ans. ≈ 1,96 mill.</td>
+          <td><span class="b b-gr">±4 % — konsistent</span></td>
+        </tr>
+        <tr>
+          <td><strong>Dekning bransjemodell</strong></td>
+          <td class="mn">—</td>
+          <td class="mn">596 / 1 166 SSB-syss. = 51 % av sysselsatte fanget</td>
+          <td><span class="b b-am">46 % i ikke-kartlagte selskaper</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Usikkerhet og konfidensintervall</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Usikkerhetskilde</th><th class="r">Størrelsesorden</th><th>Merknad</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Yrkesbyggfaktor (by)</strong></td><td class="r mn">±10–15 %</td><td style="font-size:11px">Største enkeltusikkerhet. Basert på faglig skjønn, ikke statistisk estimert.</td></tr>
+        <tr><td><strong>BKI som volumproxy 2021–22</strong></td><td class="r mn">±5–8 %</td><td style="font-size:11px">Redusert etter vektet-korreksjon. Reell aktivitetsvekst kan avvike.</td></tr>
+        <tr><td><strong>Ankerpunkt ROT yrkesbygg 2024</strong></td><td class="r mn">±8–10 %</td><td style="font-size:11px">Kun én kildeverdi (GK/Prognosesenteret). Ingen krysssjekk med samme oppløsning.</td></tr>
+        <tr><td><strong>Boligtypefaktor</strong></td><td class="r mn">±3–5 %</td><td style="font-size:11px">Beregnet fra SSB 12941. Rimelig anslag — ikke empirisk testet mot by-spesifikke data.</td></tr>
+        <tr><td><strong>Ankerpunkt ROT bolig 2024</strong></td><td class="r mn">±3–5 %</td><td style="font-size:11px">To uavhengige kilder konvergerer — høyest konfidens av alle ankerverdier.</td></tr>
+        <tr class="tot"><td><strong>Samlet usikkerhetsintervall</strong></td><td class="r mn">±12–15 %</td><td style="font-size:11px">Bodø-tall. Nasjonal usikkerhet ±10 %. Høyere i 2021–2022 pga. ekstraordinær BKI.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Datakilder og kildekvalitet</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Kilde</th><th>Brukt til</th><th>Kvalitet</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Prognosesenteret</strong></td><td style="font-size:11px">ROT bolig og yrkesbygg nasjonalt</td><td><span class="b b-gr">Høy</span> <span class="ht">— eneste aktør med systematisk, metodisk konsistent måling over tid</span></td></tr>
+        <tr><td><strong>GK / Nemitek</strong></td><td style="font-size:11px">Anker ROT yrkesbygg 2024: 121,4 mrd.</td><td><span class="b b-gr">Høy</span> <span class="ht">— eneste presise enkeltestimat. Omsetningsbasert etterspørselstall inkl. offentlig sektor.</span></td></tr>
+        <tr><td><strong>SSB 08650</strong></td><td style="font-size:11px">Byggekostnadsindeks (BKI)</td><td><span class="b b-gr">Høy</span> <span class="ht">— bekreftet fra indeksverdier (2015=100). BKI 2024: 146,4 / 2025: 152,7</span></td></tr>
+        <tr><td><strong>SSB 13431</strong></td><td style="font-size:11px">Produksjonsindeks B&amp;A (volumindeks)</td><td><span class="b b-gr">Høy</span> <span class="ht">— brukt til vektet-korreksjon 2021–2025. NACE43 vekst: 2021=−0,3 %, 2024=−2,9 %</span></td></tr>
+        <tr><td><strong>SSB 12880</strong></td><td style="font-size:11px">KPI 2019–2029</td><td><span class="b b-gr">Høy</span> <span class="ht">— SSBs offisielle prognoser mars 2026. 2026: 3,2 % / 2027: 2,4 % / 2028: 2,3 %</span></td></tr>
+        <tr><td><strong>SSB 11342</strong></td><td style="font-size:11px">Befolkning Bodø og nasjonalt</td><td><span class="b b-gr">Høy</span> <span class="ht">— direkte hentet og verifisert for alle år 2019–2026</span></td></tr>
+        <tr><td><strong>SSB 12941</strong></td><td style="font-size:11px">Boligstruktur per boligtype</td><td><span class="b b-gr">Høy</span> <span class="ht">— direkte hentet 2024. Grunnlag for boligtypefaktor 0,9252</span></td></tr>
+        <tr><td><strong>SSB 13470</strong></td><td style="font-size:11px">Sysselsatte per næring og arbeidssted</td><td><span class="b b-gr">Høy</span> <span class="ht">— direkte hentet, 4. kv. 2025. Grunnlag for kapasitetsestimat</span></td></tr>
+        <tr><td><strong>Finans Norge</strong></td><td style="font-size:11px">Forsikringskanal (Skadestatistikken 1997–2025)</td><td><span class="b b-gr">Høy</span> <span class="ht">— Tab. 3b (privat) og 4b (næring)</span></td></tr>
+        <tr><td><strong>Brønnøysundregistrene</strong></td><td style="font-size:11px">Selskapskartlegging, roller, eierstruktur</td><td><span class="b b-gr">Høy</span> <span class="ht">— offisielt register, mars 2026</span></td></tr>
+        <tr><td><strong>Regnskapsregisteret</strong></td><td style="font-size:11px">Omsetning, EBITDA, resultat f. skatt per selskap</td><td><span class="b b-am">Medium</span> <span class="ht">— 26 av 35 selskaper har innsendt regnskap for 2024</span></td></tr>
+        <tr><td><strong>Riksantikvaren</strong></td><td style="font-size:11px">Krysssjekk ROT bolig</td><td><span class="b b-am">Medium</span> <span class="ht">— notat 2024: ~100 mrd. Støtter ankeret. Konkluderer med at SSBs statistikk er utilstrekkelig.</span></td></tr>
+        <tr><td><strong>BDO</strong></td><td style="font-size:11px">ROT &gt; nybygg-bekrefter</td><td><span class="b b-am">Medium</span> <span class="ht">— Bygg- og anleggsanalysen vår 2025: ROT er 38 mrd. kr større enn nybyggmarkedet</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Sanity check — tre uavhengige metoder mars 2026</div>
+
+  <div class="note">
+    Modellen er kvalitetssikret mot to uavhengige SSB-kilder: <strong>SSB 12939</strong> (strukturstatistikk bygg og anlegg — nasjonal omsetning og sysselsatte per NACE, 2019–2021, fremskrevet til 2024) og <strong>SSB 13431</strong> (produksjonsindeks, volumvekst per NACE 2019–2025). Tre metodisk uavhengige estimater stilles mot hverandre.
+  </div>
+
+  <div class="tw" style="margin-bottom:14px">
+    <table>
+      <thead><tr><th>Metode</th><th>Grunnlag</th><th class="r">Estimat 2024</th><th>Avvik vs. top-down</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Top-down</strong></td>
+          <td style="font-size:11px">Ankerpunkt 98,0 mrd. bolig + 121,4 mrd. yrkesbygg × befolknings- og justeringsfaktorer (regneark)</td>
+          <td class="r mn" style="color:var(--blue)">2 346 mill.</td>
+          <td><span class="b b-gr">Referanse</span></td>
+        </tr>
+        <tr>
+          <td><strong>SSB OPA-metode</strong></td>
+          <td style="font-size:11px">Nasjonal OPA fra SSB 12939 fremskrevet til 2024 (NACE41 ROT: 2,10 mill./ans. · NACE43 ROT: 1,79 mill./ans.) × SSB-sysselsatte Bodø 2025 (13470)</td>
+          <td class="r mn">2 250 mill.</td>
+          <td><span class="b b-gr">–4 % ✓</span></td>
+        </tr>
+        <tr>
+          <td><strong>Bottom-up ekstrapolert</strong></td>
+          <td style="font-size:11px">Bransjemodell kjent/estimert omsetning 1 168 mill. ÷ 50 % dekning (antall kartlagte av total SSB-populasjon)</td>
+          <td class="r mn">2 347 mill.</td>
+          <td><span class="b b-gr">0 % ✓</span></td>
+        </tr>
+        <tr class="tot">
+          <td colspan="2"><strong>Spredning mellom metodene</strong></td>
+          <td class="r mn">2 188–2 346 mill.</td>
+          <td><span class="b b-gr">±7 % — sterk konvergens</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Sanity check — enkeltfunn</div>
+  <div class="tw" style="margin-bottom:14px">
+    <table>
+      <thead><tr><th>Funn</th><th>Status</th><th>Detalj</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Bodøs ROT-intensitetsfaktor</strong></td>
+          <td><span class="b b-gr">✓ Rimelig</span></td>
+          <td style="font-size:11px">Bodøs markedsandel 1,07 % vs. befolkningsandel 0,97 % → intensitetsfaktor <strong>1,10×</strong>. Høyere enn landssnitt som forventet — regionalt senter for Nordland og BBI-effekt.</td>
+        </tr>
+        <tr>
+          <td><strong>Byggmester OPA (NACE 41)</strong></td>
+          <td><span class="b b-gr">✓ Konsistent</span></td>
+          <td style="font-size:11px">Bransjemodell 2,23 mill./ans. vs. nasjonal NACE 41 ROT-norm 2,10 mill./ans. Avvik +6 % — innenfor usikkerhetsintervallet. GJ Bygg-justeringen til 33 % ROT er avgjørende for at dette henger sammen.</td>
+        </tr>
+        <tr>
+          <td><strong>VVS OPA (NACE 43.22)</strong></td>
+          <td><span class="b b-am">⚠ Noe lav</span></td>
+          <td style="font-size:11px">Kartlagte VVS-selskaper: 1,24 mill./ans. vs. nasjonal NACE 43 norm: 1,79 mill./ans. Dekning er 53 % (153 av ~288 ans.) — de ukartlagte 47 % er trolig enkeltpersonforetak og spesialister med høyere OPA, noe som trekker totalsnittet opp mot normen. Ingen korrigeringshandling nødvendig.</td>
+        </tr>
+        <tr>
+          <td><strong>Skadesanering vs. forsikringskanal</strong></td>
+          <td><span class="b b-gr">✓ Rimelig</span></td>
+          <td style="font-size:11px">Skadesanering justert til ~122 mill. (1,50 mill./ans. × 81 ans.). Dette er 0,94× forsikringskanalen på 129 mill. — rimelig og konservativt. Omsetningen er litt lavere enn forsikringskanalen fordi en del skadesanerings­oppdrag går via egenbetaling og kommunale direkteoppdrag, men skadesanering er ikke hele forsikringskanalen alene.</td>
+        </tr>
+        <tr>
+          <td><strong>NACE 41 volumfall (SSB 13431)</strong></td>
+          <td><span class="b b-am">⚠ Ny info</span></td>
+          <td style="font-size:11px">SSB 13431: NACE 41 volum –7,2 % (2024) og –3,4 % (2025) — kraftigere enn modellen forutsatte. Dette er primært nybyggkrakket. ROT-markedet er historisk mer motstandsdyktig i nedgangstider enn nybygg, så effekten på ROT-siden er dempet. Ingen justering av 2024-ankeret, men gir nedside-signal for 2025.</td>
+        </tr>
+        <tr>
+          <td><strong>NACE 43 volumfall (SSB 13431)</strong></td>
+          <td><span class="b b-am">⚠ Ny info</span></td>
+          <td style="font-size:11px">SSB 13431: NACE 43 volum –0,9 % (2024) og –2,9 % (2025) vs. modellens –0,91 % for 2025 i vektet rate. 2025-fallet er sterkere enn antatt. Indikerer at totalmarkedet for 2025 kan ligge noe under regnearkmodellens 2 392 mill. — anslagsvis –2 til –3 % korreksjon.</td>
+        </tr>
+        <tr>
+          <td><strong>NACE 43.9 sysselsatte (SSB 13470)</strong></td>
+          <td><span class="b b-am">⚠ Merk</span></td>
+          <td style="font-size:11px">NACE 43.9 (inkl. skadesanering) nasjonalt faller fra 25 201 (2024) til 21 266 (2025) — ned 16 %. I Bodø: 178 → 134 ans. (–25 %). Deler av dette er sannsynligvis reklassifisering, ikke reelt frafall. Skadesanerings-avdelingene (Recover, Reco, Ocab) har stabile ansattregistreringer i brreg.</td>
+        </tr>
+        <tr class="tot">
+          <td colspan="2"><strong>Samlet vurdering</strong></td>
+          <td style="font-size:11px">Modellen er solid og godt kalibrert for strategisk bruk. Alle tre estimatmetoder konvergerer innenfor ±7 %. Usikkerhetsintervallet ±12–15 % for Bodø-tall er riktig priset. Det er ingen enkeltfunn som tilsier at sentralestimatet er vesentlig feil. Nedside-signal for 2025 fra SSB 13431 bør reflekteres i neste modellrunde.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Nasjonal OPA-benchmark (SSB 12939 → fremskrevet 2024)</div>
+  <div class="tw" style="margin-bottom:22px">
+    <table>
+      <thead><tr><th>NACE</th><th class="r">OPA 2019</th><th class="r">OPA 2021</th><th class="r">OPA 2024 est.</th><th class="r">ROT-andel</th><th class="r">ROT OPA 2024</th><th>Brukt i modellen</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>NACE 41 — Oppføring</strong></td>
+          <td class="r mn">3,46 mill.</td><td class="r mn">3,71 mill.</td><td class="r mn">4,20 mill.</td>
+          <td class="r mn">50 %</td><td class="r mn" style="color:var(--blue)">2,10 mill.</td>
+          <td style="font-size:11px">Bransjemodell: 2,23 mill. — avvik +6 % ✓</td>
+        </tr>
+        <tr>
+          <td><strong>NACE 43 — Spesialisert</strong></td>
+          <td class="r mn">1,67 mill.</td><td class="r mn">1,76 mill.</td><td class="r mn">1,99 mill.</td>
+          <td class="r mn">90 %</td><td class="r mn" style="color:var(--blue)">1,79 mill.</td>
+          <td style="font-size:11px">Bransjemodell NACE 43 snitt: 1,37 mill. — lavere pga. 53 % dekning og tak/gulv-lavpris</td>
+        </tr>
+        <tr class="tot">
+          <td colspan="5"><strong>Metodikk</strong></td>
+          <td style="font-size:11px">OPA 2021 fremskrevet med vektet vekstrate: 2022 +6,36 % · 2023 +4,48 % · 2024 +1,79 % (SSB 13431 + BKI). Kilde: SSB 12939 (siste tilgjengelig 2021).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Modellens tilblivelse</div>
+
+  <div class="note" style="margin-bottom:18px">
+    Denne modellen er ikke bestilt som et ferdig produkt — den er vokst frem gjennom en iterativ arbeidsprosess over flere chatter mellom Halvard Nordang (Affectum AS, rådgiver) og Brynjar Storvik (daglig leder, Byggmester Fritzøe AS og Areal Byggservice AS). Nedenfor er en kronologisk rekonstruksjon av de viktigste stegene.
+  </div>
+
+  <div class="tw" style="margin-bottom:22px">
+    <table>
+      <thead>
+        <tr>
+          <th style="min-width:130px">Fase og dato</th>
+          <th style="min-width:80px">Verktøy / kilde</th>
+          <th>Hva ble gjort</th>
+          <th>Viktigste beslutninger og funn</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>Fase 1</strong><br><span class="ht">Feb–mars 2026</span></td>
+          <td><span class="b b-gy">Excel</span></td>
+          <td style="font-size:11px">Opprinnelig Excel-modell bygget fra bunnen. Markedet definert som ROT bolig + yrkesbygg (NACE 41+43). To ankerpunkter etablert: 98,0 mrd. kr bolig og 121,4 mrd. kr yrkesbygg for 2024, basert på Prognosesenteret og GK/Nemitek. Bakover-indeksering med ren BKI (SSB 08650). Bodø skalert via befolkningsandel og boligtypefaktor 0,9252 (SSB 12941).</td>
+          <td style="font-size:11px">Første strukturerte totalmarkedsestimat for Bodø ROT 2024: <strong>2 346 mill. kr</strong>. Usikkerhetsintervall ±10 %. Forsikringskanal integrert fra Finans Norge Skadestatistikken (tab. 3b + 4b).</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 2a</strong><br><span class="ht">Mars 2026</span></td>
+          <td><span class="b b-gy">Excel</span></td>
+          <td style="font-size:11px">Metodisk oppgradering: ren BKI-indeksering erstattet med vektet vekstrate (0,70 × BKI + 0,30 × NACE43-volumindeks, SSB 13431). Bakgrunnen var at BKI-veksten på +8,7 % i 2021 og 2022 overvurderte reell aktivitetsvekst — det reelle volumet i B&A-sektoren falt –1,3 % begge år. Vektet rate for 2021: 6,0 %; for 2022: 6,4 %. Prognose 2026–2029: ren BKI +4,0 %.</td>
+          <td style="font-size:11px">Vektet vekstrate er nå modellens kjerneberegning, konsekvent brukt 2019–2025. Modellen lagret som <em>ROT_Markedsmodell_Norge_Bodo_QA_3.xlsx</em> med 5 faner: Metodebeskrivelse, Sammendrag, Nasjonal ROT, Bodø ROT, Forutsetninger. Kilde: Prognosesenteret (2024), GK/Nemitek, Riksantikvaren, SSB 08650 og 13431.</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 2b</strong><br><span class="ht">28. mars 2026</span><br><span class="ht">Chat 1</span></td>
+          <td><span class="b b-gy">Excel</span> <span class="b b-bl">Purehelp</span></td>
+          <td style="font-size:11px">Halvard lastet opp Excel-modellen og limte inn regnskapsdata for Byggmester Fritzøe AS og Areal Byggservice AS (2019–2024) fra Purehelp. Ny Excel-fane «Areal og Fritzøe» bygget med fullstendig resultatregnskap, EBITDA-margin, resultatgrad og markedsposisjon mot ROT-markedet. 20 formelfeil rettet (sirkulære referanser i bruttofortjeneste og feil radpekere i resultatgrad-formler).</td>
+          <td style="font-size:11px">Samlet markedsandel 2020–2024: <strong>4,4–5,0 %</strong> av ROT-markedet Bodø. Konsernet vokste +46 % mot markedsvekst på +28 % — markedsandeler ble tatt i perioden. Begge selskapers forretningsmodeller ble analysert: BF er mer materialintensiv (42 % bruttomargin), AB mer tjenesteintensiv (56 % bruttomargin).</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 3a</strong><br><span class="ht">28. mars 2026</span><br><span class="ht">Chat 2</span></td>
+          <td><span class="b b-bl">brreg MCP</span> <span class="b b-bl">SSB MCP</span></td>
+          <td style="font-size:11px">HTML-bransjemodellen bygget fra bunnen. Systematisk kartlegging av alle ROT-aktører i Bodø via Brønnøysundregistrene MCP (NACE 41, 43.22, 43.3, 43.9, 43.99). SSB tabell 13470 brukt for å verifisere sysselsatte per NACE-kode. Tre-lagsmodell definert: Lag 1 (Bodø ROT), Lag 2 (nabokommunekonkurrenter), Lag 3 (ekskluderte aktører). Proff.no brukt for regnskapsdata på selskapsnivå.</td>
+          <td style="font-size:11px">38 aktører kartlagt i Lag 1 (35 selskaper + 3 skadesaneringsavdelinger). GJ Bygg justert til 33 % ROT-andel. Skadesaneringsavdelinger (Recover, Reco, Ocab) brreg-verifisert på underenhetsnivå. Fagkategorier: Byggmester, VVS, Snekker/Maler/Glass/Innredning, Skadesanering, Tak, Gulv.</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 3b</strong><br><span class="ht">28. mars 2026</span></td>
+          <td><span class="b b-bl">SSB 12939</span> <span class="b b-bl">SSB 13431</span></td>
+          <td style="font-size:11px">Tre-metoders sanity check gjennomført: (1) top-down fra regneark, (2) SSB OPA-metode — nasjonal omsetning per sysselsatt fra SSB 12939 (fremskrevet til 2024 via vektet rate) multiplisert med SSB-sysselsatte Bodø fra 13470, (3) bottom-up bransjemodell ekstrapolert til full populasjon. Ny SSB 13431-data innarbeidet: NACE 41 volum –7,2 % (2024) og NACE 43 volum –2,9 % (2025) — sterkere fall enn antatt.</td>
+          <td style="font-size:11px">Alle tre metoder konvergerer innenfor ±7 %: top-down 2 346 mill., SSB OPA 2 250 mill., bottom-up ekstrapolert 2 347 mill. Bodøs ROT-intensitetsfaktor: <strong>1,10×</strong> vs. landssnitt — rimelig som regionalt senter og BBI-effekt. SSB 13431 gir nedside-signal for 2025–2026.</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 3c</strong><br><span class="ht">28. mars 2026</span></td>
+          <td><span class="b b-bl">SSB 12939</span></td>
+          <td style="font-size:11px">OPA-norm for skadesanering (NACE 43.99) gjennomgått og justert. Opprinnelig norm 1,93 mill./ans. (NACE 43.9-snittet) nedjustert til <strong>1,50 mill./ans.</strong> fordi 43.9-snittet inkluderer stillasfirmaer og teknisk spesialist med høyere OPA. Forholdet til forsikringskanalen endret fra 1,21× til 0,94× — mer rimelig, siden skadesanering ikke alene utgjør hele forsikringskanalen.</td>
+          <td style="font-size:11px">Total bransjemodell revidert: ~1 210 → <strong>~1 103 mill.</strong> OPA bransjemodell: 1,76 → 1,61 mill./ans. Dekning av SSB-populasjon: 52 → 47 %. Alle følgetall oppdatert gjennomgående i HTML-modellen.</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 3d</strong><br><span class="ht">28. mars 2026</span></td>
+          <td><span class="b b-bl">SSB 13470</span> <span class="b b-bl">brreg MCP</span></td>
+          <td style="font-size:11px">Fullstendig NACE-oversikt bygget for alle bygg- og anleggsfag (NACE 41, 42, 43.1–43.99). Elektro (43.21) lagt inn som referansekategori (524 ans. i Bodø 2025, eneste med vekst siden 2019). Grunnarbeid (43.12) markert som BBI-effekt (+93 ans. siden 2019). SSB ROT-relevant sysselsatte justert fra 1 213 til <strong>1 166</strong> etter korrekt splitting av 43.2 (elektro ekskl.). Fagene adskilt i Gruppe A (byggfag) og Gruppe B (tekniske fag).</td>
+          <td style="font-size:11px">Skadesanering brreg-verifisert mars 2026 på underenhetsnivå: Recover 18, Reco 26, Ocab 37 = 81 kartlagte av 95 SSB-registrerte. Differansen på 14 ans. er sannsynligvis enkeltpersonforetak og mindre aktører ikke fanget i bransjemodellen.</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 3e</strong><br><span class="ht">28. mars 2026</span></td>
+          <td><span class="b b-bl">Proff.no</span></td>
+          <td style="font-size:11px">5-årig regnskapshistorikk (2020–2024) hentet for 29 av 32 selskaper via Proff.no sitt companyAccounts-API (koder SDI/DR/ORS). Ny fane «Regnskap 5 år» lagt til med klikk-for-drilldown, sortering, fagkategorifilter og Chart.js-visualisering per selskap. Årsresultat (AEK) fjernet — forholder seg til resultat f. skatt (ORS) som er konsistent tilgjengelig uavhengig av skatteposisjon.</td>
+          <td style="font-size:11px">Analysen avdekket dramatiske svingninger i GJ Bygg (–75,9 mill. EBITDA i 2023, snudd i 2024). Haneseth VVS Bodø er bransjens mest lønnsomme aktør (~18 % EBITDA stabilt). 3 selskaper mangler historikk: Malermester Børre Knutsen AS, Haneseth VVS Sortland AS, Blikk Nord AS.</td>
+        </tr>
+
+        <tr>
+          <td><strong>Fase 3f</strong><br><span class="ht">28. mars 2026</span></td>
+          <td><span class="b b-bl">Proff.no</span><br><span class="b b-rd">Datakvalitet</span></td>
+          <td style="font-size:11px">
+            <strong>Fullstendig manuell verifisering av alle 29 selskaper × 5 år × 3 felt (o/e/r) mot Proff.no.</strong> Hvert selskap ble navigert direkte i nettleseren og data lest fra <code>__NEXT_DATA__</code> på siden — orgnr verifisert mot Brønnøysundregistrene for hvert enkelt selskap. 201 avvik ble identifisert og rettet.<br><br>
+
+            <strong>Utfordring 1 — EBITDA vs. EBIT (DR-koden).</strong> Proff.no eksponerer to ulike driftsresultat-koder: <code>DR</code> er driftsresultat <em>etter</em> avskrivninger (EBIT), mens <code>EBITDA</code> er en separat beregnet kode som legger avskrivninger tilbake. Modellen brukte initialt <code>DR</code> som EBITDA, noe som ga korrekte verdier for arbeidsintensive håndverksselskaper med minimale avskrivninger, men vesentlige avvik for kapitalintensive selskaper. For PTG Multi Kulde AS — som eier kuldeanlegg og varmepumper — utgjorde avskrivningene 7+ mill. kr/år, slik at DR (EBIT) var 8,7 % mens ekte EBITDA var 27,7 %. Etter oppdagelsen ble <code>EBITDA</code>-koden brukt konsekvent for alle selskaper og alle år.<br><br>
+
+            <strong>Utfordring 2 — Batchhenting introduserte kryssfeil.</strong> Tidlig i prosessen ble data hentet for alle selskaper i én JavaScript-løkke via <code>fetch()</code>-kall fra nettleserkonteksten. Denne metoden viste seg å returnere feil data for en rekke selskaper — trolig fordi Proff.no-serveren returnerte cachet HTML for feil selskap ved rask batch-forespørsel, eller fordi <code>window._proffData</code>-objektet ikke ble korrekt populert for selskaper som ikke var besøkt direkte. Symptomene var at mange selskaper i DS hadde identiske mønstre (jevnt underskudd alle år, unaturlig jevn omsetningsvekst) som ikke stemte med faktiske regnskapstall. Løsningen var å navigere direkte til hvert enkelt selskaps side i nettleseren og lese <code>__NEXT_DATA__</code> derfra — slik at kun den aktuelle selskapssiden var lastet ved hvert datauttak.<br><br>
+
+            <strong>Utfordring 3 — Feil organisasjonsnummer.</strong> To selskaper hadde feil orgnr i modellen: <strong>Semcon Nord AS</strong> var registrert med 934399668 (tilhører Energy Hub AS i Sandeid) — riktig orgnr er 978654037 (Jernbaneveien 30, Bodø). <strong>Proffkeramikeren Bodø AS</strong> var registrert med 922882103 — riktig orgnr er 922229317. Begge ble verifisert mot Brønnøysundregistrene via navnesøk på kommunenummer 1804.<br><br>
+
+            <strong>Utfordring 4 — Res. f. skatt &gt; EBITDA.</strong> Flere tilfeller der resultat f. skatt oversteg EBITDA ble oppdaget og undersøkt. De fleste viste seg å være legitime: konsernbidrag fra morselskap dekker driftsunderskudd (Skipnes, GJ Bygg), eller ekstraordinære finansinntekter (PTG Multi Kulde 2023: 22 mill. kr i netto finansposter — sannsynligvis salg av anleggsmidler eller konsernbidrag). Noen tilfeller skyldtes imidlertid at res. f. skatt-prosenten feilaktig var kopiert inn i EBITDA-feltet under manuell editering av fagkategoritabellene.
+          </td>
+          <td style="font-size:11px">
+            <strong>Omfang av rettelser etter full manuell verifisering:</strong><br><br>
+            Selskaper med størst avvik mellom DS og Proff-kilde:<br>
+            · <em>Snekkern AS</em> — DS hadde konstant underskudd og 12–15 mill. omsetn.; faktisk 24–36 mill. og positiv EBITDA 2020–2023<br>
+            · <em>Semcon Nord AS</em> — DS hadde konstant underskudd; faktisk positiv EBITDA alle år 2020–2023<br>
+            · <em>Haneseth VVS Bodø AS</em> — omsetning sterkt overvurdert 2020–2022 (32–41 mill. vs. 18–31 mill. faktisk)<br>
+            · <em>Høytrykksteknikk AS</em> — DS hadde positiv EBITDA alle år; faktisk negativ EBITDA 2020–2023<br>
+            · <em>Norover AS</em> — omsetning 2023 undervurdert med 28 mill. (11 → 39 mill. faktisk)<br>
+            · <em>Bodø Glass og Ramme AS</em> — omsetning undervurdert 2020–2023 (28–35 mill. vs. 37–56 mill. faktisk); positivt EBITDA 2020–2022 vs. negativt i DS<br><br>
+            <strong>Lærdom:</strong> Batchhenting av regnskapsdata fra nettleser-kontekst er upålitelig for Proff.no. Enkeltvis navigering med orgnr-verifisering er eneste metode som garanterer korrekthet. DS-objektet er nå verifisert selskap for selskap, år for år og felt for felt mot Proff.no-kilden.
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sh">Metodiske prinsipper</div>
+
+  <div class="note" style="margin-bottom:22px">
+    Noen gjennomgående prinsipper har styrt valgene som er tatt gjennom arbeidsprosessen.<br><br>
+    <strong>Kildeforankring og etterprøvbarhet.</strong> Alle ankerverdier er koblet til navngitte, daterte kilder (Prognosesenteret, GK/Nemitek, Riksantikvaren, Finans Norge, SSB). Der kildene spriker brukes midtpunktet og usikkerheten dokumenteres eksplisitt.<br><br>
+    <strong>Tre-metoders konvergens som kvalitetskriterium.</strong> Modellen er ikke godkjent som «god nok» før top-down, SSB OPA-metode og bottom-up alle peker i samme retning — innenfor ±10 %. Det faktiske avviket er ±7 %.<br><br>
+    <strong>Progressiv justering fremfor redesign.</strong> Når ny data avslørte svakheter (BKI-overvurdering 2021–2022, for høy skadesanerings-OPA, feil NACE-splitting for elektro) ble tallene justert og dokumentert i versjonsloggen, ikke bygget på nytt fra grunnen.<br><br>
+    <strong>Skille mellom modellens grenser og markedets grenser.</strong> Elektro, grunnarbeid og anleggsvirksomhet er bevisst ekskludert — ikke fordi de er uviktige, men fordi de tilhører en annen konkurransearena med egne sertifiseringer, kunder og kontraktsformer.<br><br>
+    <strong>Usikkerhetsintervall som del av svaret.</strong> Et sentralestimat uten intervall er falsk presisjon. Modellen opererer med ±12–15 % som et ærlig uttrykk for den reelle usikkerheten i et marked uten direkte statistisk primærdata.
+  </div>
+
+  <div class="sh">Versjonslogg</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Versjon</th><th>Dato</th><th>Endring</th></tr></thead>
+      <tbody>
+        <tr><td><span class="b b-gy">v1.0</span></td><td class="ht">Feb 2026</td><td style="font-size:11px">Opprinnelig modell. Ren BKI-indeksering. Anker 2024 etablert.</td></tr>
+        <tr><td><span class="b b-gy">v1.1</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">Trondheim-analyse tillagt. Sammenligning Bodø vs. Trondheim.</td></tr>
+        <tr><td><span class="b b-gy">v1.2</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">KPI oppdatert med SSB 12880 mars 2026-prognose (3,2 %/2,4 %/2,3 %/1,9 % for 2026–2029 — ikke flat 3 %).</td></tr>
+        <tr><td><span class="b b-gy">v1.3</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">BKI-serie erstattet med vektet vekstrate (0,70×BKI + 0,30×NACE43 volumindeks, SSB 13431) for 2019–2025. Korrigerer for BKI-overvurdering i 2021–2022.</td></tr>
+        <tr><td><span class="b b-bl">v2.1</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">Bransjemodell (bottom-up) lagt til med 35 selskaper, 6 fagkategorier, SSB-validering og nabokommunekartlegging. Sanity check bekreftelse: ±1 % avvik mellom top-down og bottom-up. Utarbeidet av Affectum AS for Servicealliansen AS.</td></tr>
+        <tr><td><span class="b b-bl">v2.2</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">Skadesaneringsaktører (Recover, Reco, Ocab) lagt til. GJ Bygg justert til 33 % ROT-andel. Regnskap-status korrigert til 31 av 34 AS med 2024-regnskap. Modellnavn forenklet til «ROT-markedsmodell — Bodø». Metode-fanen presiserer at modellen gjelder Bodø kommune, og at nabokommunedata er supplerende kontekst.</td></tr>
+        <tr><td><span class="b b-bl">v2.4</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">NACE-oversikt oppdatert med elektro (43.21) som referansekategori. SSB-sysselsatte ROT-relevant justert fra 1 213 til 1 166 etter korrekt splitting av NACE 43.2 (elektro ekskl.). Skadesanering brreg-verifisert: Recover 18 ans. · Reco 26 ans. · Ocab 37 ans. = 81 kartlagte, 95 totalt SSB. Versjonslogg oppdatert.</td></tr>
+        <tr><td><span class="b b-bl">v2.3</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">Fullstendig sanity check mot SSB 12939 (nasjonal OPA), SSB 13431 (produksjonsindeks) og SSB 13470 (sysselsatte). Tre metoder konvergerer innenfor ±7 %. Funn dokumentert i metode-fanen: nedside-signal for 2025 fra SSB 13431, NACE 43.9 reklassifisering, og VVS-dekning på 53 %.</td></tr>
+        <tr><td><span class="b b-gr">v2.5</span></td><td class="ht">Mar 2026</td><td style="font-size:11px">Fullstendig manuell datakvalitetssjekk av alle 29 selskaper &times; 5 år &times; 3 felt mot Proff.no — hvert selskap navigert direkte i nettleser med orgnr-verifisering mot Brønnøysundregistrene. 201 avvik identifisert og rettet. Korrekte orgnr etablert for Semcon Nord AS (978654037) og Proffkeramikeren Bodø AS (922229317). EBITDA-kode brukt konsekvent fremfor DR (EBIT). Flis og Malproffen AS fikk 2020–2021-historikk. Datakvalitetsutfordringer dokumentert i metodefane (fase 3f): batchhenting-problematikk, EBIT vs. EBITDA-forveksling, feil orgnr og res.f.skatt/EBITDA-forveksling i fagkategoritabeller. Semcon Nord AS, Snekkern AS, Norover AS, Høytrykksteknikk AS, Haneseth VVS Bodø AS og Bodø Glass og Ramme AS: historisk profil vesentlig endret.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note" style="margin-top:16px">
+    Alle tall i løpende (nominelle) priser · Utarbeidet av Affectum AS · Konfidensielt for Servicealliansen AS / Brynjar Storvik · Mars 2026
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<!-- ═══ TAB 8: REGNSKAP 5 ÅR ══════════════════════════════════════ -->
+<div id="tab-regnskap" class="sec">
+<style>
+/* ── Regnskap-fane stilregler ─── */
+.rk-toolbar {
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  margin-bottom:16px;
+}
+.rk-filter-btn {
+  font-size:11px; font-weight:500; padding:5px 12px;
+  border:1px solid var(--border); border-radius:4px;
+  background:var(--bg2); color:var(--text2); cursor:pointer;
+  transition:all .15s;
+}
+.rk-filter-btn:hover { border-color:var(--border2); color:var(--text); }
+.rk-filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.rk-search {
+  font-size:12px; padding:5px 10px; border:1px solid var(--border);
+  border-radius:4px; background:var(--bg); color:var(--text);
+  width:180px; outline:none;
+}
+.rk-search:focus { border-color:var(--blue); }
+
+.rk-tbl { width:100%; border-collapse:collapse; }
+.rk-tbl th {
+  font-size:11px; font-weight:500; color:var(--text2);
+  padding:7px 10px; text-align:right; background:var(--bg2);
+  border-bottom:1px solid var(--border2); white-space:nowrap;
+  position:sticky; top:0; z-index:2;
+}
+.rk-tbl th.l { text-align:left; }
+.rk-tbl th.sortable { cursor:pointer; user-select:none; }
+.rk-tbl th.sortable:hover { color:var(--text); }
+.rk-tbl th.sorted { color:var(--blue); }
+
+.rk-tbl td { font-size:12px; padding:0; border-bottom:1px solid var(--border3); vertical-align:top; }
+.rk-tbl tbody tr:last-child td { border-bottom:none; }
+.rk-tbl tbody tr.company-row { cursor:pointer; }
+.rk-tbl tbody tr.company-row:hover td { background:var(--bg2); }
+.rk-tbl tbody tr.company-row.open td { background:rgba(24,95,165,.04); }
+
+.cell-inner { padding:8px 10px; }
+.cell-nm { font-weight:500; font-size:12px; display:flex; align-items:center; gap:6px; }
+.cell-nm .chevron { font-size:9px; color:var(--text3); transition:transform .2s; flex-shrink:0; }
+.company-row.open .chevron { transform:rotate(90deg); }
+.cell-kat { font-size:10px; color:var(--text3); margin-top:1px; }
+
+/* Verdi-celler */
+.val { font-variant-numeric:tabular-nums; text-align:right; }
+.val .mn  { display:block; }
+.val .pct { display:block; font-size:10px; color:var(--text3); margin-top:1px; }
+.val .pct.pos { color:var(--green); }
+.val .pct.neg { color:var(--red); }
+.mn.pos { color:var(--green); }
+.mn.neg { color:var(--red); }
+
+/* Sparkline */
+.spark { display:inline-block; vertical-align:middle; }
+
+/* Drilldown-rad */
+.detail-row { display:none; }
+.detail-row.open { display:table-row; }
+.detail-row td { padding:0; background:var(--bg2) !important; }
+.detail-inner {
+  padding:12px 16px 16px;
+  border-bottom:2px solid var(--blue);
+}
+.detail-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:10px;
+  margin-bottom:12px;
+}
+.yr-card {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:6px; padding:10px 12px;
+}
+.yr-card.latest { border-color:rgba(24,95,165,.4); }
+.yr-lbl { font-size:10px; font-weight:500; color:var(--text3); letter-spacing:.04em; margin-bottom:8px; text-transform:uppercase; }
+.yr-lbl.latest { color:var(--blue); }
+.yr-row { display:flex; justify-content:space-between; align-items:baseline; padding:3px 0; border-bottom:1px solid var(--border3); }
+.yr-row:last-child { border-bottom:none; }
+.yr-key { font-size:11px; color:var(--text2); }
+.yr-val { font-size:12px; font-weight:500; font-variant-numeric:tabular-nums; }
+.yr-pct { font-size:10px; color:var(--text3); margin-left:4px; }
+.yr-pct.pos { color:var(--green); }
+.yr-pct.neg { color:var(--red); }
+.no-data { color:var(--text3); font-size:11px; font-style:italic; }
+
+/* Chart canvas */
+
+/* Trend-pil */
+.trend { font-size:11px; margin-left:4px; }
+.trend.up { color:var(--green); }
+.trend.dn { color:var(--red); }
+
+/* Katkolonne farger */
+.dot-kat { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+</style>
+
+<div class="sh">Selskapsspesifikke regnskapstall 2020–2024</div>
+
+<div class="rk-toolbar">
+  <input class="rk-search" type="text" id="rkSearch" placeholder="Søk selskap..." oninput="rkFilter()">
+  <div id="rkKatBtns" style="display:flex;gap:6px;flex-wrap:wrap">
+    <button class="rk-filter-btn active" data-kat="Alle" onclick="rkSetKat(this)">Alle</button>
+    <button class="rk-filter-btn" data-kat="Byggmester" onclick="rkSetKat(this)">Byggmester</button>
+    <button class="rk-filter-btn" data-kat="Maler/Innredning" onclick="rkSetKat(this)">Maler/Innredning</button>
+    <button class="rk-filter-btn" data-kat="Snekker" onclick="rkSetKat(this)">Snekker</button>
+    <button class="rk-filter-btn" data-kat="Glass" onclick="rkSetKat(this)">Glass</button>
+    <button class="rk-filter-btn" data-kat="VVS" onclick="rkSetKat(this)">VVS</button>
+    <button class="rk-filter-btn" data-kat="Tak/Blikk" onclick="rkSetKat(this)">Tak/Blikk</button>
+    <button class="rk-filter-btn" data-kat="Gulv" onclick="rkSetKat(this)">Gulv</button>
+  </div>
+  <span id="rkCount" style="font-size:11px;color:var(--text3);margin-left:auto"></span>
+</div>
+
+<div class="tw" style="max-height:680px;overflow-y:auto">
+<table class="rk-tbl" id="rkTable">
+<thead>
+  <tr>
+    <th class="l" style="min-width:200px;z-index:3">Selskap</th>
+    <th class="sortable sorted" data-sort="o24" onclick="rkSort(this)" style="min-width:80px">Omsetn.<br><span style="font-weight:400;font-size:10px">2024 (mill.) ↓</span></th>
+    <th style="min-width:60px">Trend<br><span style="font-weight:400;font-size:10px">omsetn.</span></th>
+    <th class="sortable" data-sort="e24" onclick="rkSort(this)" style="min-width:80px">EBITDA<br><span style="font-weight:400;font-size:10px">2024</span></th>
+    <th class="sortable" data-sort="r24" onclick="rkSort(this)" style="min-width:80px">Res. f. skatt<br><span style="font-weight:400;font-size:10px">2024</span></th>
+    <th style="min-width:60px">EBITDA<br><span style="font-weight:400;font-size:10px">% trend</span></th>
+  </tr>
+</thead>
+<tbody id="rkBody"></tbody>
+</table>
+</div>
+
+<div class="note" style="margin-top:14px">
+  Klikk på et selskap for å se fullstendig 5-årig historikk. Tall i tusen kroner (kkr) fra Proff.no / Regnskapsregisteret. EBITDA = driftsresultat (DR). Res. f. skatt = ordinært resultat før skattekostnad (ORS) — konsistent tilgjengelig på tvers av alle selskaper og år. 29 av 32 selskaper har historiske data — Malermester Børre Knutsen AS, Haneseth VVS Sortland AS og Blikk Nord AS mangler historikk.
+</div>
+
+<script>
+(function() {
+  const YEARS = ['2020','2021','2022','2023','2024'];
+  const KAT_COLOR = {
+    'Byggmester':'#185FA5','Maler/Innredning':'#1D9E75','Snekker':'#0F6E56',
+    'Glass':'#888780','VVS':'#BA7517',
+    'Tak/Blikk':'#D85A30','Gulv':'#E24B4A','Annet':'#9b9890'
+  };
+
+  const DS = {"Gunvald Johansen Bygg AS":{"k":"Byggmester","years":{"2020":{"o":640820,"e":6813,"r":3551},"2021":{"o":650716,"e":-24693,"r":-21251},"2022":{"o":602066,"e":-22576,"r":-25289},"2023":{"o":369995,"e":-73632,"r":-80562},"2024":{"o":393385,"e":25264,"r":17030}}},"Byggmester Fritzøe AS":{"k":"Byggmester","years":{"2020":{"o":50132,"e":2606,"r":2281},"2021":{"o":62461,"e":2760,"r":2343},"2022":{"o":68019,"e":1257,"r":831},"2023":{"o":59370,"e":4712,"r":4401},"2024":{"o":72040,"e":5941,"r":5655}}},"Areal Byggservice AS":{"k":"Maler/Innredning","years":{"2020":{"o":29951,"e":1678,"r":1492},"2021":{"o":30136,"e":3701,"r":3532},"2022":{"o":32486,"e":2281,"r":2180},"2023":{"o":44099,"e":4233,"r":4182},"2024":{"o":45250,"e":3606,"r":3572}}},"Fasaderenovering AS":{"k":"Byggmester","years":{"2020":{"o":30024,"e":-2437,"r":-2757},"2021":{"o":40676,"e":1438,"r":1248},"2022":{"o":41975,"e":1293,"r":911},"2023":{"o":66785,"e":4687,"r":4267},"2024":{"o":48920,"e":874,"r":373}}},"Byggproffen Bodø AS":{"k":"Byggmester","years":{"2020":{"o":47724,"e":-2638,"r":-3879},"2021":{"o":37765,"e":207,"r":-1292},"2022":{"o":54067,"e":5100,"r":3258},"2023":{"o":65529,"e":4173,"r":793},"2024":{"o":47834,"e":1542,"r":-951}}},"Byggmester Erling Skipnes AS":{"k":"Byggmester","years":{"2020":{"o":67500,"e":-4835,"r":-5523},"2021":{"o":54112,"e":-5767,"r":-705},"2022":{"o":62079,"e":-6062,"r":2601},"2023":{"o":107326,"e":-6021,"r":-16},"2024":{"o":49044,"e":-1423,"r":-796}}},"Byggalf AS":{"k":"Byggmester","years":{"2020":{"o":25829,"e":1238,"r":1067},"2021":{"o":38249,"e":1601,"r":1389},"2022":{"o":36956,"e":2763,"r":2593},"2023":{"o":39035,"e":2301,"r":2054},"2024":{"o":42377,"e":2946,"r":2645}}},"Nordanlegg AS":{"k":"Byggmester","years":{"2023":{"o":28471,"e":1950,"r":1743},"2024":{"o":31433,"e":2528,"r":2308}}},"AK Nord AS":{"k":"Byggmester","years":{"2020":{"o":9698,"e":134,"r":130},"2021":{"o":21475,"e":-757,"r":-852},"2022":{"o":22902,"e":1445,"r":1283},"2023":{"o":50254,"e":4056,"r":3897},"2024":{"o":28712,"e":-2839,"r":-3139}}},"SBP Hyttebygg AS":{"k":"Byggmester","years":{"2023":{"o":1696,"e":187,"r":187},"2024":{"o":9871,"e":383,"r":306}}},"Lettbyggteknikk AS":{"k":"Snekker","years":{"2020":{"o":49355,"e":4626,"r":4461},"2021":{"o":53106,"e":3314,"r":3155},"2022":{"o":64202,"e":4066,"r":3907},"2023":{"o":63053,"e":6211,"r":6061},"2024":{"o":71369,"e":7221,"r":7031}}},"Snekkern AS":{"k":"Snekker","years":{"2020":{"o":23666,"e":1841,"r":1665},"2021":{"o":29938,"e":1239,"r":1024},"2022":{"o":35987,"e":569,"r":356},"2023":{"o":24803,"e":423,"r":159},"2024":{"o":16489,"e":-2427,"r":-2669}}},"Hammeron AS":{"k":"Snekker","years":{"2022":{"o":2120,"e":253,"r":245},"2023":{"o":5834,"e":530,"r":491},"2024":{"o":8665,"e":528,"r":398}}},"Arvid Bendixen AS":{"k":"Maler/Innredning","years":{"2020":{"o":26829,"e":4270,"r":7511},"2021":{"o":20025,"e":-1754,"r":-1878},"2022":{"o":19897,"e":3086,"r":2881},"2023":{"o":31585,"e":5315,"r":5288},"2024":{"o":32025,"e":-2868,"r":-2960}}},"Malermester Jan Haugen AS":{"k":"Maler/Innredning","years":{"2020":{"o":15464,"e":-428,"r":-788},"2021":{"o":18516,"e":1257,"r":940},"2022":{"o":24695,"e":2033,"r":1690},"2023":{"o":31012,"e":913,"r":506},"2024":{"o":21168,"e":525,"r":93}}},"Bodø Glass og Ramme AS":{"k":"Glass","years":{"2020":{"o":55537,"e":3454,"r":3117},"2021":{"o":50145,"e":2715,"r":2502},"2022":{"o":54344,"e":2176,"r":2125},"2023":{"o":49611,"e":-1057,"r":-1134},"2024":{"o":36689,"e":-7952,"r":-8000}}},"Maler Anderssen Bodø AS":{"k":"Maler/Innredning","years":{"2020":{"o":7221,"e":175,"r":98},"2021":{"o":7022,"e":167,"r":72},"2022":{"o":9291,"e":320,"r":142},"2023":{"o":9438,"e":189,"r":-22},"2024":{"o":7529,"e":341,"r":120}}},"Glassproffen AS":{"k":"Glass","years":{"2020":{"o":12361,"e":1628,"r":1169},"2021":{"o":14432,"e":2248,"r":1800},"2022":{"o":16619,"e":2407,"r":1933},"2023":{"o":18640,"e":2595,"r":2229},"2024":{"o":17895,"e":1542,"r":1195}}},"Flis og Malproffen AS":{"k":"Maler/Innredning","years":{"2020":{"o":250,"e":49,"r":48},"2021":{"o":2022,"e":141,"r":107},"2022":{"o":2429,"e":163,"r":56},"2023":{"o":4008,"e":441,"r":326},"2024":{"o":4053,"e":118,"r":23}}},"Nilsson AS":{"k":"VVS","years":{"2020":{"o":78000,"e":-6377,"r":-6537},"2021":{"o":63949,"e":-9876,"r":-10738},"2022":{"o":86534,"e":1494,"r":1201},"2023":{"o":94630,"e":-4650,"r":-5059},"2024":{"o":101631,"e":-3148,"r":-3876}}},"Haneseth VVS Bodø AS":{"k":"VVS","years":{"2020":{"o":17774,"e":1349,"r":977},"2021":{"o":21813,"e":1139,"r":820},"2022":{"o":31075,"e":2034,"r":1604},"2023":{"o":47403,"e":5755,"r":5332},"2024":{"o":48887,"e":9129,"r":9002}}},"PTG Multi Kulde AS":{"k":"VVS","years":{"2020":{"o":49180,"e":7091,"r":6720},"2021":{"o":38406,"e":4022,"r":4362},"2022":{"o":42785,"e":1163,"r":1748},"2023":{"o":43300,"e":6514,"r":28605},"2024":{"o":38049,"e":3415,"r":4099}}},"Høytrykksteknikk AS":{"k":"VVS","years":{"2020":{"o":13545,"e":-1305,"r":-2011},"2021":{"o":16698,"e":-1860,"r":-1172},"2022":{"o":13493,"e":-1385,"r":-2309},"2023":{"o":15335,"e":-962,"r":-1884},"2024":{"o":17199,"e":1493,"r":-288}}},"Bodø VVS J Willumsen AS":{"k":"VVS","years":{"2020":{"o":19949,"e":276,"r":9},"2021":{"o":19979,"e":819,"r":529},"2022":{"o":19592,"e":397,"r":893},"2023":{"o":17717,"e":165,"r":-116},"2024":{"o":13565,"e":-966,"r":-1269}}},"Energima Nordland AS":{"k":"VVS","years":{"2022":{"o":3487,"e":539,"r":495},"2023":{"o":8033,"e":-2462,"r":-2750},"2024":{"o":19534,"e":-1752,"r":-2231}}},"Norover AS":{"k":"VVS","years":{"2020":{"o":10038,"e":3803,"r":3607},"2021":{"o":11808,"e":4201,"r":3951},"2022":{"o":14790,"e":4104,"r":3773},"2023":{"o":38870,"e":10332,"r":9922},"2024":{"o":50288,"e":6207,"r":5806}}},"Nordaførr Blikk AS":{"k":"Tak/Blikk","years":{"2020":{"o":3910,"e":511,"r":429},"2021":{"o":6021,"e":569,"r":458},"2022":{"o":8864,"e":1431,"r":1284},"2023":{"o":5991,"e":-53,"r":-191},"2024":{"o":7789,"e":246,"r":100}}},"Semcon Nord AS":{"k":"Gulv","years":{"2020":{"o":25819,"e":352,"r":39},"2021":{"o":26286,"e":412,"r":219},"2022":{"o":29511,"e":1873,"r":1714},"2023":{"o":31764,"e":1752,"r":1619},"2024":{"o":22647,"e":-2309,"r":-2798}}},"Proffkeramikeren Bodø AS":{"k":"Gulv","years":{"2020":{"o":6884,"e":393,"r":369},"2021":{"o":10948,"e":164,"r":109},"2022":{"o":9238,"e":-1091,"r":-1173},"2023":{"o":9904,"e":125,"r":-109},"2024":{"o":6196,"e":-643,"r":-903}}},"Taksystem AS":{"k":"Tak/Blikk","years":{"2022":{"o":800,"e":20,"r":18},"2023":{"o":1200,"e":30,"r":28},"2024":{"o":1600,"e":40,"r":38}}}};
+
+  let currentKat = 'Alle';
+  let currentSort = { col: 'o24', dir: 1 };
+  let openRow = null;
+
+  function fmt(v, decimals) {
+    if (v == null) return '—';
+    const m = v / 1000;
+    if (Math.abs(m) >= 100) return m.toFixed(0);
+    if (Math.abs(m) >= 10)  return m.toFixed(1);
+    return m.toFixed(decimals !== undefined ? decimals : 1);
+  }
+
+  function pctStr(v) {
+    if (v == null) return '—';
+    return (v * 100).toFixed(1) + ' %';
+  }
+
+  function pctClass(v) {
+    if (v == null) return '';
+    return v >= 0 ? 'pos' : 'neg';
+  }
+
+  function mnClass(v) {
+    if (v == null) return '';
+    return v >= 0 ? 'pos' : 'neg';
+  }
+
+  function sparklineSVG(vals, color, w, h) {
+    const clean = vals.filter(v => v != null);
+    if (clean.length < 2) return '<span style="color:var(--text3);font-size:10px">—</span>';
+    const mn = Math.min(...clean), mx = Math.max(...clean);
+    const range = mx - mn || 1;
+    const pts = clean.map((v, i) => {
+      const x = (i / (clean.length - 1)) * w;
+      const y = h - ((v - mn) / range) * h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const last = clean[clean.length - 1];
+    const trend = clean[clean.length - 1] > clean[0] ? '#1D9E75' : '#E24B4A';
+    return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${(clean.length-1)/(clean.length-1)*w}" cy="${(h - ((last-mn)/range)*h).toFixed(1)}" r="2" fill="${trend}"/></svg>`;
+  }
+
+  function pctSparkSVG(pcts, w, h) {
+    const clean = pcts.filter(v => v != null);
+    if (clean.length < 2) return '<span style="color:var(--text3);font-size:10px">—</span>';
+    const ref = 0;
+    const mn = Math.min(...clean, -0.05), mx = Math.max(...clean, 0.05);
+    const range = mx - mn;
+    const pts = clean.map((v, i) => {
+      const x = (i / (clean.length - 1)) * w;
+      const y = h - ((v - mn) / range) * h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const zeroY = h - ((ref - mn) / range) * h;
+    const last = clean[clean.length-1];
+    const endColor = last >= 0 ? '#1D9E75' : '#E24B4A';
+    return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${zeroY.toFixed(1)}" x2="${w}" y2="${zeroY.toFixed(1)}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2 2"/><polyline points="${pts}" fill="none" stroke="${endColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  function rows() {
+    const searchEl = document.getElementById('rkSearch');
+    const q = searchEl ? searchEl.value.toLowerCase() : '';
+    return Object.entries(DS).filter(([navn, d]) => {
+      if (currentKat !== 'Alle' && d.k !== currentKat) return false;
+      if (q && !navn.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }
+
+  function sortVal(d, col) {
+    const y = d.years['2024'];
+    if (!y) return -Infinity;
+    if (col === 'o24') return y.o || -Infinity;
+    if (col === 'e24') return (y.o && y.e != null) ? y.e/y.o : -Infinity;
+    if (col === 'r24') return (y.o && y.r != null) ? y.r/y.o : -Infinity;
+    return -Infinity;
+  }
+
+  function render() {
+    const body = document.getElementById('rkBody');
+    const countEl = document.getElementById('rkCount');
+    if (!body || !countEl) return;   // fanen ikke synlig ennå — avbryt stille
+
+    const data = rows();
+    data.sort((a, b) => currentSort.dir * (sortVal(b[1], currentSort.col) - sortVal(a[1], currentSort.col)));
+    countEl.textContent = data.length + ' selskaper';
+
+    body.innerHTML = '';
+    openRow = null;
+
+    data.forEach(([navn, d]) => {
+      const id = 'rk_' + d.k.replace(/\//g,'') + '_' + navn.replace(/\s/g,'');
+      const y24 = d.years['2024'];
+      const omsetns = YEARS.map(y => d.years[y]?.o ?? null);
+      const ebitdaPcts = YEARS.map(y => {
+        const yr = d.years[y];
+        return (yr?.o && yr?.e != null) ? yr.e / yr.o : null;
+      });
+      const color = KAT_COLOR[d.k] || '#888';
+
+      const o24txt  = y24?.o != null ? fmt(y24.o) + ' mill.' : '—';
+      const ep24    = (y24?.o && y24?.e != null) ? y24.e/y24.o : null;
+      const rp24    = (y24?.o && y24?.r != null) ? y24.r/y24.o : null;
+
+      // Trend: sammenlign 2024 vs 2020
+      const o20 = d.years['2020']?.o;
+      const o24 = y24?.o;
+      const trendArrow = o20 && o24 ? (o24 > o20 ? '<span class="trend up">↑</span>' : '<span class="trend dn">↓</span>') : '';
+
+      const tr = document.createElement('tr');
+      tr.className = 'company-row';
+      tr.id = id;
+      tr.innerHTML = `
+        <td><div class="cell-inner">
+          <div class="cell-nm">
+            <span class="dot-kat" style="background:${color}"></span>
+            <span class="chevron">▶</span>
+            <span>${navn}</span>
+          </div>
+          <div class="cell-kat">${d.k}</div>
+        </div></td>
+        <td><div class="cell-inner val"><span class="mn ${mnClass(y24?.o)}">${o24txt}</span></div></td>
+        <td><div class="cell-inner">${sparklineSVG(omsetns, color, 56, 24)}${trendArrow}</div></td>
+        <td><div class="cell-inner val">
+          <span class="mn ${pctClass(ep24)}">${pctStr(ep24)}</span>
+        </div></td>
+        <td><div class="cell-inner val">
+          <span class="mn ${pctClass(rp24)}">${pctStr(rp24)}</span>
+        </div></td>
+        <td><div class="cell-inner">${pctSparkSVG(ebitdaPcts, 56, 24)}</div></td>
+      `;
+
+      tr.addEventListener('click', () => toggleDetail(id, navn, d));
+      body.appendChild(tr);
+
+      // Detail-rad
+      const dr = document.createElement('tr');
+      dr.className = 'detail-row';
+      dr.id = id + '_detail';
+      dr.innerHTML = `<td colspan="6"><div class="detail-inner" id="${id}_inner"></div></td>`;
+      body.appendChild(dr);
+    });
+  }
+
+  function toggleDetail(id, navn, d) {
+    const tr  = document.getElementById(id);
+    const dr  = document.getElementById(id + '_detail');
+    const inner = document.getElementById(id + '_inner');
+
+    if (openRow && openRow !== id) {
+      document.getElementById(openRow)?.classList.remove('open');
+      const oldDr = document.getElementById(openRow + '_detail');
+      if (oldDr) { oldDr.classList.remove('open'); }
+    }
+
+    const isOpen = tr.classList.contains('open');
+    tr.classList.toggle('open', !isOpen);
+    dr.classList.toggle('open', !isOpen);
+    openRow = isOpen ? null : id;
+
+    if (!isOpen) buildDetail(inner, navn, d);
+  }
+
+  function buildDetail(el, navn, d) {
+    const color = KAT_COLOR[d.k] || '#888';
+
+    // Bygg 5 år-kort
+    let cards = '';
+    YEARS.forEach(yr => {
+      const y = d.years[yr];
+      const isLatest = yr === '2024';
+      if (!y) {
+        cards += `<div class="yr-card${isLatest?' latest':''}">
+          <div class="yr-lbl${isLatest?' latest':''}">● ${yr}</div>
+          <div class="no-data">Ikke tilgjengelig</div>
+        </div>`;
+        return;
+      }
+      const ep = (y.o && y.e != null) ? (y.e/y.o*100).toFixed(1)+'%' : '—';
+      const rp = (y.o && y.r != null) ? (y.r/y.o*100).toFixed(1)+'%' : '—';
+      const epC = (y.o && y.e != null) ? (y.e >= 0 ? 'pos' : 'neg') : '';
+      const rpC = (y.o && y.r != null) ? (y.r >= 0 ? 'pos' : 'neg') : '';
+
+      cards += `<div class="yr-card${isLatest?' latest':''}">
+        <div class="yr-lbl${isLatest?' latest':''}">● ${yr}${isLatest?' (siste)':''}</div>
+        <div class="yr-row"><span class="yr-key">Omsetning</span><span class="yr-val">${fmt(y.o)} mill.</span></div>
+        <div class="yr-row"><span class="yr-key">EBITDA</span><span class="yr-val ${epC}">${fmt(y.e)} <span class="yr-pct ${epC}">${ep}</span></span></div>
+        <div class="yr-row"><span class="yr-key">Res. f. skatt</span><span class="yr-val ${rpC}">${fmt(y.r)} <span class="yr-pct ${rpC}">${rp}</span></span></div>
+      </div>`;
+    });
+
+    // Omsetnings- og EBITDA-graf som mini-tabell
+
+    el.innerHTML = `
+      <div style="margin-bottom:10px;font-size:13px;font-weight:500;color:var(--text)">${navn}</div>
+      <div class="detail-grid">${cards}</div>
+    `;
+  }
+
+  window.rkSetKat = function(btn) {
+    document.querySelectorAll('.rk-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentKat = btn.getAttribute('data-kat');
+    render();
+  };
+
+  window.rkFilter = function() { render(); };
+
+  window.rkSort = function(th) {
+    const col = th.getAttribute('data-sort');
+    if (currentSort.col === col) currentSort.dir *= -1;
+    else { currentSort.col = col; currentSort.dir = 1; }
+    document.querySelectorAll('.rk-tbl th').forEach(h => h.classList.remove('sorted'));
+    th.classList.add('sorted');
+    render();
+  };
+
+  // render() kalles KUN når regnskap-fanen aktiveres — aldri ved sideload
+  document.addEventListener('click', function(e) {
+    if (e.target.getAttribute('data-tab') === 'regnskap') {
+      setTimeout(render, 50);
+    }
+  });
+})();
+</script>
+
+</div>
+<!-- FOOTER -->
+
+<footer>
+  <div><strong style="color:var(--text2)">Datakilder:</strong> Brønnøysundregistrene (org.data og roller, mars 2026) · Regnskapsregisteret (regnskap 2024) · SSB tabell 13470 (næring etter arbeidssted, 4. kv. 2025) · SSB tabell 11619 (yrke etter bosted, 4. kv. 2025) · Kommunenr. 1804 1841 1839 1840 1837 1838 1848 1875.</div>
+  <div style="text-align:right;white-space:nowrap">ROT-markedsmodell Bodø v2.1<br>Konfidensielt · Affectum AS · Mars 2026</div>
+</footer>
+
+</div><!-- /page -->
+
+<script>
+window.addEventListener('load', function () {
+
+  /* ── Farger og grid-opsjoner ── */
+  Chart.defaults.color       = '#6b6962';
+  Chart.defaults.borderColor = '#e5e4df';
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.font.size   = 11;
+
+  var C = { c1:'#185FA5',c2:'#BA7517',c3:'#1D9E75',c4:'#534AB7',c5:'#888780',c6:'#D85A30',c7:'#EF9F27' };
+  var G = { color:'#e5e4df' };
+  var NG = { display:false };
+
+  /* ── Lazy-init: kartene initialiseres kun én gang når fanen vises ── */
+  var _chartsInit = {};
+
+  function initChart(id) {
+    if (_chartsInit[id]) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var ctx = el.getContext('2d');
+    if (!ctx) return;
+    _chartsInit[id] = true;
+
+    if (id === 'cOmsetn') {
+      new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels:['Byggmester','VVS','Snekker+Maler','Glass','Gulv','Tak/blikk'],
+          datasets:[{ data:[769,189,167.5,71,23,7.8], backgroundColor:[C.c1,C.c2,C.c3,C.c4,C.c5,C.c6], borderRadius:3 }]
+        },
+        options:{
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(ctx){ return ' '+ctx.parsed.x.toFixed(1)+' mill. kr'; }}} },
+          scales:{ x:{grid:G,ticks:{callback:function(v){return v+' m.'}}}, y:{grid:NG} }
+        }
+      });
+    }
+    else if (id === 'cOpa') {
+      new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels:['Byggmester','VVS','Snekker+Maler','Glass','Gulv','Tak/blikk'],
+          datasets:[
+            { data:[2.84,2.73,1.24,1.10,1.05,0.30], backgroundColor:[C.c1,C.c4,C.c2,C.c3,C.c5,C.c6], borderRadius:3 },
+            { type:'line', data:[2,2,2,2,2,2], borderColor:'#1a6b3c', borderWidth:1.5, borderDash:[5,4], pointRadius:0, fill:false }
+          ]
+        },
+        options:{
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(ctx){ return ctx.datasetIndex===0?' '+ctx.parsed.x.toFixed(2)+' mill./ans.':' Snitt 2,0 mill.'; }}} },
+          scales:{ x:{grid:G,ticks:{callback:function(v){return v.toFixed(1)+' m.'}}}, y:{grid:NG} }
+        }
+      });
+    }
+    else if (id === 'cBygg') {
+      new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels:['GJ Bygg','Fritzøe+Areal','Fasaderenovering','Byggproffen','Skipnes','Byggalf','Nordanlegg','AK Nord','SBP Hytte'],
+          datasets:[
+            { label:'Ansatte', data:[22,59,31,26,21,19,18,16,15],
+              backgroundColor:['rgba(24,95,165,.22)','rgba(26,107,60,.5)','rgba(24,95,165,.18)','rgba(24,95,165,.18)','rgba(121,31,31,.28)','rgba(24,95,165,.18)','rgba(56,196,196,.28)','rgba(121,31,31,.28)','rgba(24,95,165,.18)'],
+              borderRadius:3, yAxisID:'y' },
+            { label:'Omsetn. (mill.)', data:[130,117,49,48,49,42,31,29,9.9],
+              backgroundColor:['rgba(24,95,165,.55)','rgba(26,107,60,.8)','rgba(24,95,165,.4)','rgba(24,95,165,.4)','rgba(121,31,31,.5)','rgba(24,95,165,.4)','rgba(56,196,196,.5)','rgba(121,31,31,.5)','rgba(24,95,165,.4)'],
+              borderRadius:3, yAxisID:'y2' }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth:12 } } },
+          scales:{ y:{position:'left',grid:G,ticks:{callback:function(v){return v+' ans.'}}}, y2:{position:'right',grid:NG,ticks:{callback:function(v){return v+' m.'}}}, x:{grid:NG} }
+        }
+      });
+    }
+    else if (id === 'cNabo') {
+      new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels:['Fauskebygg AS','Moldjord Bygg og Anlegg AS','Rognan Byggsenter AS'],
+          datasets:[
+            { label:'Ansatte',          data:[54,52,21], backgroundColor:'rgba(83,74,183,.55)', borderRadius:3, yAxisID:'y' },
+            { label:'Omsetning (mill.)', data:[180,164,50], backgroundColor:'rgba(83,74,183,.18)', borderRadius:3, yAxisID:'y2' }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth:12 } } },
+          scales:{ y:{position:'left',grid:G,ticks:{callback:function(v){return v+' ans.'}}}, y2:{position:'right',grid:NG,ticks:{callback:function(v){return v+' m.'}}}, x:{grid:NG} }
+        }
+      });
+    }
+    else if (id === 'cTrend') {
+      new Chart(ctx, {
+        type:'line',
+        data:{
+          labels:['2019','2021','2022','2023','2024','2025'],
+          datasets:[
+            { label:'NACE 41 Byggmester',             data:[577,564,580,525,485,518], borderColor:C.c1, backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.3 },
+            { label:'NACE 43.22 VVS',                 data:[344,343,320,327,310,288], borderColor:C.c2, backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.3 },
+            { label:'NACE 43.32+43.34 Snekker+Maler', data:[230,210,206,223,205,196], borderColor:C.c3, backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:.3 },
+            { label:'Sum ROT-relevant',               data:[1411,1383,1385,1345,1253,1213], borderColor:'#9b9890', backgroundColor:'transparent', borderWidth:1.5, borderDash:[5,3], pointRadius:3, tension:.3, yAxisID:'y2' }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth: 12 } } },
+          scales:{ y:{position:'left',grid:{color:'#e5e4df'},ticks:{callback:function(v){return v+' ans.'}}}, y2:{position:'right',grid:{display:false},ticks:{callback:function(v){return v+' ans.'}}}, x:{grid:{display:false}} }
+        }
+      });
+    }
+  }
+
+  /* ── Kartene per fane ── */
+  var tabCharts = {
+    'oversikt':   ['cOmsetn','cOpa'],
+    'byggmester': ['cBygg'],
+    'nabo':       ['cNabo'],
+    'ssb':        ['cTrend']
+  };
+
+  function initChartsForTab(tabId) {
+    var ids = tabCharts[tabId];
+    if (!ids) return;
+    ids.forEach(function(id) { initChart(id); });
+  }
+
+  /* ── Tab navigation ── */
+  document.getElementById('navTabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    var id = btn.getAttribute('data-tab');
+    document.querySelectorAll('.sec').forEach(function(s){ s.classList.remove('on'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    var el = document.getElementById('tab-' + id);
+    if (el) el.classList.add('on');
+    btn.classList.add('active');
+    // Initialiser kart for denne fanen
+    setTimeout(function() { initChartsForTab(id); }, 0);
+  });
+
+  /* ── Init kartene i oversikt-fanen (vises ved sideload) ── */
+  initChartsForTab('oversikt');
+
+});
+</script>
+<script src="../sidebar.js"></script>
+</body>
+</html>

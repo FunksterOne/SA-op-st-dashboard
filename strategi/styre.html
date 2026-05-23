@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategi — Styremateriell</title>
+<link rel="stylesheet" href="app.css">
+<script src="config.js"></script>
+<script src="data-loader.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+</head>
+<body class="styre">
+
+<div id="app-mount"></div>
+
+<script>
+(async function () {
+  const sid = window.getAktivtSelskapId();
+  const selskap = window.getSelskap(sid);
+  const off = window.SA_CONFIG.scenarier?.[sid]?.find(s => s.id === 'offensiv');
+
+  window.SA.mount({
+    active: 'styre',
+    content: '<div class="styre-body"><div style="padding:80px;text-align:center;color:#c8b994;font-family:Geist,sans-serif">Laster…</div></div>',
+  });
+
+  let docResult;
+  try {
+    docResult = await window.DATA.loadStrategi(sid);
+  } catch (e) {
+    window.SA.mount({
+      active: 'styre',
+      content: `<div class="styre-body"><div style="padding:40px;color:#c8b994">Kunne ikke laste: ${e.message}</div></div>`,
+    });
+    return;
+  }
+  const { doc } = docResult;
+
+  const body = `
+    <div class="styre-body">
+      <div class="print-row">
+        <button class="print-btn primary" onclick="window.print()">Skriv ut / PDF</button>
+        <a class="print-btn" href="index.html">← Tilbake til oversikt</a>
+      </div>
+      ${window.RENDER.renderStyreFront(doc, selskap, off)}
+      ${window.RENDER.renderStyreSammendrag(doc, off)}
+    </div>
+  `;
+
+  window.SA.mount({
+    active: 'styre',
+    src: `Sist endret ${window.RENDER.fmtDate(doc.meta?.sist_endret)}`,
+    content: body,
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Styrerapport — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<script src="../prosjekter.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .container { padding: 22px 32px; max-width: 1280px }
+
+  .summary-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .summary-row { grid-template-columns: repeat(2, 1fr) } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .panel h2 {
+    margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--text);
+  }
+  .panel .lead { color: var(--muted); font-size: 12px; margin: 0 0 14px }
+
+  /* Tabell */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px }
+  .tbl th {
+    text-align: left; padding: 10px 12px; background: var(--panel-2); border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+  }
+  .tbl th.num, .tbl td.num { text-align: right; font-variant-numeric: tabular-nums }
+  .tbl td { padding: 10px 12px; border-bottom: 1px solid var(--line) }
+  .tbl tr:last-child td { border-bottom: 0 }
+  .tbl tr.total { font-weight: 700; background: var(--panel-2) }
+  .tbl tr.total td { border-top: 2px solid var(--line); border-bottom: 0 }
+  .pos { color: var(--good) } .neg { color: var(--bad) } .neu { color: var(--muted) }
+
+  /* Scenario-cards */
+  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px }
+  @media (max-width: 1000px) { .scenario-grid { grid-template-columns: 1fr } }
+  .sc-card {
+    border-top: 3px solid var(--hi); background: var(--panel-2);
+    border-radius: 0 0 6px 6px; padding: 14px 16px;
+  }
+  .sc-card.s-base { border-top-color: var(--hi) }
+  .sc-card.s-offensiv { border-top-color: var(--warn) }
+  .sc-card.s-bull { border-top-color: var(--good) }
+  .sc-card h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700 }
+  .sc-card .num-line {
+    font-size: 22px; font-weight: 700; margin: 6px 0; letter-spacing: -0.012em;
+  }
+  .sc-card .det { font-size: 11.5px; color: var(--muted); line-height: 1.5 }
+
+  /* Risiko */
+  .risiko-list { display: grid; gap: 8px }
+  .risiko-item {
+    padding: 11px 14px; background: var(--panel-2); border-left: 3px solid var(--warn);
+    border-radius: 6px; font-size: 12.5px;
+  }
+  .risiko-item.rod { border-left-color: var(--bad) }
+  .risiko-item.green { border-left-color: var(--good) }
+  .risiko-item .label { font-weight: 600; color: var(--text) }
+  .risiko-item .det { color: var(--muted); font-size: 11.5px; margin-top: 3px; line-height: 1.5 }
+
+  /* Sammendrag-tekst */
+  .sammendrag-text { font-size: 13px; line-height: 1.65; color: var(--text); margin: 0 }
+
+  .anbefaling-box {
+    padding: 14px 16px; background: var(--accent-soft); border-left: 3px solid var(--accent);
+    border-radius: 6px; font-size: 13px; line-height: 1.6;
+  }
+
+  /* Signaturlinje */
+  .signature-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 14px;
+  }
+  @media (max-width: 700px) { .signature-row { grid-template-columns: 1fr } }
+  .sig-block {
+    padding: 12px 14px; background: var(--panel-2); border-radius: 6px;
+    border: 1px solid var(--line);
+  }
+  .sig-block .sig-eyebrow {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;
+  }
+  .sig-block .sig-name { font-weight: 600; font-size: 13px }
+  .sig-block .sig-rolle { color: var(--muted); font-size: 11.5px; margin-top: 1px }
+
+  .meta-info {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    padding: 12px 16px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px; margin-bottom: 16px; font-size: 12px;
+  }
+  @media (max-width: 800px) { .meta-info { grid-template-columns: repeat(2, 1fr) } }
+  .meta-info .mi {
+    padding-right: 10px; border-right: 1px solid var(--line);
+  }
+  .meta-info .mi:last-child { border-right: 0 }
+  .meta-info .mi .lbl {
+    font-size: 9.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 700;
+  }
+  .meta-info .mi .val { color: var(--text); margin-top: 2px; font-weight: 500 }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="styrerapport" data-section="strategi"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+      <span>Styrerapport</span>
+    </div>
+    <h1 id="ph-title">Kvartalsrapport — Q1 2026</h1>
+    <div class="ph-meta-row" id="ph-meta-row"></div>
+  </header>
+
+  <div class="container">
+
+    <!-- Meta-info -->
+    <div class="meta-info">
+      <div class="mi"><div class="lbl">Periode</div><div class="val">Q1 2026</div></div>
+      <div class="mi"><div class="lbl">Utarbeidet</div><div class="val" id="rep-date">…</div></div>
+      <div class="mi"><div class="lbl">Klassifisering</div><div class="val">Konfidensiell · til styret</div></div>
+      <div class="mi"><div class="lbl">Scope</div><div class="val" id="rep-scope">…</div></div>
+    </div>
+
+    <!-- 1. Sammendrag -->
+    <div class="panel">
+      <h2>1. Sammendrag</h2>
+      <p class="sammendrag-text" id="sec-sammendrag"></p>
+      <div class="summary-row" style="margin-top:14px" id="kpi-row"></div>
+    </div>
+
+    <!-- 2. Anbudsstatistikk -->
+    <div class="panel">
+      <h2>2. Anbudsstatistikk</h2>
+      <p class="lead">Aktivitet siste 90 dager mot rammeavtaler og enkeltforespørsler.</p>
+      <table class="tbl" id="anbud-tbl"></table>
+    </div>
+
+    <!-- 3. Pågående prosjekter -->
+    <div class="panel">
+      <h2>3. Pågående prosjekter</h2>
+      <p class="lead">Aktive prosjekter i utførelse med margin-status og risikoflagg.</p>
+      <table class="tbl" id="prosjekt-tbl"></table>
+    </div>
+
+    <!-- 4. Økonomi -->
+    <div class="panel">
+      <h2>4. Økonomi 2024 og periodisering</h2>
+      <p class="lead">Faktiske 2024-tall fra Brreg regnskapsregister, sammenholdt med periodisert YTD 2026.</p>
+      <table class="tbl" id="okonomi-tbl"></table>
+    </div>
+
+    <!-- 5. Risiko -->
+    <div class="panel">
+      <h2>5. Risiko og oppfølgingspunkter</h2>
+      <div class="risiko-list" id="risiko-list"></div>
+    </div>
+
+    <!-- 6. Scenarier -->
+    <div class="panel">
+      <h2>6. Vekst-scenarier 2029</h2>
+      <p class="lead">Tre alternative vekstløp. Tall i MNOK ROT + forsikring per år 2029.</p>
+      <div class="scenario-grid" id="scenario-grid"></div>
+    </div>
+
+    <!-- 7. Anbefaling -->
+    <div class="panel">
+      <h2>7. Anbefaling til styret</h2>
+      <div class="anbefaling-box" id="anbefaling"></div>
+      <div class="signature-row">
+        <div class="sig-block">
+          <div class="sig-eyebrow">Daglig leder</div>
+          <div class="sig-name" id="sig-dl">DL …</div>
+          <div class="sig-rolle">Operativt ansvarlig</div>
+        </div>
+        <div class="sig-block">
+          <div class="sig-eyebrow">Styreleder</div>
+          <div class="sig-name">Mads Jespersen</div>
+          <div class="sig-rolle">Felles for hele SA-porteføljen</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="../sidebar.js"></script>
+<script>
+function build() {
+  const scope = getActiveScope();
+  const lbl = getScopeLabel(scope);
+  const r = getRegnskap2024(scope);
+  const prosjekter = getProsjekterInScope(scope);
+  const aktive = prosjekter.filter(p => ['utforelse','planlegging','ferdigstillelse'].includes(p.status));
+  const flaggRod = prosjekter.filter(p => p.flagg === 'rod').length;
+  const flaggGul = prosjekter.filter(p => p.flagg === 'gul').length;
+
+  const totVerdi = aktive.reduce((s, p) => s + (p.kontraktsverdi_kr || 0), 0);
+  const margins = aktive.map(p => p.margin_faktisk_pct).filter(m => m != null);
+  const avgMargin = margins.length ? margins.reduce((s, x) => s + x, 0) / margins.length : null;
+
+  // Header
+  document.getElementById('ph-title').textContent = `Kvartalsrapport Q1 2026 — ${lbl.label}`;
+  document.getElementById('ph-title').style.color = lbl.farge;
+  document.getElementById('ph-meta-row').innerHTML = `
+    <span><b>${lbl.label}</b> · ${lbl.sub}</span>
+    <span>Aktive prosjekter: <b>${aktive.length}</b></span>
+    <span>Kontraktsverdi: <b>${(totVerdi/1000000).toFixed(0)} MNOK</b></span>
+    <span>Røde flagg: <b>${flaggRod}</b></span>
+    <span>Gule flagg: <b>${flaggGul}</b></span>
+  `;
+  document.getElementById('rep-scope').textContent = `${lbl.label} (${lbl.sub})`;
+
+  const today = new Date();
+  const mns = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+  document.getElementById('rep-date').textContent = `${today.getDate()}. ${mns[today.getMonth()]} ${today.getFullYear()}`;
+
+  // DL-signatur
+  const selskaper = getSelskaperInScope(scope);
+  const dlSet = [...new Set(selskaper.map(s => s.ledelse.dl_kort))];
+  document.getElementById('sig-dl').textContent = dlSet.join(' / ') || '—';
+
+  // Sammendrag
+  const oms = r.omsetning_mnok;
+  const margin = r.driftsmargin_pct;
+  const sammendrag = `${lbl.label} leverte ${oms.toFixed(1).replace('.', ',')} MNOK i 2024 med ${margin.toFixed(1).replace('.', ',')} % driftsmargin. ${aktive.length} prosjekter er i utførelse med ${(totVerdi/1000000).toFixed(1).replace('.', ',')} MNOK i samlet kontraktsverdi. ${flaggRod} prosjekt har rødt flagg, ${flaggGul} har gult. Hovedfokus inneværende kvartal er ${flaggRod > 0 ? 'marginløft på flaggede prosjekter, deretter konsolidering' : 'å holde margin og bemanning i takt med pipeline'}.`;
+  document.getElementById('sec-sammendrag').textContent = sammendrag;
+
+  // KPI-rad — bruker felles sa-kpi-stil
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="sa-kpi">
+      <div class="sa-kpi-label">Omsetning 2024</div>
+      <div class="sa-kpi-value">${oms.toFixed(1).replace('.', ',')} M</div>
+      <div class="sa-kpi-detail">EBIT ${r.driftsresultat_mnok.toFixed(1).replace('.', ',')} MNOK</div>
+    </div>
+    <div class="sa-kpi ${margin < 5 ? 'bad' : margin < 7 ? 'warn' : 'good'}">
+      <div class="sa-kpi-label">Driftsmargin 2024</div>
+      <div class="sa-kpi-value">${margin.toFixed(1).replace('.', ',')} %</div>
+      <div class="sa-kpi-detail">EBIT ${r.driftsresultat_mnok.toFixed(2).replace('.', ',')} MNOK</div>
+    </div>
+    <div class="sa-kpi hi">
+      <div class="sa-kpi-label">Aktive prosjekter</div>
+      <div class="sa-kpi-value">${aktive.length}</div>
+      <div class="sa-kpi-detail">${(totVerdi/1000000).toFixed(0)} MNOK kontrakt</div>
+    </div>
+    <div class="sa-kpi ${flaggRod > 0 ? 'bad' : flaggGul > 0 ? 'warn' : 'good'}">
+      <div class="sa-kpi-label">Flagg (rød / gul)</div>
+      <div class="sa-kpi-value">${flaggRod} / ${flaggGul}</div>
+      <div class="sa-kpi-detail">Krever inngripen</div>
+    </div>
+  `;
+
+  // Anbudsstatistikk
+  let anbudHtml = `<thead><tr>
+    <th>Selskap</th><th class="num">Aktive anbud</th><th class="num">Hit-rate</th>
+    <th class="num">Vunnet 90d</th><th class="num">Pipeline-verdi</th>
+  </tr></thead><tbody>`;
+  selskaper.forEach(s => {
+    const k = getOperativKpiFor(s);
+    anbudHtml += `<tr>
+      <td><b>${s.kortnavn}</b><br><span style="color:var(--muted);font-size:10.5px">${s.lokasjon.by}</span></td>
+      <td class="num">${k.pending_anbud + k.innkommende_pipeline}</td>
+      <td class="num">${k.hit_rate_pct}%</td>
+      <td class="num">${k._won || '—'}</td>
+      <td class="num">${(k.pipeline_verdi_kr/1000000).toFixed(1).replace('.', ',')} M</td>
+    </tr>`;
+  });
+  if (selskaper.length > 1) {
+    const k = getOperativKpi(scope);
+    anbudHtml += `<tr class="total">
+      <td>Samlet</td>
+      <td class="num">${k.pending_anbud + k.innkommende_pipeline}</td>
+      <td class="num">${k.hit_rate_pct}%</td>
+      <td class="num">—</td>
+      <td class="num">${(k.pipeline_verdi_kr/1000000).toFixed(1).replace('.', ',')} M</td>
+    </tr>`;
+  }
+  anbudHtml += '</tbody>';
+  document.getElementById('anbud-tbl').innerHTML = anbudHtml;
+
+  // Pågående prosjekter
+  let prHtml = `<thead><tr>
+    <th>Prosjekt</th><th>Kunde</th><th>Fase</th>
+    <th class="num">Verdi</th><th class="num">Fremdrift</th>
+    <th class="num">Margin plan</th><th class="num">Margin faktisk</th>
+  </tr></thead><tbody>`;
+  aktive.slice(0, 10).forEach(p => {
+    const flagDot = p.flagg === 'rod' ? '<span style="color:var(--bad)">●</span> '
+                  : p.flagg === 'gul' ? '<span style="color:var(--warn)">●</span> ' : '';
+    const marginCls = p.margin_faktisk_pct == null ? 'neu'
+      : p.margin_faktisk_pct < (p.margin_plan_pct - 2) ? 'neg'
+      : p.margin_faktisk_pct < p.margin_plan_pct ? 'neu'
+      : 'pos';
+    prHtml += `<tr>
+      <td>${flagDot}<b>${p.navn}</b><br><span style="color:var(--muted);font-size:10.5px">${p.id}</span></td>
+      <td>${p.kunde}</td>
+      <td>${PROSJEKT_STATUS_LABEL[p.status]}</td>
+      <td class="num">${(p.kontraktsverdi_kr/1000000).toFixed(1).replace('.', ',')} M</td>
+      <td class="num">${p.fremdrift_pct} %</td>
+      <td class="num">${p.margin_plan_pct.toFixed(1).replace('.', ',')} %</td>
+      <td class="num ${marginCls}">${p.margin_faktisk_pct != null ? p.margin_faktisk_pct.toFixed(1).replace('.', ',') + ' %' : '—'}</td>
+    </tr>`;
+  });
+  prHtml += '</tbody>';
+  document.getElementById('prosjekt-tbl').innerHTML = prHtml;
+
+  // Økonomi-tabell
+  let okHtml = `<thead><tr>
+    <th>Selskap</th>
+    <th class="num">Omsetning 2024</th>
+    <th class="num">EBIT 2024</th>
+    <th class="num">Margin</th>
+    <th class="num">EK</th>
+    <th class="num">Ansatte</th>
+  </tr></thead><tbody>`;
+  selskaper.forEach(s => {
+    okHtml += `<tr>
+      <td><b>${s.kortnavn}</b><br><span style="color:var(--muted);font-size:10.5px">${s.lokasjon.by} · ${s.orgnr}</span></td>
+      <td class="num">${s.regnskap_2024.omsetning_mnok.toFixed(2).replace('.', ',')} M</td>
+      <td class="num">${s.regnskap_2024.driftsresultat_mnok.toFixed(2).replace('.', ',')} M</td>
+      <td class="num">${s.regnskap_2024.driftsmargin_pct.toFixed(1).replace('.', ',')} %</td>
+      <td class="num">${s.regnskap_2024.ek_mnok.toFixed(2).replace('.', ',')} M</td>
+      <td class="num">${s.regnskap_2024.ansatte}</td>
+    </tr>`;
+  });
+  if (selskaper.length > 1) {
+    okHtml += `<tr class="total">
+      <td>Samlet</td>
+      <td class="num">${r.omsetning_mnok.toFixed(2).replace('.', ',')} M</td>
+      <td class="num">${r.driftsresultat_mnok.toFixed(2).replace('.', ',')} M</td>
+      <td class="num">${r.driftsmargin_pct.toFixed(1).replace('.', ',')} %</td>
+      <td class="num">${r.ek_mnok.toFixed(2).replace('.', ',')} M</td>
+      <td class="num">${r.ansatte}</td>
+    </tr>`;
+  }
+  okHtml += '</tbody>';
+  document.getElementById('okonomi-tbl').innerHTML = okHtml;
+
+  // Risiko-liste
+  let riskHtml = '';
+  prosjekter.filter(p => p.flagg === 'rod').forEach(p => {
+    const sel = SELSKAPER.find(s => s.id === p.selskap_id);
+    riskHtml += `<div class="risiko-item rod">
+      <div class="label">⚠ ${p.navn} (${sel?.kortnavn || ''})</div>
+      <div class="det">${p.flagg_aarsak || 'Marginvarsel — krever inngripen'}</div>
+    </div>`;
+  });
+  prosjekter.filter(p => p.flagg === 'gul').slice(0, 3).forEach(p => {
+    const sel = SELSKAPER.find(s => s.id === p.selskap_id);
+    riskHtml += `<div class="risiko-item">
+      <div class="label">⚠ ${p.navn} (${sel?.kortnavn || ''})</div>
+      <div class="det">${p.flagg_aarsak || 'Forsinkelse — overvåkes'}</div>
+    </div>`;
+  });
+  const totEk = r.ek_mnok;
+  if (totEk < 5) {
+    riskHtml += `<div class="risiko-item">
+      <div class="label">Tynn egenkapital (${totEk.toFixed(2).replace('.', ',')} MNOK)</div>
+      <div class="det">Selskapsstrukturen er driftsorientert; konsernbidrag og leasing påvirker. Ikke akutt, men begrenser handlingsrom for offensiv-banen uten kapitaltilførsel fra SA.</div>
+    </div>`;
+  }
+  if (avgMargin != null && avgMargin < 6) {
+    riskHtml += `<div class="risiko-item rod">
+      <div class="label">Snitt-margin under mål (${avgMargin.toFixed(1).replace('.', ',')} %)</div>
+      <div class="det">Marginløftsplan via SA-prosesser, kalkulator-disiplin og UE-styring iverksatt.</div>
+    </div>`;
+  }
+  if (!riskHtml) {
+    riskHtml = `<div class="risiko-item green">
+      <div class="label">Ingen kritiske risikoer registrert</div>
+      <div class="det">Pipeline og prosjektmargin på sporet. Fortsetter ordinær oppfølging.</div>
+    </div>`;
+  }
+  document.getElementById('risiko-list').innerHTML = riskHtml;
+
+  // Scenarier
+  let scHtml = '';
+  ['base','offensiv','bull'].forEach(name => {
+    const data = getScenarioForScope(name, 2029, scope);
+    let beskr = '';
+    if (scope.type === 'by') beskr = getBy(scope.id).scenarioer[name].beskrivelse;
+    else if (scope.type === 'selskap') beskr = getBy(getSelskap(scope.id).by).scenarioer[name].beskrivelse;
+    const ttl = name === 'base' ? 'Base' : name === 'offensiv' ? 'Offensiv' : 'Bull';
+    scHtml += `<div class="sc-card s-${name}">
+      <h3>${ttl}</h3>
+      <div class="num-line">${data.total.toFixed(0)} M</div>
+      <div class="det" style="margin-bottom:6px">2029 sum (ROT + forsikring)</div>
+      <div class="det">${beskr}</div>
+    </div>`;
+  });
+  document.getElementById('scenario-grid').innerHTML = scHtml;
+
+  // Anbefaling
+  let anbef = '';
+  if (flaggRod > 0) {
+    anbef = `Styret ber DL prioritere marginløft på de ${flaggRod} prosjektene med rødt flagg, og rapportere status i neste styremøte. `;
+  }
+  if (avgMargin != null && avgMargin < 6) {
+    anbef += `Styret slutter seg til marginløftsplanen og avventer videre analyse i Q2. `;
+  } else if (avgMargin != null && avgMargin > 8) {
+    anbef += `Styret konstaterer at margin er over plan og vurderer akselerering av offensiv-banen i Q2. `;
+  }
+  anbef += `For neste kvartal anbefales fortsatt aktiv pipeline-styring mot rammeavtaler, samt at eier vurderer kapitaltilskudd ved endelig valg av offensiv-banen.`;
+  document.getElementById('anbefaling').textContent = anbef;
+}
+
+build();
+window.addEventListener('scope-changed', build);
+</script>
+</body>
+</html>

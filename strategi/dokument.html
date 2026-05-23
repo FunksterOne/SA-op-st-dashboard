@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategi — Dokument</title>
+<link rel="stylesheet" href="app.css">
+<script src="config.js"></script>
+<script src="data-loader.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<div id="app-mount"></div>
+
+<script>
+(async function () {
+  const sid = window.getAktivtSelskapId();
+  const selskap = window.getSelskap(sid);
+
+  window.SA.mount({
+    active: 'dokument',
+    content: '<div class="page-body"><div style="padding:80px;text-align:center;color:var(--muted);font-family:Geist,sans-serif">Laster…</div></div>',
+  });
+
+  let docResult;
+  try {
+    docResult = await window.DATA.loadStrategi(sid);
+  } catch (e) {
+    window.SA.mount({
+      active: 'dokument',
+      content: `<div class="page-body"><div style="padding:40px;background:#fbe9e9;border-left:3px solid #a83232;color:#a83232;border-radius:4px">Kunne ikke laste: ${e.message}</div></div>`,
+    });
+    return;
+  }
+  const { doc } = docResult;
+
+  const pageHd = window.RENDER.renderPageHd({
+    crumb: { pill: 'Strategisk', path: `${selskap.label} · Strategi-dokument` },
+    title: 'Posisjonering, horisonter og initiativer',
+    status: [
+      { lab: 'Versjon', val: `v3 · ${doc.meta?.status || 'utkast'}` },
+      { lab: 'Sider', val: '14' },
+      { lab: 'Eier', val: 'DL' },
+    ],
+  });
+
+  const body = `
+    <div class="page-body">
+      ${window.RENDER.renderSWOT(doc)}
+      ${window.RENDER.renderHorisonter(sid)}
+      ${window.RENDER.renderInitiativer(doc)}
+    </div>
+  `;
+
+  window.SA.mount({
+    active: 'dokument',
+    src: `Sist endret ${window.RENDER.fmtDate(doc.meta?.sist_endret)} av ${doc.meta?.sist_endret_av || '—'}`,
+    content: pageHd + body,
+  });
+})();
+</script>
+
+</body>
+</html>

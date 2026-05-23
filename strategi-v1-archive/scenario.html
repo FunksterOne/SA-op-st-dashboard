@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Scenario — ServiceAlliansen Bygg</title>
+<link rel="stylesheet" href="../style.css">
+<script>window.SA_BASE = '../';</script>
+<script src="../theme.js"></script>
+<script src="../selskaper.js"></script>
+<style>
+  .main-content { padding: 0 0 60px }
+  .page-header {
+    padding: 22px 32px 18px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .page-header .ph-crumb {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .page-header .ph-crumb a { color: var(--muted); text-decoration: none }
+  .page-header .ph-crumb a:hover { color: var(--accent-2) }
+  .page-header h1 { margin: 6px 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.012em }
+  .page-header .ph-meta-row {
+    display: flex; gap: 18px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin-top: 6px;
+  }
+  .page-header .ph-meta-row b { color: var(--text); font-weight: 600 }
+
+  .container { padding: 22px 32px; max-width: 1280px }
+
+  .summary-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .summary-row { grid-template-columns: repeat(2, 1fr) } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 14px; font-weight: 600 }
+  .panel .lead { color: var(--muted); font-size: 12px; margin: 0 0 14px }
+
+  /* Scenario-banner */
+  .scenario-banner {
+    display: flex; align-items: center; gap: 18px; padding: 14px 18px; margin-bottom: 18px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    border-left: 4px solid var(--scenario-color, var(--hi));
+  }
+  .scenario-banner .sb-badge {
+    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+    background: var(--scenario-color-soft, rgba(88,166,255,0.15));
+    color: var(--scenario-color, var(--hi));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .scenario-banner .sb-text h3 {
+    margin: 0; font-size: 16px; font-weight: 600;
+  }
+  .scenario-banner .sb-text .sb-desc {
+    color: var(--muted); font-size: 12.5px; margin-top: 4px; line-height: 1.5;
+  }
+
+  /* Tabell */
+  .table { width: 100%; border-collapse: collapse; font-size: 12.5px }
+  .table th {
+    text-align: left; padding: 10px 12px; background: var(--panel-2); border-bottom: 1px solid var(--line);
+    color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .table th.num, .table td.num { text-align: right; font-variant-numeric: tabular-nums }
+  .table td { padding: 10px 12px; border-bottom: 1px solid var(--line) }
+  .table tr:last-child td { border-bottom: 0 }
+  .table tr.total { font-weight: 600; background: var(--panel-2) }
+  .table tr.total td { border-top: 2px solid var(--line); border-bottom: 0 }
+
+  /* Ramp-bars */
+  .ramp { display: grid; gap: 10px }
+  .ramp-row { display: grid; grid-template-columns: 60px 1fr 90px; gap: 12px; align-items: center; font-size: 12.5px }
+  .ramp-row .lbl { font-weight: 600 }
+  .ramp-row .bar { height: 24px; background: var(--panel-3); border-radius: 4px; overflow: hidden; position: relative }
+  .ramp-row .bar-rot {
+    height: 100%; background: var(--scenario-color, var(--hi));
+    position: absolute; top: 0; left: 0; border-radius: 4px;
+    display: flex; align-items: center; padding-left: 8px; color: #fff; font-size: 11px; font-weight: 600;
+  }
+  .ramp-row .bar-fors {
+    height: 100%; background: var(--scenario-color-soft, rgba(88,166,255,0.4));
+    position: absolute; top: 0; border-left: 1px dashed var(--line);
+    display: flex; align-items: center; padding-left: 6px; color: var(--text); font-size: 10.5px;
+  }
+  .ramp-row .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600 }
+
+  /* Milestones */
+  .milestones { display: grid; gap: 10px }
+  .milestone {
+    display: grid; grid-template-columns: 80px 1fr; gap: 14px; padding: 11px 12px;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    border-left: 3px solid var(--scenario-color, var(--hi));
+    font-size: 12.5px;
+  }
+  .milestone .ms-q {
+    font-size: 10px; color: var(--scenario-color, var(--hi)); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 700;
+  }
+  .milestone .ms-text { line-height: 1.5 }
+  .milestone .ms-text b { color: var(--text); font-weight: 600 }
+  .milestone .ms-text .det { color: var(--muted); font-size: 11.5px; margin-top: 2px }
+
+  /* Risiko */
+  .risk-list { display: grid; gap: 8px }
+  .risk-item {
+    padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; font-size: 12.5px; border-left: 3px solid var(--warn);
+    display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center;
+  }
+  .risk-item.r-low { border-left-color: var(--good) }
+  .risk-item.r-high { border-left-color: var(--bad) }
+  .risk-item .r-text b { color: var(--text); font-weight: 600 }
+  .risk-item .r-text .det { color: var(--muted); font-size: 11.5px; margin-top: 2px }
+  .risk-item .r-prob {
+    font-size: 9.5px; padding: 3px 8px; border-radius: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em; background: var(--panel-3); color: var(--muted);
+  }
+  .risk-item.r-low .r-prob { background: var(--good-soft); color: var(--good) }
+  .risk-item.r-high .r-prob { background: var(--bad-soft); color: var(--bad) }
+
+  .compare-tabell .num { font-variant-numeric: tabular-nums; text-align: right }
+  .compare-tabell tr.this-row { background: var(--scenario-color-soft, rgba(88,166,255,0.08)) }
+  .compare-tabell tr.this-row td { font-weight: 600 }
+
+  /* Sub-tabs */
+  .page-tabs-wrap {
+    padding: 12px 32px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .page-tabs {
+    display: inline-flex; gap: 2px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px;
+  }
+  .page-tabs .tab {
+    padding: 7px 16px; background: transparent; border: 0; color: var(--muted);
+    font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; border-radius: 4px;
+    transition: 0.12s; text-decoration: none;
+  }
+  .page-tabs .tab:hover { color: var(--text); background: var(--panel-3); text-decoration: none }
+  .page-tabs .tab.active { background: var(--panel-3); color: var(--mode-strategisk); font-weight: 600 }
+
+  .tab-content { display: none }
+  .tab-content.active { display: block }
+
+  .empty-state {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 36px; text-align: center; color: var(--muted); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div data-sidebar data-active="scenario" data-section="strategi"></div>
+
+<main class="main-content">
+
+  <header class="page-header">
+    <div class="ph-crumb">
+      <span class="mode-pill" data-mode="strategisk">Strategisk</span>
+      <a href="strategi.html">Vekst-scenarier</a>
+      <span style="color:var(--muted);font-weight:400">›</span>
+      <span id="cr-name">…</span>
+    </div>
+    <h1 id="ph-title">Scenario</h1>
+    <div class="ph-meta-row" id="ph-meta-row"></div>
+  </header>
+
+  <div class="page-tabs-wrap">
+    <div class="page-tabs">
+      <a class="tab active" data-tab="ramp"      href="#ramp">Ramp & økonomi</a>
+      <a class="tab"        data-tab="kapital"   href="#kapital">Kapital</a>
+      <a class="tab"        data-tab="bemanning" href="#bemanning">Bemanning</a>
+      <a class="tab"        data-tab="milepaler" href="#milepaler">Milepæler</a>
+      <a class="tab"        data-tab="risiko"    href="#risiko">Risiko</a>
+      <a class="tab"        data-tab="sammenlikn" href="#sammenlikn">Sammenlikn</a>
+    </div>
+    <div style="font-size:11px;color:var(--muted)" id="tab-meta"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- Banner -->
+    <div class="scenario-banner" id="scenario-banner"></div>
+
+    <!-- Summary KPIs -->
+    <div class="summary-row" id="summary-row"></div>
+
+    <!-- Tab content -->
+    <section class="tab-content active" id="tab-ramp">
+      <div class="panel">
+        <h2>Ramp og økonomi 2026–2029</h2>
+        <p class="lead">Sum ROT (kjernevirksomhet) + forsikringsstrøm (SA-distribusjon) per år, MNOK. Fargen viser scenarioets tema.</p>
+        <div class="ramp" id="ramp-bars"></div>
+      </div>
+      <div class="panel">
+        <h2>Detaljert nedbrytning</h2>
+        <table class="table" id="ramp-table"></table>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-kapital">
+      <div class="panel">
+        <h2>Kapitalplan</h2>
+        <p class="lead">Hva må til for å finansiere veksten — og hvor kommer det fra.</p>
+        <table class="table" id="kapital-table"></table>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-bemanning">
+      <div class="panel">
+        <h2>Bemanningsplan 2026–2029</h2>
+        <p class="lead">Skalering av faggrupper i takt med ROT-volum. Antall ansatte ved utgang av hvert år.</p>
+        <table class="table" id="bemanning-table"></table>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-milepaler">
+      <div class="panel">
+        <h2>Strategiske milepæler</h2>
+        <p class="lead">Beslutningspunkter og operasjonelle leveranser per kvartal. Brukes som styringsgrunnlag.</p>
+        <div class="milestones" id="ms-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-risiko">
+      <div class="panel">
+        <h2>Risikofaktorer</h2>
+        <p class="lead">Scenarie-spesifikke risikoer. Sannsynlighet og konsekvens vurdert mot base-banen.</p>
+        <div class="risk-list" id="risk-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="tab-sammenlikn">
+      <div class="panel">
+        <h2>Sammenlikning på tvers</h2>
+        <p class="lead">Dette scenarioet stilt opp mot de to andre. Aktivt scenario er fremhevet.</p>
+        <table class="table compare-tabell" id="compare-table"></table>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="../sidebar.js"></script>
+<script>
+function getQueryParam(name) {
+  return new URLSearchParams(location.search).get(name);
+}
+
+// CSS custom property setter
+function setScenarioColor(scenario) {
+  const colors = {
+    base:     { c: 'var(--hi)',   s: 'var(--hi-soft)',   label: 'Base — konservativ vekst' },
+    offensiv: { c: 'var(--warn)', s: 'var(--warn-soft)', label: 'Offensiv — geografisk utvidelse' },
+    bull:     { c: 'var(--good)', s: 'var(--good-soft)', label: 'Bull — markedsledende' },
+  };
+  const cfg = colors[scenario] || colors.base;
+  document.documentElement.style.setProperty('--scenario-color', cfg.c);
+  document.documentElement.style.setProperty('--scenario-color-soft', cfg.s);
+  return cfg.label;
+}
+
+let scope, scenarioName, byEntity, scData;
+
+function fmtMNOK(v) {
+  if (v == null) return '—';
+  return v.toFixed(1).replace('.', ',') + ' M';
+}
+function fmtPct(v, dec = 1) { return v == null ? '—' : v.toFixed(dec).replace('.', ',') + ' %' }
+function fmtKr(v) {
+  if (v == null) return '—';
+  if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(1).replace('.', ',') + ' MNOK';
+  if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + ' kNOK';
+  return Math.round(v).toLocaleString('no-NO') + ' kr';
+}
+
+function init() {
+  scenarioName = getQueryParam('type') || 'base';
+  if (!['base', 'offensiv', 'bull'].includes(scenarioName)) scenarioName = 'base';
+
+  scope = getActiveScope();
+  setScenarioColor(scenarioName);
+
+  // Bestem hvilken by-entitet som leverer scenario-data
+  if (scope.type === 'by') {
+    byEntity = getBy(scope.id);
+  } else if (scope.type === 'selskap') {
+    byEntity = getBy(getSelskap(scope.id).by);
+  }
+
+  // Foretrekk selskap-spesifikt scenario (f.eks. Fritzøe sin base_case)
+  scData = getScenarioMetaForScope(scenarioName, scope);
+
+  renderHeader();
+  renderBanner();
+  renderSummary();
+  renderRamp();
+  renderRampTable();
+  renderKapital();
+  renderBemanning();
+  renderMilepaler();
+  renderRisiko();
+  renderCompare();
+
+  // Tab-switching
+  document.querySelectorAll('.page-tabs .tab').forEach(t => {
+    t.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.page-tabs .tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-' + t.dataset.tab)?.classList.add('active');
+      history.replaceState(null, '', '#' + t.dataset.tab);
+    });
+  });
+  const hash = (location.hash || '#ramp').replace('#', '');
+  if (['ramp','kapital','bemanning','milepaler','risiko','sammenlikn'].includes(hash)) {
+    document.querySelector('.page-tabs .tab[data-tab="' + hash + '"]')?.click();
+  }
+}
+
+function renderHeader() {
+  const lbl = getScopeLabel();
+  const sName = scenarioName.charAt(0).toUpperCase() + scenarioName.slice(1);
+  document.getElementById('cr-name').textContent = `${sName} · ${lbl.label}`;
+  document.getElementById('ph-title').textContent = `${sName}-scenario — ${lbl.label}`;
+  document.getElementById('ph-title').style.color = 'var(--scenario-color)';
+
+  const totals = getScenarioForScope(scenarioName, 2029, scope);
+  document.getElementById('ph-meta-row').innerHTML = `
+    <span>Scope: <b>${lbl.label}</b></span>
+    <span>Horisont: <b>2026–2029</b></span>
+    <span>2029 sum (ROT + forsikring): <b>${totals.total.toFixed(0)} MNOK</b></span>
+    <span>Margin 2029: <b>${scData ? fmtPct(scData.ebit_margin_2029_pct) : 'aggregert snitt'}</b></span>
+    <span>Kapital: <b>${scData ? scData.kapitalbehov : 'se sammenlikning'}</b></span>
+  `;
+
+  document.getElementById('tab-meta').textContent =
+    `${sName}-banen · 4-års horisont · oppdatert ut fra valgt scope`;
+}
+
+function renderBanner() {
+  const sName = scenarioName.charAt(0).toUpperCase() + scenarioName.slice(1);
+  let beskr = scData?.beskrivelse;
+  if (!beskr) {
+    // konsern — kombiner alle byer
+    beskr = `Aggregert ${scenarioName}-scenario for konsernet (${BYER.length} byer). ROT- og forsikringsstrømmer summeres på tvers av Bodø og Trondheim.`;
+  }
+  document.getElementById('scenario-banner').innerHTML = `
+    <div class="sb-badge">${sName.charAt(0)}</div>
+    <div class="sb-text">
+      <h3>${scData?.navn || sName + '-scenario (aggregert)'}</h3>
+      <div class="sb-desc">${beskr}</div>
+    </div>
+  `;
+}
+
+function renderSummary() {
+  const totals = getScenarioForScope(scenarioName, 2029, scope);
+  const totals2026 = getScenarioForScope(scenarioName, 2026, scope);
+  const cagr = scData ? scData.cagr_pct : Math.round(((totals.total / totals2026.total) ** (1/3) - 1) * 100);
+  const margin = scData ? fmtPct(scData.ebit_margin_2029_pct) : 'aggregert snitt';
+
+  document.getElementById('summary-row').innerHTML = `
+    <div class="sa-kpi" style="border-left-color: var(--scenario-color)">
+      <div class="sa-kpi-label">CAGR 2026–2029</div>
+      <div class="sa-kpi-value">${cagr} %</div>
+      <div class="sa-kpi-detail">Sammensatt årlig vekst</div>
+    </div>
+    <div class="sa-kpi">
+      <div class="sa-kpi-label">2029 sum</div>
+      <div class="sa-kpi-value">${totals.total.toFixed(0)} M</div>
+      <div class="sa-kpi-detail">ROT + forsikring</div>
+    </div>
+    <div class="sa-kpi good">
+      <div class="sa-kpi-label">EBIT-margin 2029</div>
+      <div class="sa-kpi-value">${margin}</div>
+      <div class="sa-kpi-detail">${scData ? '' : 'snitt på tvers av byer'}</div>
+    </div>
+    <div class="sa-kpi hi">
+      <div class="sa-kpi-label">Ansatte 2029</div>
+      <div class="sa-kpi-value">${scData ? scData.ansatte_2029 : (BYER.reduce((s, b) => s + b.scenarioer[scenarioName].ansatte_2029, 0))}</div>
+      <div class="sa-kpi-detail">Mål for året</div>
+    </div>
+  `;
+}
+
+function renderRamp() {
+  const years = [2026, 2027, 2028, 2029];
+  const rows = years.map(y => {
+    const data = getScenarioForScope(scenarioName, y, scope);
+    return { y, rot: data.rot, fors: data.forsikring, total: data.total };
+  });
+  const max = Math.max(...rows.map(r => r.total)) * 1.05;
+
+  document.getElementById('ramp-bars').innerHTML = rows.map(r => {
+    const rotW = (r.rot / max * 100).toFixed(1);
+    const forsW = (r.fors / max * 100).toFixed(1);
+    return `
+      <div class="ramp-row">
+        <span class="lbl">${r.y}</span>
+        <span class="bar">
+          <span class="bar-rot" style="width:${rotW}%">${r.rot.toFixed(0)} ROT</span>
+          <span class="bar-fors" style="left:${rotW}%; width:${forsW}%">+${r.fors.toFixed(0)} fors.</span>
+        </span>
+        <span class="num">${r.total.toFixed(0)} M</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderRampTable() {
+  const years = [2026, 2027, 2028, 2029];
+  const rows = years.map(y => {
+    const d = getScenarioForScope(scenarioName, y, scope);
+    return { y, ...d };
+  });
+  const head = `<thead><tr>
+    <th>År</th>
+    <th class="num">ROT (kjerne)</th>
+    <th class="num">Forsikringsstrøm</th>
+    <th class="num">Sum</th>
+    <th class="num">vs forrige år</th>
+  </tr></thead><tbody>`;
+  let html = head;
+  rows.forEach((r, i) => {
+    const prev = i > 0 ? rows[i-1].total : null;
+    const diff = prev ? ((r.total - prev) / prev * 100) : null;
+    html += `<tr>
+      <td><b>${r.y}</b></td>
+      <td class="num">${r.rot.toFixed(0)} M</td>
+      <td class="num">${r.forsikring.toFixed(0)} M</td>
+      <td class="num"><b>${r.total.toFixed(0)} M</b></td>
+      <td class="num">${diff != null ? '+' + diff.toFixed(1).replace('.', ',') + ' %' : '—'}</td>
+    </tr>`;
+  });
+  const total = getScenarioForScope(scenarioName, 2029, scope);
+  const total26 = getScenarioForScope(scenarioName, 2026, scope);
+  html += `<tr class="total">
+    <td>Δ 2026 → 2029</td>
+    <td class="num">+${(total.rot - total26.rot).toFixed(0)} M</td>
+    <td class="num">+${(total.forsikring - total26.forsikring).toFixed(0)} M</td>
+    <td class="num">+${(total.total - total26.total).toFixed(0)} M</td>
+    <td class="num">+${((total.total / total26.total - 1) * 100).toFixed(0)} %</td>
+  </tr></tbody>`;
+  document.getElementById('ramp-table').innerHTML = html;
+}
+
+function renderKapital() {
+  // Definer typiske kapitalflows per scenario
+  const kapital = {
+    base: [
+      { kilde: 'Drift / kontantstrøm', innslag: 'Løpende',  belop_mnok: '0',     formal: 'Vedlikehold av eksisterende drift, ingen ekstra kapital' },
+    ],
+    offensiv: [
+      { kilde: 'SA-konserninnskudd',   innslag: 'Q1 2027',  belop_mnok: '15–20', formal: 'Geografisk utvidelse Salten — kontorer, biler, lager' },
+      { kilde: 'M&A-finansiering',      innslag: 'Q3 2027',  belop_mnok: '10–20', formal: '1–2 oppkjøp i Salten/nabokommuner' },
+      { kilde: 'Banklån (driftskredit)',innslag: 'Løpende',  belop_mnok: 'opp til 15', formal: 'Likviditetsbuffer for økt aktivitet' },
+    ],
+    bull: [
+      { kilde: 'SA-konserninnskudd',   innslag: 'Q1 2027',  belop_mnok: '30–40', formal: 'Skalering hele Nordland — etablering Helgeland og Lofoten/Vesterålen' },
+      { kilde: 'M&A-finansiering',      innslag: '2027–2029', belop_mnok: '40–60', formal: '3–4 oppkjøp av etablerte ROT-selskaper i Nordland' },
+      { kilde: 'Banklån / obligasjon',  innslag: 'Q4 2027', belop_mnok: '20–30', formal: 'Lang finansiering, sikret mot konsernavtaler' },
+    ],
+  };
+  const items = kapital[scenarioName] || [];
+  let html = `<thead><tr>
+    <th>Kilde</th>
+    <th>Innslag</th>
+    <th class="num">Beløp (MNOK)</th>
+    <th>Formål</th>
+  </tr></thead><tbody>`;
+  if (items.length === 0) {
+    html += `<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px">Ingen ekstra kapitalbehov i dette scenarioet.</td></tr>`;
+  } else {
+    items.forEach(k => {
+      html += `<tr>
+        <td><b>${k.kilde}</b></td>
+        <td>${k.innslag}</td>
+        <td class="num">${k.belop_mnok}</td>
+        <td style="color:var(--muted)">${k.formal}</td>
+      </tr>`;
+    });
+  }
+  html += '</tbody>';
+  document.getElementById('kapital-table').innerHTML = html;
+}
+
+function renderBemanning() {
+  // Bruk 2025-bemanning som startpunkt hvis selskapet har det, ellers 2024
+  const selskap = scope.type === 'selskap' ? getSelskap(scope.id) : null;
+  const startYear = selskap?.bemanning_2025 ? 2025 : 2024;
+  const start = selskap?.bemanning_2025?.total ?? getRegnskap2024(scope).ansatte;
+  const ansatte2029 = scData?.ansatte_2029
+    ?? (BYER.reduce((s, b) => s + (b.scenarioer[scenarioName]?.ansatte_2029 || 0), 0));
+  const total = ansatte2029 - start;
+  // Lineær vekst-modell: fordel jevnt over 4 år
+  const yearly = [
+    Math.round(start + total * 0.20),
+    Math.round(start + total * 0.45),
+    Math.round(start + total * 0.75),
+    ansatte2029,
+  ];
+
+  // Faggrupper — selskap-spesifikt for Fritzøe (kun tømrere/snekkere/lærlinger),
+  // ellers generisk for by/konsern.
+  let fag;
+  if (selskap?.bemanning_2025) {
+    const b = selskap.bemanning_2025;
+    fag = [
+      { navn: 'Tømrer',   andel: b.tomrere / b.total },
+      { navn: 'Snekker',  andel: b.snekkere / b.total },
+      { navn: 'Lærling',  andel: b.laerlinger / b.total },
+    ];
+  } else {
+    fag = [
+      { navn: 'Snekker / tømrer',   andel: 0.45 },
+      { navn: 'Maler / overflate',  andel: 0.20 },
+      { navn: 'Bygg-rehab / fasade',andel: 0.15 },
+      { navn: 'PL / kalkulasjon',   andel: 0.10 },
+      { navn: 'Admin / SA-felles',  andel: 0.05 },
+      { navn: 'Lærling / annet',    andel: 0.05 },
+    ];
+  }
+
+  let html = `<thead><tr>
+    <th>Faggruppe</th>
+    <th class="num">${startYear} (start)</th>
+    <th class="num">2026</th>
+    <th class="num">2027</th>
+    <th class="num">2028</th>
+    <th class="num">2029</th>
+  </tr></thead><tbody>`;
+  fag.forEach(f => {
+    html += `<tr>
+      <td>${f.navn}</td>
+      <td class="num">${Math.round(start * f.andel)}</td>
+      <td class="num">${Math.round(yearly[0] * f.andel)}</td>
+      <td class="num">${Math.round(yearly[1] * f.andel)}</td>
+      <td class="num">${Math.round(yearly[2] * f.andel)}</td>
+      <td class="num"><b>${Math.round(yearly[3] * f.andel)}</b></td>
+    </tr>`;
+  });
+  html += `<tr class="total">
+    <td>Totalt antall ansatte</td>
+    <td class="num">${start}</td>
+    <td class="num">${yearly[0]}</td>
+    <td class="num">${yearly[1]}</td>
+    <td class="num">${yearly[2]}</td>
+    <td class="num">${yearly[3]}</td>
+  </tr></tbody>`;
+  document.getElementById('bemanning-table').innerHTML = html;
+}
+
+function renderMilepaler() {
+  const ms = {
+    base: [
+      { q: 'Q3 2026', t: 'Marginløftsplan ferdig',         d: 'Felles SA-prosesser implementert; rapportering til styret hver kvartal.' },
+      { q: 'Q1 2027', t: 'Bemanning + 5 stk',              d: 'Lærlinger og 1 ekstra kalkulator. Ingen geografisk utvidelse.' },
+      { q: 'Q4 2027', t: 'Hit-rate over 70 %',             d: 'Anbudsdisiplin og AI-screening etablert som standard.' },
+      { q: 'Q3 2029', t: 'Konsolidert posisjon i Bodø',    d: 'Markedsandel ROT-anbud ≥ 25 % (Bodø). Likeartet i Trondheim.' },
+    ],
+    offensiv: [
+      { q: 'Q4 2026', t: 'Etablering Salten-kontor',       d: 'Avdelingskontor i Fauske eller Sørfold. 4–5 nye ansatte.' },
+      { q: 'Q1 2027', t: 'SA kapitalinnskudd 15–20 M',     d: 'Styre-godkjent. Fordelt mellom Bodø/Trondheim etter behov.' },
+      { q: 'Q3 2027', t: 'Første oppkjøp gjennomført',     d: 'M&A-screening (1 selskap) → DD → kjøp og integrering.' },
+      { q: 'Q2 2028', t: 'Andre oppkjøp',                  d: 'Konsolidering Salten/Trøndelag. Bemanning ~85 stk i Bodø.' },
+      { q: 'Q4 2029', t: 'Fullført offensiv-banen',        d: 'Ledende ROT-aktør i Salten + Innherred. Margin 7,5–8,0 %.' },
+    ],
+    bull: [
+      { q: 'Q1 2027', t: 'SA kapitalinnskudd 30–40 M',     d: 'Stor fundering for hele Nordland-strategien.' },
+      { q: 'Q3 2027', t: 'Etablering Helgeland (Mo i Rana)',d: 'Avdelingskontor + første oppkjøp i Helgeland.' },
+      { q: 'Q2 2028', t: 'Etablering Lofoten/Vesterålen',  d: 'Ny avdeling Sortland eller Svolvær. 10–15 ansatte.' },
+      { q: 'Q4 2028', t: 'Tre oppkjøp gjennomført',        d: 'Konsolidering på tvers av Nordland. Bemanning ~110 stk i Bodø.' },
+      { q: 'Q2 2029', t: 'Børs-vurdering',                 d: 'Vurder strategisk exit eller fortsatt vekst — styret beslutter.' },
+      { q: 'Q4 2029', t: 'Markedsledende posisjon',        d: 'Største lokale ROT-aktør i Nordland. Margin 8,0–8,5 %.' },
+    ],
+  };
+  const list = ms[scenarioName] || [];
+  document.getElementById('ms-list').innerHTML = list.map(m => `
+    <div class="milestone">
+      <span class="ms-q">${m.q}</span>
+      <span class="ms-text"><b>${m.t}</b><div class="det">${m.d}</div></span>
+    </div>
+  `).join('');
+}
+
+function renderRisiko() {
+  const risk = {
+    base: [
+      { kort: 'Marked-stagnasjon Bodø/Trondheim',
+        det: 'Igangsatte boliger ned 38 % siden 2020. Kommunal rehab-budsjetter under press.',
+        prob: 'Mid', cls: 'r-' },
+      { kort: 'Margin-press fra konkurrenter',
+        det: 'Snekker\'n AS og Modulvegger Trøndelag presser pris.',
+        prob: 'Mid', cls: 'r-' },
+      { kort: 'Tap av nøkkelpersonell',
+        det: 'Kalkulator-disiplin og Brynjar/Øyvind er kritiske roller.',
+        prob: 'Lav', cls: 'r-low' },
+    ],
+    offensiv: [
+      { kort: 'Geografisk overekspansjon',
+        det: 'Salten-utvidelse uten lokal kjennskap = lav hit-rate i nye områder.',
+        prob: 'Mid', cls: 'r-' },
+      { kort: 'M&A-integrasjonsrisiko',
+        det: '1–2 oppkjøp samtidig krever ledelseskapasitet. Risiko for kulturkollisjon.',
+        prob: 'Høy', cls: 'r-high' },
+      { kort: 'Kapital-tilgjengelighet',
+        det: '25–40 MNOK fra SA — avhenger av konsernets prioriteringer.',
+        prob: 'Mid', cls: 'r-' },
+      { kort: 'Bemanningsutfordringer',
+        det: 'Vekst krever 30+ nye ansatte. Norsk byggebransje har generell mangel.',
+        prob: 'Høy', cls: 'r-high' },
+    ],
+    bull: [
+      { kort: 'Stor M&A-portefølje',
+        det: '3–4 oppkjøp samtidig i Nordland. Krever dedikerte M&A-ressurser i SA.',
+        prob: 'Høy', cls: 'r-high' },
+      { kort: 'Kapitalbinding',
+        det: '75–120 MNOK kapital låst i 4-årshorisont. Lavere likviditetsbuffer for konsernet.',
+        prob: 'Høy', cls: 'r-high' },
+      { kort: 'Markedsdekning over evne',
+        det: 'Hele Nordland (Lofoten/Vesterålen, Helgeland, Salten) krever lokal tilstedeværelse — kan være vanskelig å bygge på 4 år.',
+        prob: 'Mid', cls: 'r-' },
+      { kort: 'Konkurranse fra større aktører',
+        det: 'Aggressiv vekst kan trigger respons fra Veidekke/NCC i regionen.',
+        prob: 'Mid', cls: 'r-' },
+      { kort: 'Margin-uthuling',
+        det: 'Aggressiv vekst gir typisk margin-press de første 18 måneder etter oppkjøp.',
+        prob: 'Høy', cls: 'r-high' },
+    ],
+  };
+  const list = risk[scenarioName] || [];
+  document.getElementById('risk-list').innerHTML = list.map(r => `
+    <div class="risk-item ${r.cls}">
+      <div class="r-text">
+        <b>${r.kort}</b>
+        <div class="det">${r.det}</div>
+      </div>
+      <span class="r-prob">${r.prob} sannsynlighet</span>
+    </div>
+  `).join('');
+}
+
+function renderCompare() {
+  const scenarios = ['base', 'offensiv', 'bull'];
+  let html = `<thead><tr>
+    <th></th>
+    ${scenarios.map(s => `<th class="num" style="color: ${s === scenarioName ? 'var(--scenario-color)' : 'var(--muted)'}">${s.charAt(0).toUpperCase() + s.slice(1)}</th>`).join('')}
+  </tr></thead><tbody>`;
+
+  // Rader
+  const rows = [
+    { lbl: '2026 sum (MNOK)', fn: (s) => getScenarioForScope(s, 2026, scope).total.toFixed(0) },
+    { lbl: '2029 sum (MNOK)', fn: (s) => getScenarioForScope(s, 2029, scope).total.toFixed(0) },
+    { lbl: '2029 ROT (MNOK)', fn: (s) => getScenarioForScope(s, 2029, scope).rot.toFixed(0) },
+    { lbl: '2029 forsikring (MNOK)', fn: (s) => getScenarioForScope(s, 2029, scope).forsikring.toFixed(0) },
+    { lbl: 'CAGR (%)', fn: (s) => {
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.cagr_pct;
+      const cagrs = BYER.map(b => b.scenarioer[s].cagr_pct);
+      return Math.round(cagrs.reduce((a, b) => a + b, 0) / cagrs.length);
+    }},
+    { lbl: 'EBIT-margin 2029 (%)', fn: (s) => {
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.ebit_margin_2029_pct.toFixed(1).replace('.', ',');
+      const ms = BYER.map(b => b.scenarioer[s].ebit_margin_2029_pct);
+      return (ms.reduce((a, b) => a + b, 0) / ms.length).toFixed(1).replace('.', ',');
+    }},
+    { lbl: 'Ansatte 2029', fn: (s) => {
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.ansatte_2029;
+      return BYER.reduce((sum, b) => sum + b.scenarioer[s].ansatte_2029, 0);
+    }},
+    { lbl: 'Kapitalbehov', fn: (s) => {
+      const meta = getScenarioMetaForScope(s, scope);
+      if (meta) return meta.kapitalbehov;
+      return BYER.map(b => b.scenarioer[s].kapitalbehov).join(' + ');
+    }},
+  ];
+
+  rows.forEach(r => {
+    html += `<tr><td>${r.lbl}</td>`;
+    scenarios.forEach(s => {
+      const cls = s === scenarioName ? ' class="num this-row-cell"' : ' class="num"';
+      html += `<td${cls}>${r.fn(s)}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  // Marker hele aktive raden
+  html += '</tbody>';
+  html = html.replace(/<tr>/g, '<tr>'); // hold
+
+  // Legg til klasse til raden via post-processing — alternativ tilnærming
+  document.getElementById('compare-table').innerHTML = html;
+
+  // Vi har ikke this-row-rad; istedet markerer vi kolonnen via tdcellene (gjort med color over).
+  // Legg til subtil bakgrunn på aktive kolonne-celler
+  const cells = document.querySelectorAll('#compare-table .this-row-cell');
+  cells.forEach(c => {
+    c.style.background = 'var(--scenario-color-soft)';
+    c.style.fontWeight = '600';
+  });
+}
+
+init();
+</script>
+</body>
+</html>

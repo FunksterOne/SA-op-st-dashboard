@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategi — Oversikt</title>
+<link rel="stylesheet" href="app.css">
+<script src="config.js"></script>
+<script src="data-loader.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<div id="app-mount"></div>
+
+<script>
+(async function () {
+  const sid = window.getAktivtSelskapId();
+  const selskap = window.getSelskap(sid);
+  const off = window.SA_CONFIG.scenarier?.[sid]?.find(s => s.id === 'offensiv');
+
+  // Loading state
+  window.SA.mount({
+    active: 'oversikt',
+    content: '<div class="page-body"><div style="padding:80px;text-align:center;color:var(--muted);font-family:Geist,sans-serif">Laster strategi…</div></div>',
+  });
+
+  let docResult;
+  try {
+    docResult = await window.DATA.loadStrategi(sid);
+  } catch (e) {
+    window.SA.mount({
+      active: 'oversikt',
+      content: `<div class="page-body"><div style="padding:40px;background:#fbe9e9;border-left:3px solid #a83232;color:#a83232;border-radius:4px;font-family:Geist,sans-serif">
+        <b>Kunne ikke laste strategi:</b> ${e.message}
+        <br><br><small style="color:var(--muted)">Sjekk at strategi-v2/ er plassert i samme repo som strategi/data/, eller at fallback-fil ligger i strategi-v2/data/.</small>
+      </div></div>`,
+    });
+    return;
+  }
+
+  const { doc, source, draftMeta } = docResult;
+
+  // Build content
+  const statusVal = doc.meta?.status === 'utkast' ? 'Utkast'
+                  : doc.meta?.status === 'validert' ? 'Validert'
+                  : doc.meta?.status === 'vedtatt' ? 'Vedtatt' : 'Ukjent';
+  const statusCls = doc.meta?.status === 'utkast' ? 'draft' : (doc.meta?.status === 'vedtatt' ? 'strong' : '');
+
+  const pageHd = window.RENDER.renderPageHd({
+    crumb: { pill: 'Strategisk', path: `${selskap.label} · Oversikt` },
+    title: 'Strategi 2026–2029',
+    status: [
+      { lab: 'Status', val: statusVal, cls: statusCls },
+      { lab: 'Eier',   val: `DL ${selskap.dl}` },
+      { lab: 'Periode', val: doc.kvartal?.periode || '2026-Q2' },
+    ],
+  });
+
+  const draftBanner = source === 'draft' && draftMeta
+    ? `<div class="edit-cta" style="border-style:dashed;border-color:var(--warn);background:#fdf6e6">
+        <div class="copy">
+          <span class="draft-pill" style="background:#fdebc4;color:var(--warn)">Lokalt utkast</span>
+          Du ser et ulagret utkast fra ${new Date(draftMeta.savedAt).toLocaleString('no-NO')}. Publiser i editoren for å gjøre det synlig for styret.
+        </div>
+        <a class="btn" href="rediger.html" style="padding:9px 18px;background:#fff;border:1px solid var(--warn);color:var(--warn);border-radius:4px;text-decoration:none;font:500 13px/1.2 Geist,sans-serif">Til editoren →</a>
+      </div>`
+    : '';
+
+  const isDraft = doc.meta?.status !== 'vedtatt';
+  const editCta = `
+    <div class="edit-cta">
+      <div class="copy">
+        ${isDraft ? '<span class="draft-pill">' + statusVal + '</span>' : ''}
+        Du er logget inn som <b>DL ${selskap.dl}</b> — sist endret av ${window.RENDER.esc(doc.meta?.sist_endret_av || '—')} (${window.RENDER.fmtDate(doc.meta?.sist_endret)}).
+      </div>
+      <a class="btn primary" href="rediger.html" style="padding:9px 18px;font:500 13px/1.2 Geist,sans-serif;background:var(--strat);color:#fff;border:1px solid var(--strat);border-radius:4px;text-decoration:none">Rediger strategien →</a>
+    </div>
+  `;
+
+  const body = `
+    <div class="page-body">
+      ${draftBanner}
+      ${editCta}
+      ${window.RENDER.renderRetning(doc, selskap, off)}
+      ${window.RENDER.renderFokus(doc)}
+      ${window.RENDER.renderMaal(doc)}
+      ${window.RENDER.renderOkonomi(doc, selskap)}
+    </div>
+  `;
+
+  window.SA.mount({
+    active: 'oversikt',
+    src: source === 'draft' ? 'Viser lokalt utkast' : `Publisert ${window.RENDER.fmtDate(doc.meta?.sist_endret)}`,
+    content: pageHd + body,
+  });
+})();
+</script>
+
+</body>
+</html>
