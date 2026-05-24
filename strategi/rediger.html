@@ -128,13 +128,8 @@ function buildForm() {
         <p class="lead-text">
           Du redigerer strategien for <b>${selskap.label}</b>. Endringer lagres
           lokalt mens du skriver, og publiseres til GitHub når du trykker
-          <b>Lagre + publiser</b>. <i>«Send til validering»</i> sender
-          dokumentet til styreleder.
+          <b>Lagre + publiser</b>.
         </p>
-        <div class="info-box">
-          <b>Lagring</b> går via <code>${window.RENDER.esc(window.DATA.getPushUrl())}</code>.
-          DL-passord trengs for å publisere — sett som <code>DL_SECRET_*</code> i Vercel.
-        </div>
       </div>
 
       ${renderStepper(doc.meta?.status)}
@@ -158,16 +153,11 @@ function buildForm() {
           <label class="field-label" for="dl-navn">Ditt navn</label>
           <input class="input" type="text" id="dl-navn" placeholder="${window.RENDER.esc(selskap.dl)}">
         </div>
-        <div class="field">
-          <label class="field-label" for="dl-pass">Passord</label>
-          <input class="input" type="password" id="dl-pass" placeholder="DL_SECRET_*">
-        </div>
       </div>
       <div class="actions">
         <a class="btn ghost" href="index.html">Avbryt</a>
         <button class="btn" onclick="saveDraftOnly()">Lagre lokalt</button>
-        <button class="btn" onclick="publish('utkast')">Lagre + publiser</button>
-        <button class="btn primary" onclick="publish('validert')">Send til validering →</button>
+        <button class="btn primary" onclick="publish()">Lagre + publiser</button>
       </div>
     </div>
 
@@ -176,47 +166,7 @@ function buildForm() {
 }
 
 function renderStepper(status) {
-  const steps = [
-    { key: 'utkast', lab: 'Steg 1', nm: 'Utkast', sub: 'DL eier' },
-    { key: 'validert', lab: 'Steg 2', nm: 'Validert', sub: 'Styreleder' },
-    { key: 'vedtatt', lab: 'Steg 3', nm: 'Vedtatt', sub: 'Styremøte' },
-  ];
-  const idx = steps.findIndex(s => s.key === status);
-  const cur = idx >= 0 ? idx : 0;
-  const rows = steps.map((s, i) => {
-    const cls = i < cur ? 'done' : (i === cur ? 'active' : '');
-    return { ...s, cls };
-  });
-  return `
-    <div class="status-stepper">
-      <div class="step ${rows[0].cls}">
-        <div class="circle">${rows[0].cls === 'done' ? '✓' : '●'}</div>
-        <div class="info">
-          <span class="lab">${rows[0].lab}${cur === 0 ? ' · nå' : ''}</span>
-          <span class="nm">${rows[0].nm}</span>
-          <span class="sub">${rows[0].sub}</span>
-        </div>
-      </div>
-      <div class="connector ${rows[0].cls === 'done' ? 'done' : ''}"></div>
-      <div class="step ${rows[1].cls}">
-        <div class="circle">${rows[1].cls === 'done' ? '✓' : '2'}</div>
-        <div class="info">
-          <span class="lab">${rows[1].lab}${cur === 1 ? ' · nå' : ''}</span>
-          <span class="nm">${rows[1].nm}</span>
-          <span class="sub">${rows[1].sub}</span>
-        </div>
-      </div>
-      <div class="connector ${rows[1].cls === 'done' ? 'done' : ''}"></div>
-      <div class="step ${rows[2].cls}">
-        <div class="circle">${rows[2].cls === 'done' ? '✓' : '3'}</div>
-        <div class="info">
-          <span class="lab">${rows[2].lab}${cur === 2 ? ' · nå' : ''}</span>
-          <span class="nm">${rows[2].nm}</span>
-          <span class="sub">${rows[2].sub}</span>
-        </div>
-      </div>
-    </div>
-  `;
+  return '';
 }
 
 function renderRetningEditor(doc) {
@@ -699,40 +649,29 @@ window.saveDraftOnly = function () {
   toast('Lagret lokalt');
 };
 
-window.publish = async function (newStatus) {
+window.publish = async function () {
   hideMsg();
   const dlNavn = document.getElementById('dl-navn')?.value?.trim();
-  const passord = document.getElementById('dl-pass')?.value;
   if (!dlNavn) {
     showMsg('err', 'Skriv inn ditt navn først.');
     document.getElementById('dl-navn')?.focus();
     return;
   }
-  if (!passord) {
-    showMsg('err', 'Passord kreves for å publisere.');
-    document.getElementById('dl-pass')?.focus();
-    return;
-  }
 
-  // Update status
   STATE.doc.meta = STATE.doc.meta || {};
-  STATE.doc.meta.status = newStatus;
+  STATE.doc.meta.status = 'utkast';
   STATE.doc.meta.sist_endret_av = dlNavn;
 
-  // Save local first
   window.DATA.saveDraft(STATE.selskapId, STATE.doc);
-
   showMsg('info', 'Publiserer til GitHub…');
 
   try {
     const result = await window.DATA.pushStrategi({
       selskap_id: STATE.selskapId,
-      passord,
       dl_navn: dlNavn,
       strategi: STATE.doc,
     });
 
-    // Success
     window.DATA.clearDraft(STATE.selskapId);
     STATE.dirty = false;
     const dot = document.getElementById('dirty-dot');
@@ -741,12 +680,8 @@ window.publish = async function (newStatus) {
     const cm = result.commit_url
       ? `<a href="${result.commit_url}" target="_blank">commit</a>`
       : (result.no_change ? 'ingen endringer' : 'OK');
-    showMsg('ok', '', `Publisert ${newStatus === 'validert' ? '+ sendt til validering' : ''} — ${cm}`);
-    toast(newStatus === 'validert' ? 'Sendt til styreleder for validering' : 'Publisert til GitHub');
-
-    // Clear password
-    const p = document.getElementById('dl-pass');
-    if (p) p.value = '';
+    showMsg('ok', '', `Publisert — ${cm}`);
+    toast('Publisert til GitHub');
 
   } catch (err) {
     showMsg('err', 'Feil: ' + err.message);

@@ -43,23 +43,13 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { selskap_id, passord, strategi, dl_navn } = req.body || {};
+    const { selskap_id, strategi, dl_navn } = req.body || {};
 
-    if (!selskap_id || !passord || !strategi) {
-      return res.status(400).json({ error: 'Mangler selskap_id, passord eller strategi' });
+    if (!selskap_id || !strategi) {
+      return res.status(400).json({ error: 'Mangler selskap_id eller strategi' });
     }
     if (!VALID_SELSKAP.includes(selskap_id)) {
       return res.status(400).json({ error: 'Ugyldig selskap_id' });
-    }
-
-    // Autentisering
-    const envKey = 'DL_SECRET_' + selskap_id.toUpperCase().replace(/-/g, '_');
-    const expected = process.env[envKey];
-    if (!expected) {
-      return res.status(500).json({ error: `Mangler miljøvariabel ${envKey} i Vercel` });
-    }
-    if (passord !== expected) {
-      return res.status(401).json({ error: 'Feil passord' });
     }
 
     const githubToken = process.env.GITHUB_TOKEN;
